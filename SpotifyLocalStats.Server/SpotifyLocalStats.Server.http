@@ -1,0 +1,6 @@
+@SpotifyLocalStats.Server_HostAddress = http://localhost:5210
+
+GET {{SpotifyLocalStats.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
