@@ -21,7 +21,7 @@ public class Album
     public CopyrightContent Copyright { get; set; }
     public List<ExternalId> ExternalIds { get; set; }
     public string Label { get; set; }
-    public int TimesPlayed { get; set; } // total times played from tracks 'TimePlayed' field...
+    public int TimesPlayed { get; set; } // total times played from tracks 'TimePlayed' field..., i.e how many times has a track from this album been played?? not sure
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 

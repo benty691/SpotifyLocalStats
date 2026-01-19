@@ -11,7 +11,7 @@ public class Artist
     public string SpotifyUrl { get; set; }
     public string Href { get; set; }
     public string Genres { get; set; } // maybe List<Genres> later
-    public int TimesPLayed { get; set; } // total times played from tracks 'TimePlayed' field...
+    public int TimesPlayed { get; set; } // total times played from tracks 'TimePlayed' field...
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateOnly DOB { get; set; } // Date of Birth
     public int Age 
