@@ -9,8 +9,3 @@ public class Image
     public string Height { get; set; }
     public string Width { get; set; }
 }
-
-public class ImageContext : DbContext
-{
-    public DbSet<Image> Images { get; set; }
-}

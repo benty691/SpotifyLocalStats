@@ -9,7 +9,3 @@ public class ExternalId
     public string Ean { get; set; }
     public string Upc { get; set; }
 }
-public class ExternalIdContext : DbContext
-{
-    public DbSet<ExternalId> ExternalIds { get; set; }
-}

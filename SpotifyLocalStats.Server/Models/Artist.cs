@@ -3,16 +3,17 @@ using System.Net.Cache;
 
 namespace SpotifyLocalStats.Server.Models;
 
-public class Artist
+public class Artist : BaseModel
 {
-    public Guid Id { get; set; }
     public string SpotifyId { get; set; }
-    public string Name { get; set; }
     public string SpotifyUrl { get; set; }
+    public ICollection<Image> Images { get; set; }
+    public ICollection<Album> Albums { get; set; }
     public string Href { get; set; }
     public string Genres { get; set; } // maybe List<Genres> later
     public int TimesPlayed { get; set; } // total times played from tracks 'TimePlayed' field...
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public ICollection<ExternalId> ExternalIds { get; set; }
+    public bool IsBand { get; set; } // is the artist a band or solo artist
     public DateOnly DOB { get; set; } // Date of Birth
     public int Age 
     { 
@@ -27,7 +28,3 @@ public class Artist
     }
 }
 
-public class ArtistContext : DbContext
-{
-    public DbSet<Artist> Artists { get; set; }
-}

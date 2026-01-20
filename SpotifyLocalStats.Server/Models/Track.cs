@@ -7,8 +7,8 @@ public class Track
 {
     public Guid Id { get; set; }
     public string Name { get; set; }
-    public Album? Album { get; set; }
-    public List<Artist> Artists { get; set; }
+    public ICollection<Album> Album { get; set; } // can in theory be on multiple albums 
+    public ICollection<Artist> Artists { get; set; }
     public string SpotifyTrackUri { get; set; } 
     public int Duration { get; set; }
     public bool IsSingle { get; set; }
@@ -21,12 +21,7 @@ public class Track
     public string PreviewUrl { get; set; }
     public string[] AvaliableMarkets { get; set; }
     public string Href { get; set; }
-    public ExternalId ExternalIds { get; set; }
+    public ICollection<ExternalId> ExternalIds { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public int TimesPlayed { get; set; } // total times played from imported data
-}
-
-public class TrackContext : DbContext
-{
-    public DbSet<TrackContext> Track { get; set; }
+    public int TimesPlayed { get; set; } // total times played from imported data (gloabl total of imported data)
 }
