@@ -1,11 +1,12 @@
-
+using Microsoft.EntityFrameworkCore;
+using SpotifyLocalStats.Server.Extensions;
+using SpotifyLocalStats.Server.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
-builder.Services.Adde
 
 // todo : move this to diffferent folder
 SpotifyLocalStats.Server.Data.Dependencies.ConfigureServices(builder.Configuration, builder.Services);

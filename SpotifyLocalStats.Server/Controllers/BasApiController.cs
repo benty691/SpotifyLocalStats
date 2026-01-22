@@ -2,7 +2,7 @@
 
 namespace WebApi.Controllers
 {
-    public class BasApiController : Controller
+    public class BasApiController : ControllerBase
     {
         private readonly ILogger<T> _logger;
         private readonly IConfiguration _configuration;

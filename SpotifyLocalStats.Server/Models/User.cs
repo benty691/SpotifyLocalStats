@@ -13,6 +13,7 @@ public class User : BaseModel
     public DateTime LastUpdatedAt { get; set; }
     public DateTime LastTimeUsed { get; set; }
     public string Email { get; set; }
+    public string UserName { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string Country { get; set; } // either let user fill in or auto detect from ip

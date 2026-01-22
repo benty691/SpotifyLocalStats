@@ -1,14 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using SpotifyLocalStats.Server.Data;
 
-namespace WebApi.Controllers
+namespace WebApi.Controllers;
+
+[Authorize]
+[Route("api/[controller]")]
+public class ImportTracksJsonController : ControllerBase
 {
-    public class ImportTracksJsonController : Controller
-    {
-        [HttpPost("ImportedTracks/{userId}")]
+    [HttpPost("ImportedTracks/{userId}")]
 
-        public async Task<ActionResult> ()
-        {
-            return View();
-        }
+    public static SpotifyStatsContext _context;
+
+    public async Task<ActionResult> ()
+    {
+        _context.Albums.AddRange();
     }
 }
