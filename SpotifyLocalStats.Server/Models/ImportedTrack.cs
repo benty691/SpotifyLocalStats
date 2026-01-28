@@ -1,4 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace SpotifyLocalStats.Server.Models;
 public class ImportedTrack
@@ -29,33 +32,91 @@ public class ImportedTrack
         "incognito_mode": false
       },
     */
+
+    public ImportedTrack()
+    {
+        Id = Guid.NewGuid();
+        CreatedAt = DateTime.UtcNow;
+        User = new User();
+        ImportName = HashJsonContent();
+    }
+
     public Guid Id { get; set; }
     // FK to user
     public User User { get; set; }
+    [JsonProperty("ts")]
     public DateTime TimeStamp { get; set; }
-    public string Platform { get; set; } 
+    [JsonProperty("platform")]
+    public string Platform { get; set; }
+    [JsonProperty("ms_played")]
     public int MsPlayed { get; set; }
+    [JsonProperty("conn_country")]
     public string ConnCountry { get; set; }
+    [JsonProperty("master_metadata_track_name")]
     public string MasterMetadataTrackName { get; set; }
+    [JsonProperty("master_metadata_album_artist_name")]
     public string MasterMetadataArtistName { get; set; }
+    [JsonProperty("master_metadata_album_album_name")]
     public string MasterMetadataAlbumName { get; set; }
+    [JsonProperty("spotify_track_uri")]
     public string SpotifyTrackUri { get; set; }
+    [JsonProperty("episode_name")]
     public string EpisodeName { get; set; }
+    [JsonProperty("episode_show_name")]
     public string EpisodeShowName { get; set; }
+    [JsonProperty("spotify_episode_uri")]
     public string SpotifyEpisodeUri { get; set; }
+    [JsonProperty("audiobook_title")]
     public string AudiobookTitle { get; set; }
+    [JsonProperty("audiobook_uri")]
     public string AudiobookUri { get; set; }
+    [JsonProperty("audiobook_chapter_uri")]
     public string AudiobookChapterUri { get; set; }
+    [JsonProperty("audiobook_chapter_title")]
     public string AudiobookChapterTitle { get; set; }
+    [JsonProperty("reason_start")]
     public string ReasonStart { get; set; } // maybe enum later
+    [JsonProperty("reason_end")]
     public string ReasonEnd { get; set; } // maybe enum later
-    public bool IsFirstTrack { get; set; }
+    [JsonProperty("shuffle")]
     public bool IsShuffle { get; set; }
+    [JsonProperty("skipped")]
     public bool IsSkipped { get; set; }
+    [JsonProperty("offline")]
     public bool IsOffline { get; set; }
+    [JsonProperty("offline_timestamp")]
     public DateTime OfflineTimestamp { get; set; }
+    [JsonProperty("incognito_mode")]
     public bool IncognitoMode { get; set; }
     public DateTime CreatedAt { get; set; }
-    public string ImportName { get; set; } // to identify different imports, use as PK to stop multiple of same import? 
+    public string ImportName { get; set; } // hash, we check has this exact item been uploaded before? if so throw 
+
+    private string HashJsonContent()
+    {
+        string json = this.ToString();
+
+        string hash = GetHash(SHA256.Create(), json);
+        
+        return hash;
+    }
+
+    private string GetHash(HashAlgorithm hash, string input)
+    {
+        byte[] data = hash.ComputeHash(Encoding.UTF8.GetBytes(input));
+
+        // Create a new Stringbuilder to collect the bytes
+        // and create a string.
+        var sBuilder = new StringBuilder();
+
+        // Loop through each byte of the hashed data
+        // and format each one as a hexadecimal string.
+        for (int i = 0; i < data.Length; i++)
+        {
+            sBuilder.Append(data[i].ToString("x2"));
+        }
+
+        // Return the hexadecimal string.
+        return sBuilder.ToString();
+    }
 }
 
