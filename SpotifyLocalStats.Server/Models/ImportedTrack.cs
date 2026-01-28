@@ -1,9 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Mono.TextTemplating;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace SpotifyLocalStats.Server.Models;
+
+[PrimaryKey(nameof(Id), nameof(ImportHash))]
 public class ImportedTrack
 { /*
       {
@@ -37,8 +40,6 @@ public class ImportedTrack
     {
         Id = Guid.NewGuid();
         CreatedAt = DateTime.UtcNow;
-        User = new User();
-        ImportName = HashJsonContent();
     }
 
     public Guid Id { get; set; }
@@ -89,34 +90,6 @@ public class ImportedTrack
     [JsonProperty("incognito_mode")]
     public bool IncognitoMode { get; set; }
     public DateTime CreatedAt { get; set; }
-    public string ImportName { get; set; } // hash, we check has this exact item been uploaded before? if so throw 
-
-    private string HashJsonContent()
-    {
-        string json = this.ToString();
-
-        string hash = GetHash(SHA256.Create(), json);
-        
-        return hash;
-    }
-
-    private string GetHash(HashAlgorithm hash, string input)
-    {
-        byte[] data = hash.ComputeHash(Encoding.UTF8.GetBytes(input));
-
-        // Create a new Stringbuilder to collect the bytes
-        // and create a string.
-        var sBuilder = new StringBuilder();
-
-        // Loop through each byte of the hashed data
-        // and format each one as a hexadecimal string.
-        for (int i = 0; i < data.Length; i++)
-        {
-            sBuilder.Append(data[i].ToString("x2"));
-        }
-
-        // Return the hexadecimal string.
-        return sBuilder.ToString();
-    }
+    public string ImportHash { get; set; } // hash, we check has this exact item been uploaded before? This is a part of the PK of the tbale
 }
 
