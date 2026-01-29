@@ -15,17 +15,14 @@ using WebApi.Services.Interfaces;
 
 public class ImportedTrackService : IImportedTrackService
 {
-
 	private readonly SpotifyStatsContext _spotifyStatsContext;
 	private readonly ILogger _logger;
-    private readonly User _user;
 
     public ImportedTrackService(SpotifyStatsContext ctx, ILogger logger)
 	{
 		_spotifyStatsContext = ctx;
 		_logger = logger;
     }
-
 
     public Task<IEnumerable<ImportedTrack>> ValidateIncomingJson(string json)
     {
@@ -37,40 +34,28 @@ public class ImportedTrackService : IImportedTrackService
         }
 
         return Task.FromResult(importedTracks);
-
-
-
-        
-
     }
 
-    public IEnumerable<ImportedTrack> AssignPostSerializeValues(IEnumerable<ImportedTrack> importedTracks)
+    public async Task<IEnumerable<ImportedTrack>> AssignUser(IEnumerable<ImportedTrack> importedTracks, User user) // I want to do this at deserialization?
     {
         // we might want the user to sign in? or generate user for person on startup, so we have the user, can assign, rather than needing to generate on import?
-        var user = new User();
-
         foreach (var track in importedTracks)
         {
-            track.ImportHash = HashJsonContent(JsonSerializer.Serialize<ImportedTrack>(track)); // setting hash content for each imported track (should enusre that no two exact same imported tracks). Stupid way to do? deserialise then reserialsie to do this? 
-
-            track.User = _spotifyStatsContext.Users.Select(x => x.Id == user.Id).Single(); 
+            track.User = user; // what am i 
             // thinking here? cannot assign this to a user (table) where the user is yet to be created.. Need to create the user here? or will ef handle this for me?
         }
+
+        return importedTracks;
     }
 
-    public Task HandleNullValues()
+    public async Task SaveTracksToDb(IEnumerable<ImportedTrack> importedTracks)
     {
-        // not sure we need this? null values are ok. We just neeed to ensure the shape of data is correct but i think thats handled above
+        _spotifyStatsContext.ImportedTracks.AddRange(importedTracks);
+        var numberOfRecordsSaved = _spotifyStatsContext.SaveChanges();
+        var recordsSkipped = importedTracks.Count() - numberOfRecordsSaved;
 
-        throw new NotImplementedException();
-    }
-
-    public Task SaveTracksToDb()
-    {
+        _logger.LogInformation($"Saved {numberOfRecordsSaved} imported tracks to database for user: {_user.Id}. {recordsSkipped} were skipped due to rule unique enforcment");
         // need to figure out how to handle if there is a duplicate imported track?? just skip and ignore, or handle and say these record has been uplaoded before?
-
-
-        throw new NotImplementedException();
     }
 
     private string HashJsonContent(string json)

@@ -19,8 +19,12 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+// need to check has there been a user created, if there has, nothing, else create one. 
+if (builder.Services.sc)
+
 app.UseDefaultFiles();
 app.MapStaticAssets();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
