@@ -12,7 +12,7 @@
         public virtual int PlayCount { get; set; }
         public int MsListened { get; set; }
         public double MinsListened { get; set; }  // set from msListend
-        public string TopListeningDate { get; set; } // date when the user listened to this track the most // maybe datetime??
+        public DateOnly TopListeningDate { get; set; } // date when the user listened to this track the most // maybe datetime??
         public string TimeOfDayStats { get; set; } // morning, afternoon, evening, night || Need to figure this out, map tod from imported then store somewhere?
         public string DateTimeFirstListened { get; set; } // date when user first listened to this artist
         public string DateTimeLastListened { get; set; } // date when user last listened to this artist

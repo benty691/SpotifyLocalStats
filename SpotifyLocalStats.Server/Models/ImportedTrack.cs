@@ -48,7 +48,7 @@ public class ImportedTrack
     public User User { get; set; }
     public Guid UserId { get; set; }
     [JsonPropertyName("ts")]
-    public DateTime TimeStamp { get; set; }
+    public DateTime TimeStamp { get; set; } // thbis is actually a string in the json, but we need to convert to dt somehow? 
     [JsonPropertyName("platform")]
     public string Platform { get; set; }
     [JsonPropertyName("ms_played")]
