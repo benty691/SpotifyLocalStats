@@ -97,7 +97,10 @@ public class ArtistAggregationHelpers
         // have to determine if I want set 24 hours at 0000-2400 or rolling 24 hours (leaning rolling)
 
         var aggArtists = _context.AggregatedArtists.ToList();
-        int timesListend24Hours = 0;
+
+        var playsIn24Hours = 0;
+
+        //int timesListend24Hours = 0;
 
         if (aggArtists.Count == 0)
         {
@@ -109,10 +112,23 @@ public class ArtistAggregationHelpers
             // need to get the max number of plays in any 24 hour period for this artist
             // set time frame from track time, then search 24 hours back, count numbver of times artist appears
 
-            timesListend24Hours = _context.ImportedTracks
-                .Where(x => x.MasterMetadataArtistName == aggArtist.Artist.Name && x.User.Id == aggArtist.User.Id)
-                .
+           var allTracksOfArtist = _context.ImportedTracks
+                .Where(x => x.MasterMetadataArtistName == aggArtist.Artist.Name && x.User.Id == aggArtist.User.Id).ToList();
+            
+            foreach(var trackOfArtist in allTracksOfArtist)
+            {
+                var trackTime = trackOfArtist.TimeStamp;
+                var startTime = trackTime.AddHours(-24);
+                var nextPlaysIn24Hours = allTracksOfArtist
+                    .Where(x => x.TimeStamp >= startTime && x.TimeStamp < trackTime)
+                    .Count();
+
+                if (nextPlaysIn24Hours > playsIn24Hours)
+                {
+                    playsIn24Hours = nextPlaysIn24Hours;
+                }
+            }
         }
-        return uniqueAlbums;
+        return playsIn24Hours;
     }
 }
