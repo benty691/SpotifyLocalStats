@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using SpotifyLocalStats.Server.Extensions;
 using SpotifyLocalStats.Server.Data;
+using WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,18 +9,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 // todo : move this to diffferent folder
-SpotifyLocalStats.Server.Data.Dependencies.ConfigureServices(builder.Configuration, builder.Services);
+Dependencies.ConfigureServices(builder.Configuration, builder.Services);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
 builder.Configuration.AddConfiguration("appsettings.test.json");
+
 builder.Logging.AddConsole();
+builder.Services.AddLogging(builder => builder.AddConsole());
 
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
 // need to check has there been a user created, if there has, nothing, else create one. 
-if (builder.Services.sc)
+var user = Dependencies.DoesUserExist(builder.Services);
 
 app.UseDefaultFiles();
 app.MapStaticAssets();

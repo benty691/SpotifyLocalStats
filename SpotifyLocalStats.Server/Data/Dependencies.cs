@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Build.Utilities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.SqlServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore.SqlServer;
-
 using SpotifyLocalStats.Server.Models;
+using WebApi.Services;
+using WebApi.Services.Implementations;
 using WebApi.Services.Interfaces;
 
 namespace SpotifyLocalStats.Server.Data;
@@ -31,13 +33,36 @@ public static class Dependencies
             services.AddDbContext<SpotifyStatsContext>(c =>
                 c.UseSqlServer(configuration.GetConnectionString("SpotifyStats")));
             services.AddScoped<IImportedTrackService, ImportedTrackService>();
-            services.AddScoped<IImportedTrackService, ImportedTrackService>();
-            services.AddScoped<IImportedTrackService, ImportedTrackService>();
-            services.AddScoped<IImportedTrackService, ImportedTrackService>();
-            services.AddScoped<IImportedTrackService, ImportedTrackService>();
-            services.AddScoped<IImportedTrackService, ImportedTrackService>();
+            services.AddScoped(typeof(BaseService<>));
+            services.AddScoped<IImportOrchestrationService, ImportOrchestrationService>();
+            services.AddScoped<IAggreationService, AggreationService>();
+            services.AddScoped<IModelPopulationService, ModelPopulationService>();
 
 
         }
+    }
+
+    public static User DoesUserExist(IServiceCollection services)
+    {
+        var user = new User();
+
+        using (var serviceProvider = services.BuildServiceProvider())
+        {
+            using (var context = serviceProvider.GetRequiredService<SpotifyStatsContext>())
+            {
+                var userCount = context.Users.Count();
+                if (userCount == 0)
+                {
+                    user.UserName = "DefaultUser";
+                    context.Users.Add(user);
+                    context.SaveChanges();
+                }
+                else
+                {
+                    user = context.Users.Single();
+                }
+            }
+        }
+        return user;
     }
 }

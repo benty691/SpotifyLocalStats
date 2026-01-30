@@ -4,11 +4,8 @@ namespace SpotifyLocalStats.Server.Models;
 
 public class User : BaseModel
 {
-
     public User()
     {
-        Id = Guid.NewGuid();
-        CreatedAt = DateTime.UtcNow;
         Images = new List<Image>();
     }
 

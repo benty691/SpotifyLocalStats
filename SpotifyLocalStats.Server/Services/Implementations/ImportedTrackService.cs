@@ -2,6 +2,7 @@
 
 using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
+using SpotifyLocalStats.Server.Controllers.DTOs;
 
 using System;
 using System.Security.Cryptography;
@@ -18,10 +19,19 @@ public class ImportedTrackService : IImportedTrackService
 	private readonly SpotifyStatsContext _spotifyStatsContext;
 	private readonly ILogger _logger;
 
-    public ImportedTrackService(SpotifyStatsContext ctx, ILogger logger)
+    public ImportedTrackService(SpotifyStatsContext ctx, ILogger<ImportedTrackService> logger)
 	{
 		_spotifyStatsContext = ctx;
 		_logger = logger;
+    }
+
+    public async Task<IEnumerable<ImportedTrack>> HandleImport(string json, User user)
+    {
+        var trackList = await ValidateIncomingJson(json);
+        var updatedTrackList = await AssignUser(trackList, user);
+        await SaveTracksToDb(updatedTrackList);
+
+        return updatedTrackList;
     }
 
     public Task<IEnumerable<ImportedTrack>> ValidateIncomingJson(string json)
@@ -30,32 +40,33 @@ public class ImportedTrackService : IImportedTrackService
 
         if (importedTracks == null)
         {
+            _logger.LogError("Failed to deserialize incoming JSON to ImportedTrack collection.");
             throw new ArgumentNullException(nameof(importedTracks));
         }
 
         return Task.FromResult(importedTracks);
     }
 
-    public async Task<IEnumerable<ImportedTrack>> AssignUser(IEnumerable<ImportedTrack> importedTracks, User user) // I want to do this at deserialization?
+    public async Task<IEnumerable<ImportedTrack>> AssignUser(IEnumerable<ImportedTrack> importedTracks, User user) // user will come from controller
     {
         // we might want the user to sign in? or generate user for person on startup, so we have the user, can assign, rather than needing to generate on import?
         foreach (var track in importedTracks)
         {
-            track.User = user; // what am i 
-            // thinking here? cannot assign this to a user (table) where the user is yet to be created.. Need to create the user here? or will ef handle this for me?
+            track.User = user; 
         }
 
         return importedTracks;
     }
 
-    public async Task SaveTracksToDb(IEnumerable<ImportedTrack> importedTracks)
+    public async Task<int> SaveTracksToDb(IEnumerable<ImportedTrack> importedTracks)
     {
         _spotifyStatsContext.ImportedTracks.AddRange(importedTracks);
         var numberOfRecordsSaved = _spotifyStatsContext.SaveChanges();
         var recordsSkipped = importedTracks.Count() - numberOfRecordsSaved;
 
-        _logger.LogInformation($"Saved {numberOfRecordsSaved} imported tracks to database for user: {_user.Id}. {recordsSkipped} were skipped due to rule unique enforcment");
+        _logger.LogInformation($"Saved {numberOfRecordsSaved} imported tracks to database. {recordsSkipped} were skipped due to rule unique enforcment");
         // need to figure out how to handle if there is a duplicate imported track?? just skip and ignore, or handle and say these record has been uplaoded before?
+        return numberOfRecordsSaved;
     }
 
     private string HashJsonContent(string json)

@@ -3,9 +3,15 @@
 namespace SpotifyLocalStats.Server.Models;
 
 //Tracks are generated via imported tracks. We do not have a catalog of all tracks.
-public class Track
+public class Track : BaseModel
 {
-    public Guid Id { get; set; }
+    public Track()
+    {
+        Artists = new List<Artist>();
+        Album = new List<Album>();
+        ExternalIds = new List<ExternalId>();
+    }
+
     public string Name { get; set; }
     public ICollection<Album> Album { get; set; } // can in theory be on multiple albums 
     public ICollection<Artist> Artists { get; set; }
@@ -22,6 +28,5 @@ public class Track
     public string[] AvaliableMarkets { get; set; }
     public string Href { get; set; }
     public ICollection<ExternalId> ExternalIds { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public int TimesPlayed { get; set; } // total times played from imported data (gloabl total of imported data)
 }

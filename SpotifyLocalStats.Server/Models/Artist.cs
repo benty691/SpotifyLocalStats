@@ -5,6 +5,13 @@ namespace SpotifyLocalStats.Server.Models;
 
 public class Artist : BaseModel
 {
+    public Artist()
+    {
+        Images = new List<Image>();
+        Albums = new List<Album>();
+        ExternalIds = new List<ExternalId>();
+    }
+    public string Name { get; set; }
     public string SpotifyId { get; set; }
     public string SpotifyUrl { get; set; }
     public ICollection<Image> Images { get; set; }

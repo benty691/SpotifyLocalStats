@@ -4,6 +4,7 @@ namespace SpotifyLocalStats.Server.Models;
 
 public class AggregatedArtist : AggregateBase
 {
+
     public Artist Artist { get; set; }
 
     // these are for the user... 

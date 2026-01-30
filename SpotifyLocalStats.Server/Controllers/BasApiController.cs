@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SpotifyLocalStats.Server.Data;
 
 namespace WebApi.Controllers
 {
     public class BasApiController : ControllerBase
     {
-        private readonly ILogger<T> _logger;
-        private readonly IConfiguration _configuration;
+        protected SpotifyStatsContext _spotifyStatsContext => (SpotifyStatsContext)HttpContext.RequestServices.GetService(typeof(SpotifyStatsContext));
     }
 }
