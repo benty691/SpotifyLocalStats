@@ -7,6 +7,7 @@ public class AggreationService
 {
     private readonly ILogger<AggreationService> _logger;
     private readonly SpotifyStatsContext _context;
+
     public AggreationService(ILogger<AggreationService> logger, SpotifyStatsContext ctx)
     {
         _context = ctx;
@@ -25,8 +26,6 @@ public class AggreationService
 
     private async Task UpdateAggregateArtist(User user, IEnumerable<ImportedTrack> tracks)
     {
-
-
         // for each track that was upl;aoded, we must check that trackj for the artist, if artist stats exist, increase count on things, esle create new agg stats 
         foreach(var track in tracks)
         {
@@ -53,12 +52,9 @@ public class AggreationService
 
                 _context.AggregatedArtists.Add(newAggArtist);
             }
-            else if (aggregateArtists.Count > 1)
+            else if (aggregateArtists.Count == 1)
             {
-                _logger.LogWarning("Multiple artists found with the same name, this is unhandable atm.");
-            }
-            else
-            {
+
                 var aggregateArtist = aggregateArtists.First();
 
                 // we need to calcualte alot here. we should either delegate to functions, handle in the model that wokrs as a background service, or just do it here.
@@ -66,10 +62,13 @@ public class AggreationService
                 aggregateArtist.DateTimeLastListened = track.TimeStamp > aggregateArtist.DateTimeLastListened ? track.TimeStamp : aggregateArtist.DateTimeLastListened;
                 aggregateArtist.PlayCount += 1;
                 aggregateArtist.MsListened += track.MsPlayed;
-                aggregateArtist.
-
 
                 _logger.LogInformation("Artist already exists, updating stats not implemented yet.");
+            }
+            else
+            {
+                _logger.LogWarning("Multiple artists found with the same name, this is unhandable atm.");
+
             }
         }
 
