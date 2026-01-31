@@ -38,6 +38,8 @@ public static class Dependencies
             services.AddScoped(typeof(BaseService<>));
             services.AddScoped<IImportOrchestrationService, ImportOrchestrationService>();
             services.AddScoped<IArtistAggregationHelpersService, ArtistAggregationHelpersService>();
+            services.AddScoped<IAlbumAggregationHelpersService, AlbumAggregationHelperService>();
+            services.AddScoped<ITrackAggregationHelpersService, TrackAggregationHelpersService>();
             services.AddScoped<IAggregationService, AggreationService>();
             services.AddScoped<IModelPopulationService, ModelPopulationService>();
 

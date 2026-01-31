@@ -1,11 +1,11 @@
 ﻿using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
+using WebApi.Services.Interfaces.Helpers;
 
 namespace WebApi.Services.Implementations.Helpers
 {
-    public class TrackAggregationHelpersService
+    public class TrackAggregationHelpersService : ITrackAggregationHelpersService
     {
-
         private readonly ILogger<TrackAggregationHelpersService> _logger;
         private readonly SpotifyStatsContext _context;
         private readonly List<AggregatedTrack> _aggregatedTracks;
