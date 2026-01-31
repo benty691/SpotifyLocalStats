@@ -15,16 +15,14 @@ public class ImportTracksJsonController : BasApiController
 {
     public readonly IImportOrchestrationService _importOrchestrationService;
 
+
     [HttpPost]
     // maybe create a user dto and not pass the entire user object, just user id? 
     public async Task<ActionResult<ImportTracksDTO>> ImportTracks(User user, string json)
     {
         try 
         {
-            var serialized = await _importedTrackService.ValidateIncomingJson(json);
-            var tracksFinal = await _importedTrackService.AssignUser(serialized, user);
-
-            var result = await _importedTrackService.SaveTracksToDb(tracksFinal);
+            var serialized = await _importOrchestrationService.Orchestrate(json, user);
 
             return Ok(new ImportTracksDTO
             {

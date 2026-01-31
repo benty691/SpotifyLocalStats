@@ -4,7 +4,6 @@ namespace WebApi.Services.Interfaces
 {
     public interface IAggregationService
     {
-        Task UpdateAggregatedDataForUser();
-
+        Task UpdateAggregatedDataForUser(User user, IEnumerable<ImportedTrack> tracks);
     }
 }

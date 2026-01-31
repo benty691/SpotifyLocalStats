@@ -22,6 +22,7 @@
         public string CurrentStreakDays { get; set; } // current streak of days listened to this artist
         public DateTime LongestDrySpellStart { get; set; } // longest dry spell without listening to this artist and the date to and from 
         public DateTime LongestDrySpellEnd { get; set; } // hasnt ended yet if current
+        public int LongestDrySpell {  get; set; }
         public int MostTimesIn24Hours { get; set; }
       
     }

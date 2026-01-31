@@ -1,15 +1,24 @@
 ﻿using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
+using WebApi.Services.Implementations.Helpers;
+using WebApi.Services.Interfaces;
+using WebApi.Services.Interfaces.Helpers;
 
 namespace WebApi.Services.Implementations;
 
-public class AggreationService
+public class AggreationService : IAggregationService
 {
     private readonly ILogger<AggreationService> _logger;
     private readonly SpotifyStatsContext _context;
+    private readonly IArtistAggregationHelpersService _artistAggregationHelpersService;
+    private readonly IAlbumAggregationHelpersService _albumAggregationHelpersService;
+    private readonly ITrackAggregationHelpersService _TrackAggregationHelpersService;
 
-    public AggreationService(ILogger<AggreationService> logger, SpotifyStatsContext ctx)
+
+
+    public AggreationService(ILogger<AggreationService> logger, SpotifyStatsContext ctx, IArtistAggregationHelpersService artistAggregationHelpersService)
     {
+        _artistAggregationHelpersService = artistAggregationHelpersService;
         _context = ctx;
         _logger = logger;
     }
@@ -22,6 +31,14 @@ public class AggreationService
         await UpdateAggregateArtist(user, tracks);
         await UpdateAggregateAlbum(user, tracks);
         await UpdateAggregateTrack(user, tracks);
+
+        await _artistAggregationHelpersService.RunCalculations();
+        await _albumAggregationHelpersService.RunCalculations();
+        await 
+
+        _context.SaveChanges();
+
+        // then run 'baxkground' aggragtion helpers to fill in rest of the values... considering having this on a background service that updates daily when webapi opens (runs once after import of tracks, but for now, i think we just call after aggregates are created, essentially here. 
     }
 
     private async Task UpdateAggregateArtist(User user, IEnumerable<ImportedTrack> tracks)

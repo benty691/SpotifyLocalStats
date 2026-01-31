@@ -6,7 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using SpotifyLocalStats.Server.Models;
 using WebApi.Services;
 using WebApi.Services.Implementations;
+using WebApi.Services.Implementations.Helpers;
 using WebApi.Services.Interfaces;
+using WebApi.Services.Interfaces.Helpers;
 
 namespace SpotifyLocalStats.Server.Data;
 
@@ -35,7 +37,8 @@ public static class Dependencies
             services.AddScoped<IImportedTrackService, ImportedTrackService>();
             services.AddScoped(typeof(BaseService<>));
             services.AddScoped<IImportOrchestrationService, ImportOrchestrationService>();
-            services.AddScoped<IAggreationService, AggreationService>();
+            services.AddScoped<IArtistAggregationHelpersService, ArtistAggregationHelpersService>();
+            services.AddScoped<IAggregationService, AggreationService>();
             services.AddScoped<IModelPopulationService, ModelPopulationService>();
 
 

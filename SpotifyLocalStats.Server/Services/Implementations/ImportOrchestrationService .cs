@@ -28,6 +28,9 @@ namespace WebApi.Services.Implementations
             
             await _modelPopulationService.PopulateModelsFromImportedTracks(trackList);
             await _aggreationService.UpdateAggregatedDataForUser(trackList, user);
+
+            // return amount of records processed, few other smaller details, via a dto creation? 
+            // maybe return loading until processing is finished?
             return result;
         }
     }
