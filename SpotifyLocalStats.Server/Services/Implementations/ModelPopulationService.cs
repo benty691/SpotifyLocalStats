@@ -1,6 +1,7 @@
 ﻿using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
 using System.Diagnostics.Metrics;
+using WebApi.Controllers.DTO;
 using WebApi.Services.Interfaces;
 
 namespace WebApi.Services.Implementations;
@@ -16,14 +17,17 @@ public sealed class ModelPopulationService : IModelPopulationService
         _context = context;
     }
 
-    public async Task PopulateModelsFromImportedTracks(IEnumerable<ImportedTrack> tracks)
+    public async Task<ImportTracksDTO> PopulateModelsFromImportedTracks(IEnumerable<ImportedTrack> tracks)
     {
-        await GenerateArtist(tracks);
-        await GenerateAlbum(tracks);
-        await GenerateTrack(tracks);
+        var aritstCount = await GenerateArtist(tracks);
+        var albumCount = await GenerateAlbum(tracks);
+        var trackCount = await GenerateTrack(tracks);
+
+        return new ImportTracksDTO() {AlbumCount = albumCount, ArtistCount = aritstCount, TrackCount = trackCount }
+        ;
     }
 
-    private async Task GenerateArtist(IEnumerable<ImportedTrack> tracks)
+    private async Task<int> GenerateArtist(IEnumerable<ImportedTrack> tracks)
     {
         var nullArtistCount = 0;
 
@@ -58,9 +62,11 @@ public sealed class ModelPopulationService : IModelPopulationService
         }
         var result = _context.SaveChanges();
         _logger.LogInformation($"Generated {result} new artists from imported tracks.\n {nullArtistCount} tracks with null artist.");
+
+        return result; ;
     }
 
-    private async Task GenerateAlbum(IEnumerable<ImportedTrack> tracks)
+    private async Task<int> GenerateAlbum(IEnumerable<ImportedTrack> tracks)
     {
         var nullAlbumCount = 0;
 
@@ -90,9 +96,10 @@ public sealed class ModelPopulationService : IModelPopulationService
         }
         var result = _context.SaveChanges();
         _logger.LogInformation($"Generated {result} new albums from imported tracks.\n {nullAlbumCount} tracks with null album.");
+        return result;
     }
 
-    private async Task GenerateTrack(IEnumerable<ImportedTrack> tracks)
+    private async Task<int> GenerateTrack(IEnumerable<ImportedTrack> tracks)
     {
         var nullTrackCount = 0;
 
@@ -125,5 +132,6 @@ public sealed class ModelPopulationService : IModelPopulationService
         }
         var result = _context.SaveChanges();
         _logger.LogInformation($"Generated {result} new albums from imported tracks.\n {nullTrackCount} tracks with null album.");
+        return result;
     }
 }

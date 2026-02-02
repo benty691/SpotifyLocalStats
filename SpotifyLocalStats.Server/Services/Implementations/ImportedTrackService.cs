@@ -1,16 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-using SpotifyLocalStats.Server.Data;
+﻿using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
-using SpotifyLocalStats.Server.Controllers.DTOs;
 
 using System;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
-using WebApi.Controllers;
 using WebApi.Services.Interfaces;
 
 

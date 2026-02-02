@@ -22,16 +22,16 @@ namespace WebApi.Services.Implementations
             _context = context;
         }
 
-        public async Task<int> Orchestrate(string json, User user)
+        public async Task<ImportTracksDTO> Orchestrate(string json, User user)
         {
             var trackList = await _importedTrackService.HandleImport(json, user);
-            
-            await _modelPopulationService.PopulateModelsFromImportedTracks(trackList);
+
+            var result = await _modelPopulationService.PopulateModelsFromImportedTracks(trackList);
             await _aggreationService.UpdateAggregatedDataForUser(user, trackList);
 
             // return amount of records processed, few other smaller details, via a dto creation? 
             // maybe return loading until processing is finished?
-            return result;
+            return new ImportTracksDTO() { ArtistCount = result[0], AlbumCount = result[1], TrackCount = result[2] };
         }
     }
 }

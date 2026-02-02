@@ -40,7 +40,6 @@ public class AggreationService : IAggregationService
         _context.SaveChanges();
 
         // so in theolry here, we should have populated all the dbs now.. including calculated values, no idea how long this would take? fairly quick I would guess... 
-
         // then run 'baxkground' aggragtion helpers to fill in rest of the values... considering having this on a background service that updates daily when webapi opens (runs once after import of tracks, but for now, i think we just call after aggregates are created, essentially here. 
     }
 

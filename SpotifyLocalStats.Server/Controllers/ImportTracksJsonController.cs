@@ -15,6 +15,10 @@ public class ImportTracksJsonController : BasApiController
 {
     public readonly IImportOrchestrationService _importOrchestrationService;
 
+    public ImportTracksJsonController(IImportOrchestrationService importOrchestrationService)
+    {
+        _importOrchestrationService = importOrchestrationService;
+    }
 
     [HttpPost]
     // maybe create a user dto and not pass the entire user object, just user id? 
@@ -24,11 +28,7 @@ public class ImportTracksJsonController : BasApiController
         {
             var serialized = await _importOrchestrationService.Orchestrate(json, user);
 
-            return Ok(new ImportTracksDTO
-            {
-                Count = result,
-                ImportedAt = DateTime.UtcNow
-            });
+            return Ok(serialized);
         }
         catch (Exception ex)
         {
