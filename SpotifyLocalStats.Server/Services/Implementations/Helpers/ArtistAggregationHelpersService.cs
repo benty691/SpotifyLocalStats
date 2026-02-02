@@ -4,18 +4,22 @@ using WebApi.Services.Interfaces.Helpers;
 
 namespace WebApi.Services.Implementations.Helpers;
 
-public class ArtistAggregationHelpersService : IArtistAggregationHelpersService
+public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersService
 {
     private readonly ILogger<ArtistAggregationHelpersService> _logger;
     private readonly SpotifyStatsContext _context;
-    private readonly List<AggregatedArtist> _aggregateArtists;
+    private List<AggregatedArtist> _aggregateArtists => GetAggregatedArtists();
 
     // really thinking this can be a helper class, where we pass in the aggergate we want to calc for, instead of having three separte aggreggate helpers that do pretty muhc smae thing? 
-    public ArtistAggregationHelpersService(ILogger<ArtistAggregationHelpersService> logger, SpotifyStatsContext context, List<AggregatedArtist> aggregatedArtists)
+    public ArtistAggregationHelpersService(ILogger<ArtistAggregationHelpersService> logger, SpotifyStatsContext context)
     {
         _logger = logger;
         _context = context;
-        _aggregateArtists = _context.AggregatedArtists.ToList(); // is this bad practice?, will this even compile?
+    }
+
+    public List<AggregatedArtist> GetAggregatedArtists()
+    {
+        return _context.AggregatedArtists.ToList();
     }
 
     public async Task RunCalculations()
@@ -28,7 +32,7 @@ public class ArtistAggregationHelpersService : IArtistAggregationHelpersService
         await CalculateUniqueArtistTracksListened();
     }
 
-    public async Task CalculateTopListeningDate()
+    private async Task CalculateTopListeningDate()
     {
         //var _aggregateArtists = _context.AggregatedArtists.ToList();
 
@@ -57,7 +61,7 @@ public class ArtistAggregationHelpersService : IArtistAggregationHelpersService
         }
     }
 
-    public async Task CalculateUniqueArtistTracksListened()
+    private async Task CalculateUniqueArtistTracksListened()
     {
         int uniqueTracks = 0; 
 
@@ -78,7 +82,7 @@ public class ArtistAggregationHelpersService : IArtistAggregationHelpersService
         }
     }
 
-    public async Task CalculateMostTimesIn24Hours()
+    private async Task CalculateMostTimesIn24Hours()
     {
         // have to determine if I want set 24 hours at 0000-2400 or rolling 24 hours (leaning rolling)
         var playsIn24Hours = 0;
@@ -115,7 +119,7 @@ public class ArtistAggregationHelpersService : IArtistAggregationHelpersService
         }
     }
 
-    public async Task TimeOfDayStats()
+    private async Task TimeOfDayStats()
     {
         // goal here is to get all tracks for artist then determine time of day stats by segmenting into morning, afternoon, evening, night?? or just hourly? BY the min? 
         // really need to determine how to split. 
@@ -181,7 +185,7 @@ public class ArtistAggregationHelpersService : IArtistAggregationHelpersService
         }
     }
 
-    public async Task CalculateAlbumsListened()
+    private async Task CalculateAlbumsListened()
     {
         // for each artist agg, get distinct album names from imported tracks for that artist and user
         if (_aggregateArtists.Count == 0)
@@ -202,7 +206,7 @@ public class ArtistAggregationHelpersService : IArtistAggregationHelpersService
     }
 
     // probably should get longest streak date start and end here. 
-    public async Task CalculateLongestStreak()
+    private async Task CalculateLongestStreak()
     {
         // goal here is find the most amount of days in a row the artist was listened to
         var longestStreak = 0;
@@ -265,7 +269,7 @@ public class ArtistAggregationHelpersService : IArtistAggregationHelpersService
         }
     }
 
-    public async Task CalculateDrySpell()
+    private async Task CalculateDrySpell()
     {
         var dryStreak = 0;
         var dryStreakStartDate = new DateTime();

@@ -34,12 +34,10 @@ public class ImportedTrack
       },
     */
 
-    public ImportedTrack(User user)
+    public ImportedTrack()
     {
         Id = Guid.NewGuid();
         CreatedAt = DateTime.UtcNow;
-        User = user;
-        UserId = user.Id;
     }
 
     [Key]

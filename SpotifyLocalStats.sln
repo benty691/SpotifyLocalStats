@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.14.36408.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "client", "spotifylocalstats.client\client.esproj", "{8AE943D8-64B0-7D40-A7D2-FFDD058D0AB2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{243606DB-8D45-42FF-856F-6F2AE889CA6C} = {243606DB-8D45-42FF-856F-6F2AE889CA6C}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi", "SpotifyLocalStats.Server\WebApi.csproj", "{243606DB-8D45-42FF-856F-6F2AE889CA6C}"
 EndProject

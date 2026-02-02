@@ -6,8 +6,8 @@ public class UserProfileDTO
 
     public UserProfileDTO(Guid userId) // then use gets to retriev that info??
     {
-        
-        UserName = getUserName()
+
+//        UserName = getUserName();
 
     }
     public string UserName { get; set; }

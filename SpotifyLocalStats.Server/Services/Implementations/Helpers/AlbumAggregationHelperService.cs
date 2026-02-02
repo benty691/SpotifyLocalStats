@@ -4,18 +4,22 @@ using WebApi.Services.Interfaces.Helpers;
 
 namespace WebApi.Services.Implementations.Helpers;
 
-public class AlbumAggregationHelperService : IAlbumAggregationHelpersService
+public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersService
 {
     private readonly ILogger<AlbumAggregationHelperService> _logger;
     private readonly SpotifyStatsContext _context;
-    private readonly List<AggregatedAlbum> _aggregateAlbums;
+    private List<AggregatedAlbum> _aggregatedAlbums => GetAggregatedAlbums();
 
     // really thinking this can be a helper class, where we pass in the aggergate we want to calc for, instead of having three separte aggreggate helpers that do pretty muhc smae thing? 
-    public AlbumAggregationHelperService(ILogger<AlbumAggregationHelperService> logger, SpotifyStatsContext context, List<AggregatedAlbum> aggregatedAlbums)
+    public AlbumAggregationHelperService(ILogger<AlbumAggregationHelperService> logger, SpotifyStatsContext context)
     {
         _logger = logger;
         _context = context;
-        _aggregateAlbums = _context.AggregatedAlbums.ToList(); // is this bad practice?, will this even compile?
+    }
+
+    private List<AggregatedAlbum> GetAggregatedAlbums()
+    {
+        return _context.AggregatedAlbums.ToList();
     }
 
     public async Task RunCalculations()
@@ -26,16 +30,16 @@ public class AlbumAggregationHelperService : IAlbumAggregationHelpersService
         await CalculateTopListeningDate();
     }
 
-    public async Task CalculateTopListeningDate()
+    private async Task CalculateTopListeningDate()
     {
-        if (_aggregateAlbums.Count == 0)
+        if (_aggregatedAlbums.Count == 0)
         {
             throw new InvalidOperationException("No aggregated artists found.");
         }
 
         else
         {
-            foreach (var aggAlbum in _aggregateAlbums)
+            foreach (var aggAlbum in _aggregatedAlbums)
             {
                 var importedTracks = _context.ImportedTracks.Where(x => x.MasterMetadataAlbumName == aggAlbum.Album.Name && x.User.Id == aggAlbum.User.Id);
 
@@ -57,12 +61,12 @@ public class AlbumAggregationHelperService : IAlbumAggregationHelpersService
     {
         int uniqueAlbums = 0;
 
-        if (_aggregateAlbums.Count == 0)
+        if (_aggregatedAlbums.Count == 0)
         {
             throw new InvalidOperationException("No aggregated artists found.");
         }
 
-        foreach (var aggAlbum in _aggregateAlbums)
+        foreach (var aggAlbum in _aggregatedAlbums)
         {
             uniqueAlbums = _context.ImportedTracks
                 .Where(x => x.MasterMetadataAlbumName == aggAlbum.Album.Name && x.User.Id == aggAlbum.User.Id)
@@ -75,19 +79,19 @@ public class AlbumAggregationHelperService : IAlbumAggregationHelpersService
     }
     */
 
-    public async Task CalculateMostTimesIn24Hours()
+    private async Task CalculateMostTimesIn24Hours()
     {
         // have to determine if I want set 24 hours at 0000-2400 or rolling 24 hours (leaning rolling)
         var playsIn24Hours = 0;
 
         //int timesListend24Hours = 0;
 
-        if (_aggregateAlbums.Count == 0)
+        if (_aggregatedAlbums.Count == 0)
         {
             throw new InvalidOperationException("No aggregated artists found.");
         }
 
-        foreach (var aggAlbum in _aggregateAlbums)
+        foreach (var aggAlbum in _aggregatedAlbums)
         {
             // need to get the max number of plays in any 24 hour period for this artist
             // set time frame from track time, then search 24 hours back, count numbver of times artist appears
@@ -112,7 +116,7 @@ public class AlbumAggregationHelperService : IAlbumAggregationHelpersService
         }
     }
 
-    public async Task TimeOfDayStats()
+    private async Task TimeOfDayStats()
     {
         // goal here is to get all tracks for artist then determine time of day stats by segmenting into morning, afternoon, evening, night?? or just hourly? BY the min? 
         // really need to determine how to split. 
@@ -120,13 +124,13 @@ public class AlbumAggregationHelperService : IAlbumAggregationHelpersService
 
         Dictionary<TimeSpan, int> timeOfDayCount;
 
-        if (_aggregateAlbums.Count == 0)
+        if (_aggregatedAlbums.Count == 0)
         {
             throw new InvalidOperationException("No aggregated artists found.");
         }
 
         // loop through each artist, get artist tracks from imported tracks 
-        foreach (var aggAlbum in _aggregateAlbums)
+        foreach (var aggAlbum in _aggregatedAlbums)
         {
             var artistAlbumTracks = _context.ImportedTracks
                 .Where(x => x.MasterMetadataArtistName == aggAlbum.Album.Name && x.User.Id == aggAlbum.User.Id)
@@ -182,14 +186,14 @@ public class AlbumAggregationHelperService : IAlbumAggregationHelpersService
     public async Task CalculateAlbumsListened()
     {
         // for each artist agg, get distinct album names from imported tracks for that artist and user
-        var _aggregateAlbums = _context.AggregatedArtists.ToList();
+        var _aggregatedAlbums = _context.AggregatedArtists.ToList();
 
-        if (_aggregateAlbums.Count == 0)
+        if (_aggregatedAlbums.Count == 0)
         {
             throw new InvalidOperationException("No aggregated artists found.");
         }
 
-        foreach (var aggAlbum in _aggregateAlbums)
+        foreach (var aggAlbum in _aggregatedAlbums)
         {
             var albumListenCount = _context.ImportedTracks
                 .Where(x => x.MasterMetadataArtistName == aggAlbum.Artist.Name && x.UserId == aggAlbum.UserId)
@@ -202,7 +206,7 @@ public class AlbumAggregationHelperService : IAlbumAggregationHelpersService
     }*/
 
     // probably should get longest streak date start and end here. 
-    public async Task CalculateLongestStreak()
+    private async Task CalculateLongestStreak()
     {
         // goal here is find the most amount of days in a row the artist was listened to
 
@@ -213,12 +217,12 @@ public class AlbumAggregationHelperService : IAlbumAggregationHelpersService
         var longestStreakStartDate = new DateTime();
 
 
-        if (_aggregateAlbums.Count == 0)
+        if (_aggregatedAlbums.Count == 0)
         {
             throw new InvalidOperationException("No aggregated artists found.");
         }
 
-        foreach (var aggAlbum in _aggregateAlbums)
+        foreach (var aggAlbum in _aggregatedAlbums)
         {
 
             // ideally ordered by date from oldest to newest
@@ -267,13 +271,13 @@ public class AlbumAggregationHelperService : IAlbumAggregationHelpersService
         }
     }
 
-    public async Task CalculateDrySpell()
+    private async Task CalculateDrySpell()
     {
         var dryStreak = 0;
         var dryStreakStartDate = new DateTime();
         var dryStreakEndDate = new DateTime();
 
-        foreach (var aggAlbum in _aggregateAlbums)
+        foreach (var aggAlbum in _aggregatedAlbums)
         {
             var albumTracks = _context.ImportedTracks.Where(x => x.MasterMetadataArtistName == aggAlbum.Album.Name && x.User.Id == aggAlbum.User.Id).OrderBy(x => x.TimeStamp).ToList();
 

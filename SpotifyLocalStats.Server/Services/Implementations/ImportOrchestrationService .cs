@@ -31,7 +31,7 @@ namespace WebApi.Services.Implementations
 
             // return amount of records processed, few other smaller details, via a dto creation? 
             // maybe return loading until processing is finished?
-            return new ImportTracksDTO() { ArtistCount = result[0], AlbumCount = result[1], TrackCount = result[2] };
+            return result;
         }
     }
 }

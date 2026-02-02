@@ -16,7 +16,7 @@ public static class Dependencies
 {
     public static void ConfigureServices(IConfiguration configuration, IServiceCollection services)
     {
-        bool useOnlyInMemoryDatabase = false;
+        /*bool useOnlyInMemoryDatabase = false;
         if (configuration["UseOnlyInMemoryDatabase"] != null)
         {
             useOnlyInMemoryDatabase = bool.Parse(configuration["UseOnlyInMemoryDatabase"]!);
@@ -26,25 +26,19 @@ public static class Dependencies
         {
             services.AddDbContext<SpotifyStatsContext>(c =>
                c.UseInMemoryDatabase("SpotifyStats"));
-        }
-        else
-        {
-            // use real database
-            // Requires LocalDB which can be installed with SQL Server Express 2016
-            // https://www.microsoft.com/en-us/download/details.aspx?id=54284
-            services.AddDbContext<SpotifyStatsContext>(c =>
-                c.UseSqlServer(configuration.GetConnectionString("SpotifyStats")));
-            services.AddScoped<IImportedTrackService, ImportedTrackService>();
-            services.AddScoped(typeof(BaseService<>));
-            services.AddScoped<IImportOrchestrationService, ImportOrchestrationService>();
-            services.AddScoped<IArtistAggregationHelpersService, ArtistAggregationHelpersService>();
-            services.AddScoped<IAlbumAggregationHelpersService, AlbumAggregationHelperService>();
-            services.AddScoped<ITrackAggregationHelpersService, TrackAggregationHelpersService>();
-            services.AddScoped<IAggregationService, AggreationService>();
-            services.AddScoped<IModelPopulationService, ModelPopulationService>();
+        }*/
+            // use SQL server
 
-
-        }
+        services.AddDbContext<SpotifyStatsContext>(c =>
+            c.UseSqlServer(configuration.GetConnectionString("SpotifyStatsConnection")));
+        services.AddScoped<IImportedTrackService, ImportedTrackService>();
+        //services.AddScoped(typeof(BaseService<>));
+        services.AddScoped<IImportOrchestrationService, ImportOrchestrationService>();
+        services.AddScoped<IArtistAggregationHelpersService, ArtistAggregationHelpersService>();
+        services.AddScoped<IAlbumAggregationHelpersService, AlbumAggregationHelperService>();
+        services.AddScoped<ITrackAggregationHelpersService, TrackAggregationHelpersService>();
+        services.AddScoped<IAggregationService, AggreationService>();
+        services.AddScoped<IModelPopulationService, ModelPopulationService>();
     }
 
     public static User DoesUserExist(IServiceCollection services)
