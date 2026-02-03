@@ -1,4 +1,6 @@
-﻿namespace SpotifyLocalStats.Server.Models
+﻿using WebApi.Models;
+
+namespace SpotifyLocalStats.Server.Models
 {
     public abstract class AggregateBase : BaseModel
     {
@@ -13,7 +15,6 @@
         public int MsListened { get; set; }
         public double MinsListened { get; set; }  // set from msListend
         public DateTime TopListeningDate { get; set; } // date when the user listened to this track the most // maybe datetime??
-        public Dictionary<TimeSpan, int> TimeOfDayStats { get; set; } // morning, afternoon, evening, night || Need to figure this out, map tod from imported then store somewhere?
         public DateTime DateTimeFirstListened { get; set; } // date when user first listened to this artist
         public DateTime DateTimeLastListened { get; set; } // date when user last listened to this artist
         public int LongestStreakDays { get; set; } // longest streak of days listened to this artist
@@ -24,6 +25,5 @@
         public DateTime LongestDrySpellEnd { get; set; } // hasnt ended yet if current
         public int LongestDrySpell {  get; set; }
         public int MostTimesIn24Hours { get; set; }
-      
     }
 }

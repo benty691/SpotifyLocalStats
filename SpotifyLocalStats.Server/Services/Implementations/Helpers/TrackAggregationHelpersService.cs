@@ -1,5 +1,6 @@
 ﻿using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
+using WebApi.Models;
 using WebApi.Services.Interfaces.Helpers;
 
 namespace WebApi.Services.Implementations.Helpers;
@@ -28,6 +29,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
         await CalculateLongestStreak();
         await CalculateMostTimesIn24Hours();
         await CalculateTopListeningDate();
+        await TimeOfDayStats();
     }
 
     private async Task CalculateTopListeningDate()
@@ -101,7 +103,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
         // really need to determine how to split. 
         // also need to figure out whjat to return, maybe a dict for time of day and count?
 
-        Dictionary<TimeSpan, int> timeOfDayCount;
+        TimeOfDayStat<AggregatedTrack> timeOfDayCount;
 
         if (_aggregatedTracks.Count == 0)
         {
@@ -111,53 +113,42 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
         // loop through each artist, get artist tracks from imported tracks 
         foreach (var aggTrack in _aggregatedTracks)
         {
-            var tracks = _context.ImportedTracks
+            var artistTracks = _context.ImportedTracks
                 .Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.User.Id == aggTrack.User.Id)
                 .ToList();
 
             // not sure if this will workl, as we need to span from 0000-1000 etc etc, if in this range, increment count
-
-            timeOfDayCount = new Dictionary<TimeSpan, int> // thinking we use enum maybe iher instead of string?
-        {
-            { new TimeSpan(0, 0, 0) , 0}, // midnight
-            { new TimeSpan(1,0,0), 0}, // 6am
-            { new TimeSpan(2,0,0), 0}, // noon
-            { new TimeSpan(3,0,0), 0}, // 6pm
-            { new TimeSpan(4,0,0), 0}, // 11:59pm
-            { new TimeSpan(5,0,0), 0}, // 11:59pm
-            { new TimeSpan(6,0,0), 0}, // 11:59pm
-            { new TimeSpan(7,0,0), 0}, // 11:59pm
-            { new TimeSpan(8,0,0), 0}, // 11:59pm
-            { new TimeSpan(9,0,0), 0}, // 11:59pm
-            { new TimeSpan(10,0,0), 0}, // 11:59pm
-            { new TimeSpan(11,0,0), 0} ,// 11:59pm
-            { new TimeSpan(12,0,0), 0} ,// 11:59pm
-            { new TimeSpan(13,0,0), 0}, // 11:59pm
-            { new TimeSpan(14,0,0), 0}, // 11:59pm
-            { new TimeSpan(15,0,0), 0}, // 11:59pm
-            { new TimeSpan(16,0,0), 0}, // 11:59pm
-            { new TimeSpan(17,0,0), 0}, // 11:59pm
-            { new TimeSpan(18,0,0), 0} ,// 11:59pm
-            { new TimeSpan(19,0,0), 0}, // 11:59pm
-            { new TimeSpan(20,0,0), 0} ,// 11:59pm
-            { new TimeSpan(21,0,0), 0} ,// 11:59pm
-            { new TimeSpan(22,0,0), 0} ,// 11:59pm
-            { new TimeSpan(23,0,0), 0} ,// 11:59pm
-        };
+            // need to get old stats, then update them with new, or make old obselete, or somehting?? 
+            // create new for now, but we need to delete all old after we get new... 
 
             // then foreach track, determine time of day and increment count
-            foreach (var track in tracks)
+            foreach (var track in artistTracks)
             {
-                var trackTime = track.TimeStamp.TimeOfDay;
+                // dont create a new one eveyrtime, just increase count by 1 if it exists, if nt create it
+                var timeOfDayStatsForUser = _context.TrackTimeOfDaysStats.Where(x => x.Aggregate.UserId == track.UserId).ToList();
 
-                // find closest hour slot
-                var hourSlot = new TimeSpan(trackTime.Hours, 0, 0);
-                if (timeOfDayCount.ContainsKey(hourSlot))
+                if (timeOfDayStatsForUser.Count != 0)
                 {
-                    timeOfDayCount[hourSlot]++;
+                    var todSameAsTrack = timeOfDayStatsForUser.Where(x => x.TimeOfDay == track.TimeStamp.Hour).First();
+
+                    if (todSameAsTrack is null) //???
+                    {
+                        timeOfDayCount = new TimeOfDayStat<AggregatedTrack>()
+                        {
+                            CreatedAt = DateTime.UtcNow,
+                            Aggregate = aggTrack,
+                            AggregateId = aggTrack.Id,
+                            TimeOfDay = track.TimeStamp.Hour, // this is a in value 0 - 23
+                            PlayCount = 1
+                        };
+                    }
+                    else
+                    {
+                        todSameAsTrack.PlayCount = +1;
+                        todSameAsTrack.LastUpdatedAt = DateTime.UtcNow;
+                    }
                 }
             }
-            aggTrack.TimeOfDayStats = timeOfDayCount;
         }
     }
 

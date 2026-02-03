@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SpotifyLocalStats.Server.Models;
 using System.Reflection;
+using WebApi.Models;
 
 namespace SpotifyLocalStats.Server.Data;
 
@@ -16,10 +17,13 @@ public class SpotifyStatsContext : DbContext
     public DbSet<AggregatedTrack> AggregatedTracks { get; set; }
     public DbSet<AggregatedAlbum> AggregatedAlbums { get; set; }
     public DbSet<AggregatedArtist> AggregatedArtists { get; set; }
-    public DbSet<CopyrightContent> CopyrightContents { get; set; }
-    public DbSet<Image> Images { get; set; }
-    public DbSet<ExternalId> ExternalIds { get; set; }
-    public DbSet<Genre> Genres { get; set; }
+    public DbSet<TimeOfDayStat<AggregatedArtist>> ArtistTimeOfDaysStats { get; set; }
+    public DbSet<TimeOfDayStat<AggregatedTrack>> TrackTimeOfDaysStats { get; set; }
+    public DbSet<TimeOfDayStat<AggregatedAlbum>> AlbumTimeOfDaysStats { get; set; }
+    //public DbSet<CopyrightContent> CopyrightContents { get; set; }
+    //public DbSet<Image> Images { get; set; }
+    //public DbSet<ExternalId> ExternalIds { get; set; }
+    //public DbSet<Genre> Genres { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
