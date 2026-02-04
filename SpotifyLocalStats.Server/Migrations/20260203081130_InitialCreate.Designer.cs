@@ -12,7 +12,7 @@ using SpotifyLocalStats.Server.Data;
 namespace WebApi.Migrations
 {
     [DbContext(typeof(SpotifyStatsContext))]
-    [Migration("20260203021555_InitialCreate")]
+    [Migration("20260203081130_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -116,11 +116,16 @@ namespace WebApi.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("UserId1")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AlbumId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("AggregatedAlbums");
                 });
@@ -180,9 +185,6 @@ namespace WebApi.Migrations
                     b.Property<int>("PlayCount")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("TimeOfDayStatsId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("TopListeningDate")
                         .HasColumnType("datetime2");
 
@@ -192,13 +194,16 @@ namespace WebApi.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("UserId1")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ArtistId");
 
-                    b.HasIndex("TimeOfDayStatsId");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("AggregatedArtists");
                 });
@@ -252,9 +257,6 @@ namespace WebApi.Migrations
                     b.Property<int>("PlayCount")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("TimeOfDayStatsId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("TopListeningDate")
                         .HasColumnType("datetime2");
 
@@ -264,13 +266,16 @@ namespace WebApi.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                    b.Property<Guid>("UserId1")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.HasIndex("TimeOfDayStatsId");
+                    b.HasKey("Id");
 
                     b.HasIndex("TrackId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("AggregatedTracks");
                 });
@@ -674,32 +679,28 @@ namespace WebApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("Auth")
+                    b.Property<bool?>("Auth")
                         .HasColumnType("bit");
 
                     b.Property<string>("Country")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("HasImportedHistorical")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsPremium")
+                    b.Property<bool?>("IsPremium")
                         .HasColumnType("bit");
 
                     b.Property<string>("LastName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("LastTimeUsed")
@@ -709,31 +710,24 @@ namespace WebApi.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Phone")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SpotifyDisplayName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SpotifyHref")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SpotifyId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.PrimitiveCollection<string>("SpotifyPermissions")
-                        .IsRequired()
+                    b.Property<string>("SpotifyPermissions")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SpotifyUri")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -764,8 +758,7 @@ namespace WebApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AggregateId")
-                        .IsUnique();
+                    b.HasIndex("AggregateId");
 
                     b.ToTable("AlbumTimeOfDaysStats");
                 });
@@ -864,9 +857,15 @@ namespace WebApi.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SpotifyLocalStats.Server.Models.User", "User")
+                    b.HasOne("SpotifyLocalStats.Server.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("SpotifyLocalStats.Server.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -883,46 +882,42 @@ namespace WebApi.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WebApi.Models.TimeOfDayStat<SpotifyLocalStats.Server.Models.AggregatedAlbum>", "TimeOfDayStats")
+                    b.HasOne("SpotifyLocalStats.Server.Models.User", null)
                         .WithMany()
-                        .HasForeignKey("TimeOfDayStatsId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("SpotifyLocalStats.Server.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("UserId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Artist");
-
-                    b.Navigation("TimeOfDayStats");
 
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregatedTrack", b =>
                 {
-                    b.HasOne("WebApi.Models.TimeOfDayStat<SpotifyLocalStats.Server.Models.AggregatedAlbum>", "TimeOfDayStats")
-                        .WithMany()
-                        .HasForeignKey("TimeOfDayStatsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("SpotifyLocalStats.Server.Models.Track", "Track")
                         .WithMany()
                         .HasForeignKey("TrackId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SpotifyLocalStats.Server.Models.User", "User")
+                    b.HasOne("SpotifyLocalStats.Server.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("TimeOfDayStats");
+                    b.HasOne("SpotifyLocalStats.Server.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Track");
 
@@ -991,8 +986,8 @@ namespace WebApi.Migrations
             modelBuilder.Entity("WebApi.Models.TimeOfDayStat<SpotifyLocalStats.Server.Models.AggregatedAlbum>", b =>
                 {
                     b.HasOne("SpotifyLocalStats.Server.Models.AggregatedAlbum", "Aggregate")
-                        .WithOne("TimeOfDayStats")
-                        .HasForeignKey("WebApi.Models.TimeOfDayStat<SpotifyLocalStats.Server.Models.AggregatedAlbum>", "AggregateId")
+                        .WithMany("TimeOfDayStats")
+                        .HasForeignKey("AggregateId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1002,7 +997,7 @@ namespace WebApi.Migrations
             modelBuilder.Entity("WebApi.Models.TimeOfDayStat<SpotifyLocalStats.Server.Models.AggregatedArtist>", b =>
                 {
                     b.HasOne("SpotifyLocalStats.Server.Models.AggregatedArtist", "Aggregate")
-                        .WithMany()
+                        .WithMany("TimeOfDayStats")
                         .HasForeignKey("AggregateId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1013,7 +1008,7 @@ namespace WebApi.Migrations
             modelBuilder.Entity("WebApi.Models.TimeOfDayStat<SpotifyLocalStats.Server.Models.AggregatedTrack>", b =>
                 {
                     b.HasOne("SpotifyLocalStats.Server.Models.AggregatedTrack", "Aggregate")
-                        .WithMany()
+                        .WithMany("TimeOfDayStats")
                         .HasForeignKey("AggregateId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1023,8 +1018,17 @@ namespace WebApi.Migrations
 
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregatedAlbum", b =>
                 {
-                    b.Navigation("TimeOfDayStats")
-                        .IsRequired();
+                    b.Navigation("TimeOfDayStats");
+                });
+
+            modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregatedArtist", b =>
+                {
+                    b.Navigation("TimeOfDayStats");
+                });
+
+            modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregatedTrack", b =>
+                {
+                    b.Navigation("TimeOfDayStats");
                 });
 
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.Album", b =>

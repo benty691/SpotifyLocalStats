@@ -53,12 +53,15 @@ public static class Dependencies
                 if (userCount == 0)
                 {
                     user.UserName = "DefaultUser";
+                    user.HasImportedHistorical = false;
                     context.Users.Add(user);
                     context.SaveChanges();
                 }
                 else
                 {
                     user = context.Users.Single();
+                    user.LastTimeUsed = DateTime.UtcNow;
+                    context.SaveChanges();
                 }
             }
         }

@@ -1,4 +1,6 @@
-﻿using WebApi.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using WebApi.Models;
 
 namespace SpotifyLocalStats.Server.Models
 {
@@ -11,7 +13,7 @@ namespace SpotifyLocalStats.Server.Models
 
         public User User { get; set; }
         public Guid UserId { get; set; }
-        public virtual int PlayCount { get; set; }
+        public int PlayCount { get; set; }
         public int MsListened { get; set; }
         public double MinsListened { get; set; }  // set from msListend
         public DateTime TopListeningDate { get; set; } // date when the user listened to this track the most // maybe datetime??

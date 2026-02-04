@@ -147,7 +147,7 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
             foreach (var track in artistAlbumTracks)
             {
                 // dont create a new one eveyrtime, just increase count by 1 if it exists, if nt create it
-                var timeOfDayStatsForUser = _context.AlbumTimeOfDaysStats.Where(x => x.Aggregate.UserId == track.UserId).ToList();
+                var timeOfDayStatsForUser = _context.AlbumTimeOfDaysStats.Where(x => x.Aggregate.User.Id == track.UserId).ToList();
 
                 if (timeOfDayStatsForUser.Count != 0)
                 {

@@ -57,19 +57,19 @@ namespace WebApi.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     LastUpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastTimeUsed = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Country = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Auth = table.Column<bool>(type: "bit", nullable: false),
-                    SpotifyPermissions = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SpotifyId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SpotifyUri = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SpotifyDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SpotifyHref = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsPremium = table.Column<bool>(type: "bit", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Country = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Auth = table.Column<bool>(type: "bit", nullable: true),
+                    SpotifyPermissions = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SpotifyId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SpotifyUri = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SpotifyDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SpotifyHref = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsPremium = table.Column<bool>(type: "bit", nullable: true),
                     HasImportedHistorical = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -135,6 +135,52 @@ namespace WebApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AggregatedTracks",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TrackId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PlayCount = table.Column<int>(type: "int", nullable: false),
+                    MsListened = table.Column<int>(type: "int", nullable: false),
+                    MinsListened = table.Column<double>(type: "float", nullable: false),
+                    TopListeningDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateTimeFirstListened = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateTimeLastListened = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LongestStreakDays = table.Column<int>(type: "int", nullable: false),
+                    LongestStreakStartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LongestStreakEndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CurrentStreakDays = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LongestDrySpellStart = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LongestDrySpellEnd = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LongestDrySpell = table.Column<int>(type: "int", nullable: false),
+                    MostTimesIn24Hours = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AggregatedTracks", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AggregatedTracks_Tracks_TrackId",
+                        column: x => x.TrackId,
+                        principalTable: "Tracks",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AggregatedTracks_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AggregatedTracks_Users_UserId1",
+                        column: x => x.UserId1,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ImportedTracks",
                 columns: table => new
                 {
@@ -183,6 +229,7 @@ namespace WebApi.Migrations
                     AlbumId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TimesCompleted = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PlayCount = table.Column<int>(type: "int", nullable: false),
                     MsListened = table.Column<int>(type: "int", nullable: false),
@@ -212,6 +259,11 @@ namespace WebApi.Migrations
                         name: "FK_AggregatedAlbums_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AggregatedAlbums_Users_UserId1",
+                        column: x => x.UserId1,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -236,6 +288,54 @@ namespace WebApi.Migrations
                         name: "FK_AlbumTrack_Tracks_TracksId",
                         column: x => x.TracksId,
                         principalTable: "Tracks",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AggregatedArtists",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ArtistId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UniqueTracksPlayed = table.Column<int>(type: "int", nullable: false),
+                    AlbumsListened = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PlayCount = table.Column<int>(type: "int", nullable: false),
+                    MsListened = table.Column<int>(type: "int", nullable: false),
+                    MinsListened = table.Column<double>(type: "float", nullable: false),
+                    TopListeningDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateTimeFirstListened = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateTimeLastListened = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LongestStreakDays = table.Column<int>(type: "int", nullable: false),
+                    LongestStreakStartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LongestStreakEndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CurrentStreakDays = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LongestDrySpellStart = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LongestDrySpellEnd = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LongestDrySpell = table.Column<int>(type: "int", nullable: false),
+                    MostTimesIn24Hours = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AggregatedArtists", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AggregatedArtists_Artists_ArtistId",
+                        column: x => x.ArtistId,
+                        principalTable: "Artists",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AggregatedArtists_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AggregatedArtists_Users_UserId1",
+                        column: x => x.UserId1,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -329,6 +429,28 @@ namespace WebApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TrackTimeOfDaysStats",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AggregateId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TimeOfDay = table.Column<int>(type: "int", nullable: false),
+                    PlayCount = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastUpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TrackTimeOfDaysStats", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TrackTimeOfDaysStats_AggregatedTracks_AggregateId",
+                        column: x => x.AggregateId,
+                        principalTable: "AggregatedTracks",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AlbumTimeOfDaysStats",
                 columns: table => new
                 {
@@ -346,102 +468,6 @@ namespace WebApi.Migrations
                         name: "FK_AlbumTimeOfDaysStats_AggregatedAlbums_AggregateId",
                         column: x => x.AggregateId,
                         principalTable: "AggregatedAlbums",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AggregatedArtists",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ArtistId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TimeOfDayStatsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UniqueTracksPlayed = table.Column<int>(type: "int", nullable: false),
-                    AlbumsListened = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PlayCount = table.Column<int>(type: "int", nullable: false),
-                    MsListened = table.Column<int>(type: "int", nullable: false),
-                    MinsListened = table.Column<double>(type: "float", nullable: false),
-                    TopListeningDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateTimeFirstListened = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateTimeLastListened = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LongestStreakDays = table.Column<int>(type: "int", nullable: false),
-                    LongestStreakStartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LongestStreakEndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CurrentStreakDays = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LongestDrySpellStart = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LongestDrySpellEnd = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LongestDrySpell = table.Column<int>(type: "int", nullable: false),
-                    MostTimesIn24Hours = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AggregatedArtists", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AggregatedArtists_AlbumTimeOfDaysStats_TimeOfDayStatsId",
-                        column: x => x.TimeOfDayStatsId,
-                        principalTable: "AlbumTimeOfDaysStats",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AggregatedArtists_Artists_ArtistId",
-                        column: x => x.ArtistId,
-                        principalTable: "Artists",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AggregatedArtists_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AggregatedTracks",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TrackId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TimeOfDayStatsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PlayCount = table.Column<int>(type: "int", nullable: false),
-                    MsListened = table.Column<int>(type: "int", nullable: false),
-                    MinsListened = table.Column<double>(type: "float", nullable: false),
-                    TopListeningDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateTimeFirstListened = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateTimeLastListened = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LongestStreakDays = table.Column<int>(type: "int", nullable: false),
-                    LongestStreakStartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LongestStreakEndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CurrentStreakDays = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LongestDrySpellStart = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LongestDrySpellEnd = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LongestDrySpell = table.Column<int>(type: "int", nullable: false),
-                    MostTimesIn24Hours = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AggregatedTracks", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AggregatedTracks_AlbumTimeOfDaysStats_TimeOfDayStatsId",
-                        column: x => x.TimeOfDayStatsId,
-                        principalTable: "AlbumTimeOfDaysStats",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AggregatedTracks_Tracks_TrackId",
-                        column: x => x.TrackId,
-                        principalTable: "Tracks",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AggregatedTracks_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -468,28 +494,6 @@ namespace WebApi.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "TrackTimeOfDaysStats",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AggregateId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TimeOfDay = table.Column<int>(type: "int", nullable: false),
-                    PlayCount = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastUpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TrackTimeOfDaysStats", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_TrackTimeOfDaysStats_AggregatedTracks_AggregateId",
-                        column: x => x.AggregateId,
-                        principalTable: "AggregatedTracks",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_AggregatedAlbums_AlbumId",
                 table: "AggregatedAlbums",
@@ -501,14 +505,14 @@ namespace WebApi.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AggregatedAlbums_UserId1",
+                table: "AggregatedAlbums",
+                column: "UserId1");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AggregatedArtists_ArtistId",
                 table: "AggregatedArtists",
                 column: "ArtistId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AggregatedArtists_TimeOfDayStatsId",
-                table: "AggregatedArtists",
-                column: "TimeOfDayStatsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AggregatedArtists_UserId",
@@ -516,9 +520,9 @@ namespace WebApi.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AggregatedTracks_TimeOfDayStatsId",
-                table: "AggregatedTracks",
-                column: "TimeOfDayStatsId");
+                name: "IX_AggregatedArtists_UserId1",
+                table: "AggregatedArtists",
+                column: "UserId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AggregatedTracks_TrackId",
@@ -529,6 +533,11 @@ namespace WebApi.Migrations
                 name: "IX_AggregatedTracks_UserId",
                 table: "AggregatedTracks",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AggregatedTracks_UserId1",
+                table: "AggregatedTracks",
+                column: "UserId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AlbumArtist_ArtistsId",
@@ -543,8 +552,7 @@ namespace WebApi.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_AlbumTimeOfDaysStats_AggregateId",
                 table: "AlbumTimeOfDaysStats",
-                column: "AggregateId",
-                unique: true);
+                column: "AggregateId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AlbumTrack_TracksId",
@@ -615,6 +623,9 @@ namespace WebApi.Migrations
                 name: "AlbumArtist");
 
             migrationBuilder.DropTable(
+                name: "AlbumTimeOfDaysStats");
+
+            migrationBuilder.DropTable(
                 name: "AlbumTrack");
 
             migrationBuilder.DropTable(
@@ -633,31 +644,28 @@ namespace WebApi.Migrations
                 name: "TrackTimeOfDaysStats");
 
             migrationBuilder.DropTable(
+                name: "AggregatedAlbums");
+
+            migrationBuilder.DropTable(
                 name: "AggregatedArtists");
 
             migrationBuilder.DropTable(
                 name: "AggregatedTracks");
 
             migrationBuilder.DropTable(
-                name: "Artists");
-
-            migrationBuilder.DropTable(
-                name: "AlbumTimeOfDaysStats");
-
-            migrationBuilder.DropTable(
-                name: "Tracks");
-
-            migrationBuilder.DropTable(
-                name: "AggregatedAlbums");
-
-            migrationBuilder.DropTable(
                 name: "Albums");
+
+            migrationBuilder.DropTable(
+                name: "Artists");
 
             migrationBuilder.DropTable(
                 name: "Users");
 
             migrationBuilder.DropTable(
                 name: "CopyrightContent");
+
+            migrationBuilder.DropTable(
+                name: "Tracks");
         }
     }
 }

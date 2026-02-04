@@ -149,7 +149,7 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
             foreach (var track in artistTracks)
             {
                 // dont create a new one eveyrtime, just increase count by 1 if it exists, if nt create it
-                var timeOfDayStatsForUser = _context.ArtistTimeOfDaysStats.Where(x => x.Aggregate.UserId == track.UserId).ToList();
+                var timeOfDayStatsForUser = _context.ArtistTimeOfDaysStats.Where(x => x.Aggregate.User.Id == track.UserId).ToList();
 
                 if (timeOfDayStatsForUser.Count != 0)
                 {
@@ -187,7 +187,7 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
         foreach (var aggArtist in _aggregateArtists)
         {
             var albumListenCount = _context.ImportedTracks
-                .Where(x => x.MasterMetadataArtistName == aggArtist.Artist.Name && x.UserId == aggArtist.UserId)
+                .Where(x => x.MasterMetadataArtistName == aggArtist.Artist.Name && x.UserId == aggArtist.User.Id)
                 .GroupBy(x => x.MasterMetadataAlbumName)
                 .ToList()
                 .Count();

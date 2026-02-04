@@ -125,7 +125,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
             foreach (var track in artistTracks)
             {
                 // dont create a new one eveyrtime, just increase count by 1 if it exists, if nt create it
-                var timeOfDayStatsForUser = _context.TrackTimeOfDaysStats.Where(x => x.Aggregate.UserId == track.UserId).ToList();
+                var timeOfDayStatsForUser = _context.TrackTimeOfDaysStats.Where(x => x.Aggregate.User.Id == track.UserId).ToList();
 
                 if (timeOfDayStatsForUser.Count != 0)
                 {

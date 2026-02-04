@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SpotifyLocalStats.Server.Models;
 using System.Reflection;
+using System.Reflection.Emit;
 using WebApi.Models;
 
 namespace SpotifyLocalStats.Server.Data;
@@ -28,6 +29,15 @@ public class SpotifyStatsContext : DbContext
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+        foreach (var entity in builder.Model.GetEntityTypes()
+         .Where(e => typeof(AggregateBase).IsAssignableFrom(e.ClrType)))
+        {
+            builder.Entity(entity.ClrType)
+                .HasOne("User")
+                .WithMany()
+                .HasForeignKey(nameof(AggregateBase.UserId))
+                .OnDelete(DeleteBehavior.NoAction);
+        }
     }
 }
