@@ -7,5 +7,5 @@ export const userApi = {
   getUserById: (id: Guid) => apiClient.get<User>(`/user/${id}`),
   getCurrentUser: () => apiClient.get<User>(`/user`), // will have to pass in a auth token or cookie or somehting
   getUserSpotifyStats: (userId: Guid) =>
-    apiClient.get<UserSpotifyStats>(`stats/${userId}`),
+    apiClient.get<UserSpotifyStats>(`/stats/${userId}`),
 };
