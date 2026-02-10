@@ -1,36 +1,43 @@
-// import navbar buttons (tutorial, artists etc) 
-import NavBarButton from './NavbarButton.tsx';
-import Container from 'react-bootstrap/Container';
-import NavDropdown from 'react-bootstrap/NavDropdown';
-import Navbar from 'react-bootstrap/Navbar';
-import Nav from 'react-bootstrap/Nav';
+// import navbar buttons (tutorial, artists etc)
+import { Link } from "react-router-dom";
 
+function NavBarMenu() {
+  // need to pass in base url (defnied as loacalhost essentially)
+  // /probably set up a fetch className that we delegate every request tot he backend to, even a router?
+  const handleSubmit = () => {
+    // call our endpoint to post the file to, received response, handle response etc
+  };
 
-function NavBarMenu () 
-{ 
-    const buttonList = ['Tutorial', 'Artists', 'Albums', 'Tracks', 'Stats']
-    
-    // need to pass in base url (defnied as loacalhost essentially)
-    // /probably set up a fetch class that we delegate every request tot he backend to, even a router? 
-    
-    return (
+  return (
     <>
-        <Navbar expand= "lg" className='bg-body-tertiary'>
-            <Container>
-                <Navbar.Brand href='#home'>SpotifyStatsLocal</Navbar.Brand>
-                <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                <Navbar.Collapse id="basic-navbar-nav">
-                <Nav className="me-auto">
-                    <Nav.Link href="#home">Artists</Nav.Link>
-                    <Nav.Link href="#Albums">Albums</Nav.Link>
-                    <Nav.Link href="#Tracks">Tracks</Nav.Link>
-                    <Nav.Link href="#Stats">Stats</Nav.Link>
-                </Nav>
-                </Navbar.Collapse>
-            </Container>
-        </Navbar>
+      <nav className='navbar navbar-expand-lg bg-body-tertiary'>
+        <div className='container-fluid'>
+          <div className='navbar-brand'>
+            <Link to='/'>SpotifyLocalStats</Link>
+          </div>
+          <div className='navbar-links'>
+            <Link to='/Artists' className='nav-link'>
+              Artists
+            </Link>
+            <Link to='/Albums' className='nav-link'>
+              Albums
+            </Link>
+            <Link to='/Tracks' className='nav-link'>
+              Tracks
+            </Link>
+            <Link to='/Stats' className='nav-link'>
+              Stats
+            </Link>
+            <form action='' className='upload-form' onSubmit={handleSubmit}>
+              <label>Upload Spotify Data</label>
+              <input type='file' className='track-upload-input' />
+              <input type='submit' value='submit' className='submit-form' />
+            </form>
+          </div>
+        </div>
+      </nav>
     </>
-    );
+  );
 }
 
 export default NavBarMenu;
