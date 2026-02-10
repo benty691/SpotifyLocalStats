@@ -5,4 +5,5 @@ export interface UserSpotifyStats {
   totalTracks: number;
   totalArtists: number;
   totalAlbums: number;
+  endpoint: string;
 }

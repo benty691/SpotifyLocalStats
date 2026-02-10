@@ -7,6 +7,7 @@ import { userApi } from "../services/api/userApi";
 interface UserContextType {
   user: User | null;
   loading: boolean;
+  isAuthenticated: boolean;
   storeUser: () => void;
   fetchUser: () => Promise<User>;
 }
@@ -53,8 +54,9 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(await fetchUser());
   };
 
-  const value = {
+  const value: UserContextType = {
     user,
+    isAuthenticated: user !== null,
     loading,
     storeUser,
     fetchUser,
