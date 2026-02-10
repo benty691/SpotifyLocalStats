@@ -1,5 +1,6 @@
 // import navbar buttons (tutorial, artists etc)
 import { Link } from "react-router-dom";
+import { userApi } from "../services/api/userApi";
 
 function NavBarMenu() {
   // need to pass in base url (defnied as loacalhost essentially)

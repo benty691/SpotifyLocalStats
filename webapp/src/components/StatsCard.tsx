@@ -1,9 +1,3 @@
-import { useState, useEffect, useContext } from "react";
-import { useUserContext } from "../contexts/UserContexts";
-
-import type { ApiError } from "../types/ApiError";
-import type { UserSpotifyStats } from "../types/UserSpotifyStats";
-
 function StatsCard({
   statNumber,
   statName,

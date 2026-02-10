@@ -3,6 +3,7 @@ import Navbar from "../components/Navbar";
 import { useState, useEffect, useContext } from "react";
 
 import HomeStats from "../components/HomeStats";
+import HowTo from "../components/HowTo";
 
 import type { ApiError } from "../types/ApiError";
 import type { UserSpotifyStats } from "../types/UserSpotifyStats";
@@ -14,6 +15,7 @@ function Home() {
     <>
       <div className='home'>
         <HomeStats />
+        <HowTo />
       </div>
     </>
   );
