@@ -3,14 +3,11 @@ using SpotifyLocalStats.Server.Models;
 namespace WebApi.Data.DTOs;
 
 // essentially the main user data passed likely to a user profile page?
-public class UserSpotifyStats
+public class UserSpotifyStatsDto
 {
 
-    public UserSpotifyStats(Guid userId) // then use gets to retriev that info??
+    public UserSpotifyStatsDto(Guid userId) // then use gets to retriev that info??
     {
-
-//        UserName = getUserName();
-
     }
     public UserDto User {get; set;}
     public int totalTracks {get; set;} // every single imported track count

@@ -3,12 +3,13 @@ import type { User } from "../types/User";
 import React from "react";
 import { apiClient } from "../services/api/apiClient";
 import { userApi } from "../services/api/userApi";
+import type { Guid } from "guid-typescript";
 
 interface UserContextType {
   user: User | null;
   loading: boolean;
   isAuthenticated: boolean;
-  storeUser: () => void;
+  updateUser: (user: User) => Promise<void>;
   fetchUser: () => Promise<User>;
 }
 
@@ -50,15 +51,15 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const storeUser = async () => {
-    setUser(await fetchUser());
+  const updateUser = async (user: User) => {
+    setUser(user);
   };
 
   const value: UserContextType = {
     user,
     isAuthenticated: user !== null,
     loading,
-    storeUser,
+    updateUser,
     fetchUser,
   };
 

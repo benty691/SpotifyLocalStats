@@ -11,7 +11,7 @@ using WebApi.Controllers.DTO;
 namespace WebApi.Controllers;
 
 [Route("api/[controller]")]
-public class ImportTracksJsonController : BasApiController
+public class ImportTracksJsonController : BaseApiController
 {
     public readonly IImportOrchestrationService _importOrchestrationService;
 

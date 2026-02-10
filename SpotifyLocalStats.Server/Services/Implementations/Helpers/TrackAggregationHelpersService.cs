@@ -1,4 +1,5 @@
-﻿using SpotifyLocalStats.Server.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
 using WebApi.Models;
 using WebApi.Services.Interfaces.Helpers;
@@ -9,7 +10,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
 {
     private readonly ILogger<TrackAggregationHelpersService> _logger;
     private readonly SpotifyStatsContext _context;
-    private List<AggregatedTrack> _aggregatedTracks => GetAggregatedTracks();
+    private List<AggregatedTrack> _aggregatedTracks = new List<AggregatedTrack>();
 
     // really thinking this can be a helper class, where we pass in the aggergate we want to calc for, instead of having three separte aggreggate helpers that do pretty muhc smae thing? 
     public TrackAggregationHelpersService(ILogger<TrackAggregationHelpersService> logger, SpotifyStatsContext context)
@@ -17,16 +18,21 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
         _logger = logger;
         _context = context;
     }
-
-    public List<AggregatedTrack> GetAggregatedTracks()
+    public async Task InitializeAggregatedTracksAsync()
     {
-        return _context.AggregatedTracks.ToList();
+        _aggregatedTracks = await GetAggregatedTracks();
+    }
+
+    private async Task<List<AggregatedTrack>> GetAggregatedTracks()
+    {
+        return await _context.AggregatedTracks.ToListAsync();
     }
 
     public async Task RunCalculations()
     {
+        CalculateLongestStreak();
+        await InitializeAggregatedTracksAsync();
         await CalculateDrySpell();
-        await CalculateLongestStreak();
         await CalculateMostTimesIn24Hours();
         await CalculateTopListeningDate();
         await TimeOfDayStats();
@@ -47,13 +53,16 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
             {
                 var importedTracks = _context.ImportedTracks.Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.User.Id == aggTrack.User.Id);
 
-                var topDay = importedTracks.GroupBy(x => x.TimeStamp.Date).Select(g => new
+                var topDay = await importedTracks.GroupBy(x => x.TimeStamp.Date).Select(g => new
                 {
                     Date = g.Key,
                     PlayCount = g.Count()
                 })
                      .OrderByDescending(g => g.PlayCount)
-                     .FirstOrDefault();
+                     .FirstOrDefaultAsync();
+
+                if (topDay == null)
+                    throw new Exception($"{topDay} is null");
 
                 aggTrack.TopListeningDate = topDay.Date;
             }
@@ -77,8 +86,8 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
             // need to get the max number of plays in any 24 hour period for this artist
             // set time frame from track time, then search 24 hours back, count numbver of times artist appears
 
-            var tracksOfTracks = _context.ImportedTracks
-                 .Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.User.Id == aggTrack.User.Id).ToList();
+            var tracksOfTracks = await _context.ImportedTracks
+                 .Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.User.Id == aggTrack.User.Id).ToListAsync();
 
             foreach (var track in tracksOfTracks)
             {
@@ -113,9 +122,9 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
         // loop through each artist, get artist tracks from imported tracks 
         foreach (var aggTrack in _aggregatedTracks)
         {
-            var artistTracks = _context.ImportedTracks
+            var artistTracks = await _context.ImportedTracks
                 .Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.User.Id == aggTrack.User.Id)
-                .ToList();
+                .ToListAsync();
 
             // not sure if this will workl, as we need to span from 0000-1000 etc etc, if in this range, increment count
             // need to get old stats, then update them with new, or make old obselete, or somehting?? 
@@ -125,7 +134,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
             foreach (var track in artistTracks)
             {
                 // dont create a new one eveyrtime, just increase count by 1 if it exists, if nt create it
-                var timeOfDayStatsForUser = _context.TrackTimeOfDaysStats.Where(x => x.Aggregate.User.Id == track.UserId).ToList();
+                var timeOfDayStatsForUser = await _context.TrackTimeOfDaysStats.Where(x => x.Aggregate.User.Id == track.UserId).ToListAsync();
 
                 if (timeOfDayStatsForUser.Count != 0)
                 {
@@ -153,15 +162,13 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
     }
 
     // probably should get longest streak date start and end here. 
-    private async Task CalculateLongestStreak()
+    private void CalculateLongestStreak()
     {
         // goal here is find the most amount of days in a row the artist was listened to
         var longestStreak = 0;
         var tempStreak = 0;
 
         var longestStreakEndDate = new DateTime();
-        var longestStreakStartDate = new DateTime();
-
 
         if (_aggregatedTracks.Count == 0)
         {
@@ -224,7 +231,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
 
         foreach (var aggTrack in _aggregatedTracks)
         {
-            var tracks = _context.ImportedTracks.Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.User.Id == aggTrack.User.Id).OrderBy(x => x.TimeStamp).ToList();
+            var tracks = await _context.ImportedTracks.Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.User.Id == aggTrack.User.Id).OrderBy(x => x.TimeStamp).ToListAsync();
 
             // we have list of tracks in order, we just have to fin dlongest date between date values.. 
             for (var i = 0; i < tracks.Count(); i++)

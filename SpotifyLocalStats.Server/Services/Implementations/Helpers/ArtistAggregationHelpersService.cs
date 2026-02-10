@@ -1,4 +1,5 @@
-﻿using SpotifyLocalStats.Server.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
 using WebApi.Models;
 using WebApi.Services.Interfaces.Helpers;
@@ -9,7 +10,7 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
 {
     private readonly ILogger<ArtistAggregationHelpersService> _logger;
     private readonly SpotifyStatsContext _context;
-    private List<AggregatedArtist> _aggregateArtists => GetAggregatedArtists();
+    private List<AggregatedArtist> _aggregateArtists = new List<AggregatedArtist>();
 
     // really thinking this can be a helper class, where we pass in the aggergate we want to calc for, instead of having three separte aggreggate helpers that do pretty muhc smae thing? 
     public ArtistAggregationHelpersService(ILogger<ArtistAggregationHelpersService> logger, SpotifyStatsContext context)
@@ -17,20 +18,25 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
         _logger = logger;
         _context = context;
     }
-
-    public List<AggregatedArtist> GetAggregatedArtists()
+    public async Task InitializeAggregatedTracksAsync()
     {
-        return _context.AggregatedArtists.ToList();
+        _aggregateArtists = await getAggregatedArtists();
+    }
+
+    private async Task<List<AggregatedArtist>> getAggregatedArtists()
+    {
+        return await _context.AggregatedArtists.ToListAsync();
     }
 
     public async Task RunCalculations()
     {
-        await CalculateAlbumsListened();
+        CalculateLongestStreak();
+        CalculateUniqueArtistTracksListened();
+        CalculateAlbumsListened();
+        await InitializeAggregatedTracksAsync();
         await CalculateDrySpell();
-        await CalculateLongestStreak();
         await CalculateMostTimesIn24Hours();
         await CalculateTopListeningDate();
-        await CalculateUniqueArtistTracksListened();
         await TimeOfDayStats();
     }
 
@@ -49,13 +55,16 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
             {
                 var importedTracks = _context.ImportedTracks.Where(x => x.MasterMetadataArtistName == aggArtist.Artist.Name && x.User.Id == aggArtist.User.Id);
 
-               var topDay = importedTracks.GroupBy(x => x.TimeStamp.Date).Select(g => new
+               var topDay = await importedTracks.GroupBy(x => x.TimeStamp.Date).Select(g => new
                 {
                     Date = g.Key,
                     PlayCount = g.Count()
                 })
                     .OrderByDescending(g => g.PlayCount)
-                    .FirstOrDefault();
+                    .FirstOrDefaultAsync();
+
+                if (topDay != null)
+                    throw new Exception($"{topDay} is null");
                
                 aggArtist.TopListeningDate = topDay.Date;
 
@@ -63,7 +72,7 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
         }
     }
 
-    private async Task CalculateUniqueArtistTracksListened()
+    private void CalculateUniqueArtistTracksListened()
     {
         int uniqueTracks = 0; 
 
@@ -101,8 +110,8 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
             // need to get the max number of plays in any 24 hour period for this artist
             // set time frame from track time, then search 24 hours back, count numbver of times artist appears
 
-           var allTracksOfArtist = _context.ImportedTracks
-                .Where(x => x.MasterMetadataArtistName == aggArtist.Artist.Name && x.User.Id == aggArtist.User.Id).ToList();
+           var allTracksOfArtist = await _context.ImportedTracks
+                .Where(x => x.MasterMetadataArtistName == aggArtist.Artist.Name && x.User.Id == aggArtist.User.Id).ToListAsync();
             
             foreach(var trackOfArtist in allTracksOfArtist)
             {
@@ -137,9 +146,9 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
         // loop through each artist, get artist tracks from imported tracks 
         foreach (var aggArtist in _aggregateArtists)
         {
-            var artistTracks = _context.ImportedTracks
+            var artistTracks = await _context.ImportedTracks
                 .Where(x => x.MasterMetadataArtistName == aggArtist.Artist.Name && x.User.Id == aggArtist.User.Id)
-                .ToList();
+                .ToListAsync();
 
             // not sure if this will workl, as we need to span from 0000-1000 etc etc, if in this range, increment count
             // need to get old stats, then update them with new, or make old obselete, or somehting?? 
@@ -149,7 +158,7 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
             foreach (var track in artistTracks)
             {
                 // dont create a new one eveyrtime, just increase count by 1 if it exists, if nt create it
-                var timeOfDayStatsForUser = _context.ArtistTimeOfDaysStats.Where(x => x.Aggregate.User.Id == track.UserId).ToList();
+                var timeOfDayStatsForUser = await _context.ArtistTimeOfDaysStats.Where(x => x.Aggregate.User.Id == track.UserId).ToListAsync();
 
                 if (timeOfDayStatsForUser.Count != 0)
                 {
@@ -176,7 +185,7 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
         }
     }
 
-    private async Task CalculateAlbumsListened()
+    private void CalculateAlbumsListened()
     {
         // for each artist agg, get distinct album names from imported tracks for that artist and user
         if (_aggregateArtists.Count == 0)
@@ -197,15 +206,13 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
     }
 
     // probably should get longest streak date start and end here. 
-    private async Task CalculateLongestStreak()
+    private void CalculateLongestStreak()
     {
         // goal here is find the most amount of days in a row the artist was listened to
         var longestStreak = 0;
         var tempStreak = 0;
 
         var longestStreakEndDate = new DateTime();
-        var longestStreakStartDate = new DateTime();
-
 
         if (_aggregateArtists.Count == 0)
         {
@@ -268,7 +275,7 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
 
         foreach (var aggArtist in _aggregateArtists)
         {
-            var artistTracks = _context.ImportedTracks.Where(x => x.MasterMetadataArtistName == aggArtist.Artist.Name && x.User.Id == aggArtist.User.Id).OrderBy(x => x.TimeStamp).ToList();
+            var artistTracks = await _context.ImportedTracks.Where(x => x.MasterMetadataArtistName == aggArtist.Artist.Name && x.User.Id == aggArtist.User.Id).OrderBy(x => x.TimeStamp).ToListAsync();
 
             // we have list of tracks in order, we just have to fin dlongest date between date values.. 
             for (var i = 0; i < artistTracks.Count(); i++)

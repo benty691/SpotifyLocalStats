@@ -43,7 +43,7 @@ public static class Dependencies
 
     public static User DoesUserExist(IServiceCollection services)
     {
-        var user = new User();
+        var user = new User("DefaultUser");
 
         using (var serviceProvider = services.BuildServiceProvider())
         {
@@ -52,7 +52,6 @@ public static class Dependencies
                 var userCount = context.Users.Count();
                 if (userCount == 0)
                 {
-                    user.UserName = "DefaultUser";
                     user.HasImportedHistorical = false;
                     context.Users.Add(user);
                     context.SaveChanges();

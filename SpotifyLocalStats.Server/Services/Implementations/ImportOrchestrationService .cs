@@ -14,8 +14,9 @@ namespace WebApi.Services.Implementations
         private readonly ILogger<ImportOrchestrationService> _logger;
         private readonly SpotifyStatsContext _context;
 
-        public ImportOrchestrationService(IImportedTrackService importedTrackService, IModelPopulationService modelPopulationService, IAggregationService aggreationService, SpotifyStatsContext context)
+        public ImportOrchestrationService(ILogger<ImportOrchestrationService> logger, IImportedTrackService importedTrackService, IModelPopulationService modelPopulationService, IAggregationService aggreationService, SpotifyStatsContext context)
         {
+            _logger = logger;
             _importedTrackService = importedTrackService;
             _modelPopulationService = modelPopulationService;
             _aggreationService = aggreationService;

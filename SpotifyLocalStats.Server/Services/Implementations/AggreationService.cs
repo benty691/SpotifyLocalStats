@@ -1,6 +1,6 @@
-﻿using SpotifyLocalStats.Server.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
-using WebApi.Services.Implementations.Helpers;
 using WebApi.Services.Interfaces;
 using WebApi.Services.Interfaces.Helpers;
 
@@ -14,10 +14,10 @@ public class AggreationService : IAggregationService
     private readonly IAlbumAggregationHelpersService _albumAggregationHelpersService;
     private readonly ITrackAggregationHelpersService _TrackAggregationHelpersService;
 
-
-
-    public AggreationService(ILogger<AggreationService> logger, SpotifyStatsContext ctx, IArtistAggregationHelpersService artistAggregationHelpersService)
+    public AggreationService(ILogger<AggreationService> logger, SpotifyStatsContext ctx, IArtistAggregationHelpersService artistAggregationHelpersService, IAlbumAggregationHelpersService albumAggregationHelpersService, ITrackAggregationHelpersService trackAggregationHelpersService)
     {
+        _TrackAggregationHelpersService = trackAggregationHelpersService;
+        _albumAggregationHelpersService = albumAggregationHelpersService;
         _artistAggregationHelpersService = artistAggregationHelpersService;
         _context = ctx;
         _logger = logger;
@@ -37,7 +37,7 @@ public class AggreationService : IAggregationService
         await _albumAggregationHelpersService.RunCalculations();
         await _TrackAggregationHelpersService.RunCalculations();
 
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         // so in theolry here, we should have populated all the dbs now.. including calculated values, no idea how long this would take? fairly quick I would guess... 
         // then run 'baxkground' aggragtion helpers to fill in rest of the values... considering having this on a background service that updates daily when webapi opens (runs once after import of tracks, but for now, i think we just call after aggregates are created, essentially here. 
@@ -54,7 +54,7 @@ public class AggreationService : IAggregationService
             {
                 var newAggArtist = new AggregatedArtist()
                 {
-                    Artist = _context.Artists.FirstOrDefault(x => x.Name == track.MasterMetadataArtistName),
+                    Artist = await _context.Artists.FirstAsync(x => x.Name == track.MasterMetadataArtistName),
                     UniqueTracksPlayed = 1,
                     AlbumsListened = 1,
                     DateTimeFirstListened = track.TimeStamp,
@@ -92,7 +92,7 @@ public class AggreationService : IAggregationService
         // for each track that was uplaoded, we must check that trackj for the artist, if artist stats exist, increase count on things, esle create new agg stats 
         foreach (var track in tracks)
         {
-            var aggregatedAlbums = _context.AggregatedAlbums.Where(x => x.Album.Name == track.MasterMetadataAlbumName && x.User.Id == user.Id).ToList(); // done bby name which gets eh, we need ids 
+            var aggregatedAlbums = await _context.AggregatedAlbums.Where(x => x.Album.Name == track.MasterMetadataAlbumName && x.User.Id == user.Id).ToListAsync(); // done bby name which gets eh, we need ids 
 
             if (aggregatedAlbums.Count == 0)
             {
@@ -137,7 +137,7 @@ public class AggreationService : IAggregationService
         // for each track that was uplaoded, we must check that trackj for the artist, if artist stats exist, increase count on things, esle create new agg stats 
         foreach (var track in tracks)
         {
-            var aggregatedTracks = _context.AggregatedTracks.Where(x => x.Track.SpotifyTrackUri == track.SpotifyTrackUri && x.User.Id == user.Id).ToList();
+            var aggregatedTracks = await _context.AggregatedTracks.Where(x => x.Track.SpotifyTrackUri == track.SpotifyTrackUri && x.User.Id == user.Id).ToListAsync();
 
             if (aggregatedTracks.Count == 0)
             {

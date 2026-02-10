@@ -5,16 +5,18 @@ namespace SpotifyLocalStats.Server.Models;
 
 public class User : BaseModel
 {
-    public User()
+    public User(string userName, string firstName)
     {
+        UserName = userName ?? throw new ArgumentNullException(nameof(userName));
+        FirstName = firstName ?? throw new ArgumentNullException(nameof(firstName));
         Images = new List<Image>();
     }
 
     public DateTime LastUpdatedAt { get; set; }
     public DateTime LastTimeUsed { get; set; }
     public string? Email { get; set; }
-    public string? UserName { get; set; }
-    public string? FirstName { get; set; }
+    public string UserName { get; set; }
+    public string FirstName { get; set; }
     public string? LastName { get; set; }
     public string? Country { get; set; } // either let user fill in or auto detect from ip
     public string? Phone { get; set; }

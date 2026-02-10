@@ -23,7 +23,7 @@ public class ImportedTrackService : IImportedTrackService
     public async Task<IEnumerable<ImportedTrack>> HandleImport(string json, User user)
     {
         var trackList = await ValidateIncomingJson(json);
-        var updatedTrackList = await AssignUser(trackList, user);
+        var updatedTrackList = AssignUser(trackList, user);
         await SaveTracksToDb(updatedTrackList);
 
         return updatedTrackList;
@@ -42,7 +42,7 @@ public class ImportedTrackService : IImportedTrackService
         return Task.FromResult(importedTracks);
     }
 
-    public async Task<IEnumerable<ImportedTrack>> AssignUser(IEnumerable<ImportedTrack> importedTracks, User user) // user will come from controller
+    public IEnumerable<ImportedTrack> AssignUser(IEnumerable<ImportedTrack> importedTracks, User user) // user will come from controller
     {
         // we might want the user to sign in? or generate user for person on startup, so we have the user, can assign, rather than needing to generate on import?
         foreach (var track in importedTracks)
@@ -55,8 +55,8 @@ public class ImportedTrackService : IImportedTrackService
 
     public async Task<int> SaveTracksToDb(IEnumerable<ImportedTrack> importedTracks)
     {
-        _spotifyStatsContext.ImportedTracks.AddRange(importedTracks);
-        var numberOfRecordsSaved = _spotifyStatsContext.SaveChanges();
+        await _spotifyStatsContext.ImportedTracks.AddRangeAsync(importedTracks);
+        var numberOfRecordsSaved = await _spotifyStatsContext.SaveChangesAsync();
         var recordsSkipped = importedTracks.Count() - numberOfRecordsSaved;
 
         _logger.LogInformation($"Saved {numberOfRecordsSaved} imported tracks to database. {recordsSkipped} were skipped due to rule unique enforcment");

@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.EntityFrameworkCore;
 using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
 using WebApi.Models;
@@ -10,7 +11,7 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
 {
     private readonly ILogger<AlbumAggregationHelperService> _logger;
     private readonly SpotifyStatsContext _context;
-    private List<AggregatedAlbum> _aggregatedAlbums => GetAggregatedAlbums();
+    private List<AggregatedAlbum> _aggregatedAlbums = new List<AggregatedAlbum>();
 
     // really thinking this can be a helper class, where we pass in the aggergate we want to calc for, instead of having three separte aggreggate helpers that do pretty muhc smae thing? 
     public AlbumAggregationHelperService(ILogger<AlbumAggregationHelperService> logger, SpotifyStatsContext context)
@@ -19,15 +20,21 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
         _context = context;
     }
 
-    private List<AggregatedAlbum> GetAggregatedAlbums()
+    public async Task InitializeAggregatedArtistsAsync()
     {
-        return _context.AggregatedAlbums.ToList();
+        _aggregatedAlbums = await GetAggregatedAlbums();
+    }
+
+    private async Task<List<AggregatedAlbum>> GetAggregatedAlbums()
+    {
+        return await _context.AggregatedAlbums.ToListAsync();
     }
 
     public async Task RunCalculations()
     {
+        CalculateLongestStreak();
+        await InitializeAggregatedArtistsAsync();
         await CalculateDrySpell();
-        await CalculateLongestStreak();
         await CalculateMostTimesIn24Hours();
         await CalculateTopListeningDate();
         await TimeOfDayStats();
@@ -46,13 +53,16 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
             {
                 var importedTracks = _context.ImportedTracks.Where(x => x.MasterMetadataAlbumName == aggAlbum.Album.Name && x.User.Id == aggAlbum.User.Id);
 
-                var topDay = importedTracks.GroupBy(x => x.TimeStamp.Date).Select(g => new
+                var topDay = await importedTracks.GroupBy(x => x.TimeStamp.Date).Select(g => new
                 {
                     Date = g.Key,
                     PlayCount = g.Count()
                 })
                      .OrderByDescending(g => g.PlayCount)
-                     .FirstOrDefault();
+                     .FirstOrDefaultAsync();
+
+                if (topDay == null)
+                    throw new Exception($"{topDay} is null");
 
                 aggAlbum.TopListeningDate = topDay.Date;
             }
@@ -99,8 +109,8 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
             // need to get the max number of plays in any 24 hour period for this artist
             // set time frame from track time, then search 24 hours back, count numbver of times artist appears
 
-            var allTracksOfAlbum = _context.ImportedTracks
-                 .Where(x => x.MasterMetadataAlbumName == aggAlbum.Album.Name && x.User.Id == aggAlbum.User.Id).ToList();
+            var allTracksOfAlbum = await _context.ImportedTracks
+                 .Where(x => x.MasterMetadataAlbumName == aggAlbum.Album.Name && x.User.Id == aggAlbum.User.Id).ToListAsync();
 
             foreach (var trackOfAlbum in allTracksOfAlbum)
             {
@@ -135,9 +145,9 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
         // loop through each artist, get artist tracks from imported tracks 
         foreach (var aggAlbum in _aggregatedAlbums)
         {
-            var artistAlbumTracks = _context.ImportedTracks
+            var artistAlbumTracks = await _context.ImportedTracks
                 .Where(x => x.MasterMetadataAlbumName == aggAlbum.Album.Name && x.User.Id == aggAlbum.User.Id)
-                .ToList();
+                .ToListAsync();
 
             // not sure if this will workl, as we need to span from 0000-1000 etc etc, if in this range, increment count
             // need to get old stats, then update them with new, or make old obselete, or somehting?? 
@@ -147,7 +157,7 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
             foreach (var track in artistAlbumTracks)
             {
                 // dont create a new one eveyrtime, just increase count by 1 if it exists, if nt create it
-                var timeOfDayStatsForUser = _context.AlbumTimeOfDaysStats.Where(x => x.Aggregate.User.Id == track.UserId).ToList();
+                var timeOfDayStatsForUser = await _context.AlbumTimeOfDaysStats.Where(x => x.Aggregate.User.Id == track.UserId).ToListAsync();
 
                 if (timeOfDayStatsForUser.Count != 0)
                 {
@@ -198,7 +208,7 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
     }*/
 
     // probably should get longest streak date start and end here. 
-    private async Task CalculateLongestStreak()
+    private void CalculateLongestStreak()
     {
         // goal here is find the most amount of days in a row the artist was listened to
 
@@ -206,8 +216,6 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
         var tempStreak = 0;
 
         var longestStreakEndDate = new DateTime();
-        var longestStreakStartDate = new DateTime();
-
 
         if (_aggregatedAlbums.Count == 0)
         {
@@ -271,7 +279,7 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
 
         foreach (var aggAlbum in _aggregatedAlbums)
         {
-            var albumTracks = _context.ImportedTracks.Where(x => x.MasterMetadataArtistName == aggAlbum.Album.Name && x.User.Id == aggAlbum.User.Id).OrderBy(x => x.TimeStamp).ToList();
+            var albumTracks = await _context.ImportedTracks.Where(x => x.MasterMetadataArtistName == aggAlbum.Album.Name && x.User.Id == aggAlbum.User.Id).OrderBy(x => x.TimeStamp).ToListAsync();
 
             // we have list of tracks in order, we just have to fin dlongest date between date values.. 
             for (var i = 0; i < albumTracks.Count(); i++)
