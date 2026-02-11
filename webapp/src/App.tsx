@@ -10,15 +10,15 @@ import { UserProvider } from "./contexts/UserContexts.tsx";
 
 function App() {
   return (
-    <main className='main-content'>
+    <main className="main-content">
       <UserProvider>
         <Navbar />
         <Routes>
-          <Route path='/' element={<Home />} />
-          <Route path='/Stats' element={<Stats />} />
-          <Route path='/Artists' element={<Artists />} />
-          <Route path='/Tracks' element={<Tracks />} />
-          <Route path='/Albums' element={<Albums />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/Stats" element={<Stats />} />
+          <Route path="/Artists" element={<Artists />} />
+          <Route path="/Tracks" element={<Tracks />} />
+          <Route path="/Albums" element={<Albums />} />
         </Routes>
         <Footer />
       </UserProvider>

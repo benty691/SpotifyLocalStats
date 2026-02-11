@@ -1,7 +1,7 @@
 import Container from "react-bootstrap/Container";
 import { Col } from "react-bootstrap";
 
-function HowTo() {
+function HowToDetails() {
   return (
     <Container>
       <Col></Col>
@@ -13,4 +13,4 @@ function HowTo() {
   );
 }
 
-export default HowTo;
+export default HowToDetails;

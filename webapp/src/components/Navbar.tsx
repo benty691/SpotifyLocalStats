@@ -1,5 +1,6 @@
 // import navbar buttons (tutorial, artists etc)
 import { Link } from "react-router-dom";
+import "../App.css";
 import { userApi } from "../services/api/userApi";
 
 function NavBarMenu() {
@@ -11,28 +12,28 @@ function NavBarMenu() {
 
   return (
     <>
-      <nav className='navbar navbar-expand-lg bg-body-tertiary'>
-        <div className='container-fluid'>
-          <div className='navbar-brand'>
-            <Link to='/'>SpotifyLocalStats</Link>
+      <nav className="flex justify-center">
+        <div className="flex flex-wrap">
+          <div className="navbar-brand">
+            <Link to="/">SpotifyLocalStats</Link>
           </div>
-          <div className='navbar-links'>
-            <Link to='/Artists' className='nav-link'>
+          <div className="flex flex-col">
+            <Link to="/Artists" className="w-8">
               Artists
             </Link>
-            <Link to='/Albums' className='nav-link'>
+            <Link to="/Albums" className="nav-link">
               Albums
             </Link>
-            <Link to='/Tracks' className='nav-link'>
+            <Link to="/Tracks" className="nav-link">
               Tracks
             </Link>
-            <Link to='/Stats' className='nav-link'>
+            <Link to="/Stats" className="nav-link">
               Stats
             </Link>
-            <form action='' className='upload-form' onSubmit={handleSubmit}>
+            <form action="" className="upload-form" onSubmit={handleSubmit}>
               <label>Upload Spotify Data</label>
-              <input type='file' className='track-upload-input' />
-              <input type='submit' value='submit' className='submit-form' />
+              <input type="file" className="track-upload-input" />
+              <input type="submit" value="submit" className="submit-form" />
             </form>
           </div>
         </div>

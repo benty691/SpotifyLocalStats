@@ -3,7 +3,6 @@ import Navbar from "../components/Navbar";
 import { useState, useEffect, useContext } from "react";
 
 import HomeStats from "../components/HomeStats";
-import HowTo from "../components/HowTo";
 
 import type { ApiError } from "../types/ApiError";
 import type { UserSpotifyStats } from "../types/UserSpotifyStats";
@@ -13,9 +12,8 @@ function Home() {
 
   return (
     <>
-      <div className='home'>
+      <div className="flex justify-center align-middle w">
         <HomeStats />
-        <HowTo />
       </div>
     </>
   );
