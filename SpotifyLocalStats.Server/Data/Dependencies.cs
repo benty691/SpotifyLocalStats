@@ -43,7 +43,7 @@ public static class Dependencies
 
     public static User DoesUserExist(IServiceCollection services)
     {
-        var user = new User("DefaultUser");
+        var user = new User("DefaultUser", "TestUser");
 
         using (var serviceProvider = services.BuildServiceProvider())
         {

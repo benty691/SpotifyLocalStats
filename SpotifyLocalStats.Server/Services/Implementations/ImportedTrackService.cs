@@ -29,9 +29,11 @@ public class ImportedTrackService : IImportedTrackService
         return updatedTrackList;
     }
 
-    public Task<IEnumerable<ImportedTrack>> ValidateIncomingJson(string json)
+    public async Task<IEnumerable<ImportedTrack>> ValidateIncomingJson(string json)
     {
-        var importedTracks = JsonSerializer.Deserialize<IEnumerable<ImportedTrack>>(json);
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+
+        var importedTracks = await JsonSerializer.DeserializeAsync<IEnumerable<ImportedTrack>>(stream);
 
         if (importedTracks == null)
         {
@@ -39,7 +41,7 @@ public class ImportedTrackService : IImportedTrackService
             throw new ArgumentNullException(nameof(importedTracks));
         }
 
-        return Task.FromResult(importedTracks);
+        return importedTracks;
     }
 
     public IEnumerable<ImportedTrack> AssignUser(IEnumerable<ImportedTrack> importedTracks, User user) // user will come from controller

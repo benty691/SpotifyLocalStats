@@ -5,7 +5,6 @@ using SpotifyLocalStats.Server;
 using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
 using System.Net;
-using WebApi.Controllers.DTO;
 using WebApi.Data.DTOs;
 using WebApi.Services.Interfaces;
 
@@ -42,6 +41,7 @@ public class UserController : BaseApiController
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, $"Error getting user with id: {userId}");
             return StatusCode((int)HttpStatusCode.InternalServerError, $"Error retireiving user with id: {userId}");
 
         }

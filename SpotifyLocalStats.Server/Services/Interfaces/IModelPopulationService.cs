@@ -1,5 +1,5 @@
 ﻿using SpotifyLocalStats.Server.Models;
-using WebApi.Controllers.DTO;
+using WebApi.Data.DTOs;
 
 namespace WebApi.Services.Interfaces;
 

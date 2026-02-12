@@ -63,7 +63,7 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
                     .OrderByDescending(g => g.PlayCount)
                     .FirstOrDefaultAsync();
 
-                if (topDay != null)
+                if (topDay == null)
                     throw new Exception($"{topDay} is null");
                
                 aggArtist.TopListeningDate = topDay.Date;
@@ -158,7 +158,7 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
             foreach (var track in artistTracks)
             {
                 // dont create a new one eveyrtime, just increase count by 1 if it exists, if nt create it
-                var timeOfDayStatsForUser = await _context.ArtistTimeOfDaysStats.Where(x => x.Aggregate.User.Id == track.UserId).ToListAsync();
+                var timeOfDayStatsForUser = await _context.ArtistTimeOfDaysStats.Where(x => x.Aggregate!.User.Id == track.UserId).ToListAsync();
 
                 if (timeOfDayStatsForUser.Count != 0)
                 {
@@ -166,13 +166,9 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
 
                     if (todSameAsTrack is null) //???
                     {
-                        timeOfDayCount = new TimeOfDayStat<AggregatedArtist>()
+                        timeOfDayCount = new TimeOfDayStat<AggregatedArtist>(aggArtist.Id, track.TimeStamp.Hour, 1)
                         {
-                            CreatedAt = DateTime.UtcNow,
                             Aggregate = aggArtist,
-                            AggregateId = aggArtist.Id,
-                            TimeOfDay = track.TimeStamp.Hour, // this is a in value 0 - 23
-                            PlayCount = 1
                         };
                     }
                     else
@@ -269,8 +265,8 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
 
     private async Task CalculateDrySpell()
     {
-        var dryStreak = 0;
-        var dryStreakStartDate = new DateTime();
+        var drySpell = 0;
+        var drySpellStartDate = new DateTime();
         var dryStreakEndDate = new DateTime();
 
         foreach (var aggArtist in _aggregateArtists)
@@ -280,16 +276,16 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
             // we have list of tracks in order, we just have to fin dlongest date between date values.. 
             for (var i = 0; i < artistTracks.Count(); i++)
             {
-                if (dryStreak < (artistTracks[i].TimeStamp.Date - artistTracks[i - 1].TimeStamp.Date).Days)
+                if (drySpell < (artistTracks[i].TimeStamp.Date - artistTracks[i - 1].TimeStamp.Date).Days)
                 {
-                    dryStreak = (artistTracks[i].TimeStamp.Date - artistTracks[i - 1].TimeStamp.Date).Days;
-                    dryStreakStartDate = artistTracks[i].TimeStamp.Date;
+                    drySpell = (artistTracks[i].TimeStamp.Date - artistTracks[i - 1].TimeStamp.Date).Days;
+                    drySpellStartDate = artistTracks[i].TimeStamp.Date;
                     dryStreakEndDate = artistTracks[i - 1].TimeStamp.Date;
                 }
             }
             aggArtist.LongestDrySpellEnd = dryStreakEndDate;
-            aggArtist.LongestStreakStartDate = dryStreakStartDate;
-            aggArtist.LongestDrySpell = dryStreak;
+            aggArtist.LongestDrySpellStart = drySpellStartDate;
+            aggArtist.LongestDrySpell = drySpell;
         }
     }
 }

@@ -1,7 +1,8 @@
-﻿using SpotifyLocalStats.Server.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
 using System.Diagnostics.Metrics;
-using WebApi.Controllers.DTO;
+using WebApi.Data.DTOs;
 using WebApi.Services.Interfaces;
 
 namespace WebApi.Services.Implementations;
@@ -47,16 +48,13 @@ public sealed class ModelPopulationService : IModelPopulationService
                     // we need spotify webapi to allow this to occur properly, as we neeed to hit the endpoint to get details, but we need the artist id from spotify to query??? 
                     // appears we can use the search endpoint and search artist nam, and then get aristid from that, then query artist endpoint for details
 
-                    await _context.Artists.AddAsync(new Artist
-                    {
-                        Name = track.MasterMetadataArtistName
-                    });
+                    await _context.Artists.AddAsync(new Artist(track.MasterMetadataArtistName));
                 }
             }
             else
             {
                 nullArtistCount++;
-                _logger.LogWarning("Track with ID {TrackId} does not have an artist name.", track.Id);
+                _logger.LogWarning($"Track with ID {track.Id} does not have an artist name.");
                 continue;
             }
         }
@@ -80,17 +78,16 @@ public sealed class ModelPopulationService : IModelPopulationService
                 }
                 else
                 {
-                    await _context.Albums.AddAsync(new Album
+                    await _context.Albums.AddAsync(new Album(track.MasterMetadataAlbumName)
                     {
-                        Name = track.MasterMetadataAlbumName,
-                        Artists = _context.Artists.Where(a => a.Name == track.MasterMetadataArtistName).ToList()
+                        Artists = await _context.Artists.Where(a => a.Name == track.MasterMetadataArtistName).ToListAsync()
                     });
                 }
             }
             else
             {
                 nullAlbumCount++;
-                _logger.LogWarning("Track with ID {TrackId} does not have an album name.", track.Id);
+                _logger.LogWarning($"Track with ID {track.Id} does not have an album name.");
                 continue;
             }
         }
@@ -107,26 +104,25 @@ public sealed class ModelPopulationService : IModelPopulationService
         {
             if (track.MasterMetadataTrackName != null)
             {
-                if (_context.Albums.Select(x => x.Name == track.MasterMetadataAlbumName).Single())
+                if (_context.Tracks.Select(x => x.Name == track.MasterMetadataTrackName).Single())
                 {
                     continue;
                 }
                 else
                 {
-                    await _context.Tracks.AddAsync(new Track
+                    var newTrack = new Track(track.MasterMetadataTrackName, track.SpotifyTrackUri)
                     {
-                        Name = track.MasterMetadataTrackName,
-                        Artists = _context.Artists.Where(a => a.Name == track.MasterMetadataArtistName).ToList(),
-                        Album = _context.Albums.Where(a => a.Name == track.MasterMetadataAlbumName).ToList(),
-                        SpotifyTrackUri = track.SpotifyTrackUri,
-                        Duration = track.MsPlayed,
-                    });
+                        Artists = await _context.Artists.Where(a => a.Name == track.MasterMetadataArtistName).ToListAsync(),
+                        Albums = await _context.Albums.Where(a => a.Name == track.MasterMetadataAlbumName).ToListAsync()
+                    };
+
+                    await _context.Tracks.AddAsync(newTrack);
                 }
             }
             else
             {
                 nullTrackCount++;
-                _logger.LogWarning("Track with ID {TrackId} does not have an album name.", track.Id);
+                _logger.LogWarning($"Track with ID {track.Id} does not have an album name.");
                 continue;
             }
         }

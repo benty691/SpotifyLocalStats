@@ -2,9 +2,8 @@
 
 namespace SpotifyLocalStats.Server.Models;
 
-public class CopyrightContent
+public class CopyrightContent : BaseModel
 {
-    public Guid Id { get; set; }
-    public string Text { get; set; }
-    public string Type { get; set; } // C = Copyright, P = Performance
+    public string? Text { get; set; }
+    public string? Type { get; set; } // C = Copyright, P = Performance
 }

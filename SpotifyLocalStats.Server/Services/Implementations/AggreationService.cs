@@ -48,13 +48,12 @@ public class AggreationService : IAggregationService
         // for each track that was upl;aoded, we must check that trackj for the artist, if artist stats exist, increase count on things, esle create new agg stats 
         foreach(var track in tracks)
         {
-            var aggregateArtists = _context.AggregatedArtists.Where(x => x.Artist.Name == track.MasterMetadataArtistName && x.User.Id == user.Id).ToList();
+            var aggregateArtists = await _context.AggregatedArtists.Where(x => x.Artist.Name == track.MasterMetadataArtistName && x.User.Id == user.Id).ToListAsync();
 
             if (aggregateArtists.Count == 0)
             {
-                var newAggArtist = new AggregatedArtist()
+                var newAggArtist = new AggregatedArtist(await _context.Artists.FirstAsync(x => x.Name == track.MasterMetadataArtistName))
                 {
-                    Artist = await _context.Artists.FirstAsync(x => x.Name == track.MasterMetadataArtistName),
                     UniqueTracksPlayed = 1,
                     AlbumsListened = 1,
                     DateTimeFirstListened = track.TimeStamp,
@@ -64,7 +63,7 @@ public class AggreationService : IAggregationService
                     MsListened = track.MsPlayed,
                 };
 
-                _context.AggregatedArtists.Add(newAggArtist);
+                await _context.AggregatedArtists.AddAsync(newAggArtist);
             }
             else if (aggregateArtists.Count == 1)
             {
@@ -98,9 +97,8 @@ public class AggreationService : IAggregationService
             {
                 // alot of these values will be calculater, either from wihtin the models get or via a background job???? 
 
-                var newAggAlbum = new AggregatedAlbum()
+                var newAggAlbum = new AggregatedAlbum(await _context.Albums.Where(x => x.Name == track.MasterMetadataAlbumName).FirstAsync())
                 {
-                    Album = _context.Albums.Where(x => x.Name == track.MasterMetadataAlbumName).First(),
                     DateTimeFirstListened = track.TimeStamp,
                     DateTimeLastListened = track.TimeStamp,
                     User = user,
@@ -108,7 +106,7 @@ public class AggreationService : IAggregationService
                     MsListened = track.MsPlayed,
                 };
 
-                _context.AggregatedAlbums.Add(newAggAlbum);
+               await _context.AggregatedAlbums.AddAsync(newAggAlbum);
             }
             else if (aggregatedAlbums.Count == 1)
             {
@@ -143,9 +141,8 @@ public class AggreationService : IAggregationService
             {
                 // alot of these values will be calculater, either from wihtin the models get or via a background job???? 
 
-                var newAggTrack = new AggregatedTrack()
+                var newAggTrack = new AggregatedTrack(await _context.Tracks.Where(x => x.Name == track.MasterMetadataTrackName && x.SpotifyTrackUri == track.SpotifyTrackUri).FirstAsync())
                 {
-                    Track = _context.Tracks.Where(x => x.Name == track.MasterMetadataTrackName && x.SpotifyTrackUri == track.SpotifyTrackUri).First(), 
                     DateTimeFirstListened = track.TimeStamp,
                     DateTimeLastListened = track.TimeStamp,
                     User = user,
@@ -153,7 +150,7 @@ public class AggreationService : IAggregationService
                     MsListened = track.MsPlayed,
                 };
 
-                _context.AggregatedTracks.Add(newAggTrack);
+                await _context.AggregatedTracks.AddAsync(newAggTrack);
             }
             else if (aggregatedTracks.Count == 1)
             {

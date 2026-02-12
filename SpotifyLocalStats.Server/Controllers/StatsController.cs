@@ -39,12 +39,12 @@ public class StatsController : BaseApiController
         }
     }
 
-    [HttpGet("/tracks/{userId}")]
+    /*[HttpGet("/tracks/{userId}")]
 
     [HttpGet("/artists/{userId}")]
 
     [HttpGet("/albums/{userId}")]
 
-    [HttpGet("/tracks/{userId}")]
+    [HttpGet("/tracks/{userId}")]*/
 
 }

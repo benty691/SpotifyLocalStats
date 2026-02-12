@@ -39,5 +39,7 @@ public class SpotifyStatsContext : DbContext
                 .HasForeignKey(nameof(AggregateBase.UserId))
                 .OnDelete(DeleteBehavior.NoAction);
         }
+
+        builder.Entity<AggregateBase>().Ignore(x => x.MinsListened);
     }
 }

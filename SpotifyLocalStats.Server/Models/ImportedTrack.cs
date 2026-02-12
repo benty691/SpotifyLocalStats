@@ -43,52 +43,52 @@ public class ImportedTrack
     [Key]
     public Guid Id { get; set; }
     // FK to user
-    public User User { get; set; }
+    public required User User { get; set; }
     public Guid UserId { get; set; }
     [JsonPropertyName("ts")]
-    public DateTime TimeStamp { get; set; } // thbis is actually a string in the json, but we need to convert to dt somehow? 
+    public required DateTime TimeStamp { get; set; } // thbis is actually a string in the json, but we need to convert to dt somehow? 
     [JsonPropertyName("platform")]
-    public string Platform { get; set; }
+    public string? Platform { get; set; }
     [JsonPropertyName("ms_played")]
-    public int MsPlayed { get; set; }
+    public int? MsPlayed { get; set; }
     [JsonPropertyName("conn_country")]
-    public string ConnCountry { get; set; }
+    public string? ConnCountry { get; set; }
     [JsonPropertyName("master_metadata_track_name")]
-    public string MasterMetadataTrackName { get; set; }
+    public string? MasterMetadataTrackName { get; set; }
     [JsonPropertyName("master_metadata_album_artist_name")]
-    public string MasterMetadataArtistName { get; set; }
+    public string? MasterMetadataArtistName { get; set; }
     [JsonPropertyName("master_metadata_album_album_name")]
-    public string MasterMetadataAlbumName { get; set; }
+    public string? MasterMetadataAlbumName { get; set; }
     [JsonPropertyName("spotify_track_uri")]
-    public string SpotifyTrackUri { get; set; }
+    public string? SpotifyTrackUri { get; set; }
     [JsonPropertyName("episode_name")]
-    public string EpisodeName { get; set; }
+    public string? EpisodeName { get; set; }
     [JsonPropertyName("episode_show_name")]
-    public string EpisodeShowName { get; set; }
+    public string? EpisodeShowName { get; set; }
     [JsonPropertyName("spotify_episode_uri")]
-    public string SpotifyEpisodeUri { get; set; }
+    public string? SpotifyEpisodeUri { get; set; }
     [JsonPropertyName("audiobook_title")]
-    public string AudiobookTitle { get; set; }
+    public string? AudiobookTitle { get; set; }
     [JsonPropertyName("audiobook_uri")]
-    public string AudiobookUri { get; set; }
+    public string? AudiobookUri { get; set; }
     [JsonPropertyName("audiobook_chapter_uri")]
-    public string AudiobookChapterUri { get; set; }
+    public string? AudiobookChapterUri { get; set; }
     [JsonPropertyName("audiobook_chapter_title")]
-    public string AudiobookChapterTitle { get; set; }
+    public string? AudiobookChapterTitle { get; set; }
     [JsonPropertyName("reason_start")]
-    public string ReasonStart { get; set; } // maybe enum later
+    public string? ReasonStart { get; set; } // maybe enum later
     [JsonPropertyName("reason_end")]
-    public string ReasonEnd { get; set; } // maybe enum later
+    public string? ReasonEnd { get; set; } // maybe enum later
     [JsonPropertyName("shuffle")]
-    public bool IsShuffle { get; set; }
+    public bool? IsShuffle { get; set; }
     [JsonPropertyName("skipped")]
-    public bool IsSkipped { get; set; }
+    public bool? IsSkipped { get; set; }
     [JsonPropertyName("offline")]
-    public bool IsOffline { get; set; }
+    public bool? IsOffline { get; set; }
     [JsonPropertyName("offline_timestamp")]
-    public DateTime OfflineTimestamp { get; set; }
+    public DateTime? OfflineTimestamp { get; set; }
     [JsonPropertyName("incognito_mode")]
-    public bool IncognitoMode { get; set; }
+    public bool? IncognitoMode { get; set; }
     public DateTime CreatedAt { get; set; }
 }
 

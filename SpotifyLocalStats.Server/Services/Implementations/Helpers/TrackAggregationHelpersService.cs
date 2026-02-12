@@ -142,13 +142,9 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
 
                     if (todSameAsTrack is null) //???
                     {
-                        timeOfDayCount = new TimeOfDayStat<AggregatedTrack>()
+                        timeOfDayCount = new TimeOfDayStat<AggregatedTrack>(aggTrack.Id, track.TimeStamp.Hour, 1)
                         {
-                            CreatedAt = DateTime.UtcNow,
                             Aggregate = aggTrack,
-                            AggregateId = aggTrack.Id,
-                            TimeOfDay = track.TimeStamp.Hour, // this is a in value 0 - 23
-                            PlayCount = 1
                         };
                     }
                     else
@@ -244,7 +240,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
                 }
             }
             aggTrack.LongestDrySpellEnd = dryStreakEndDate;
-            aggTrack.LongestStreakStartDate = dryStreakStartDate;
+            aggTrack.LongestDrySpellStart = dryStreakStartDate;
             aggTrack.LongestDrySpell = dryStreak;
         }
     }

@@ -8,10 +8,11 @@ import Albums from "./pages/Albums.tsx";
 import Footer from "./components/Footer.tsx";
 import { UserProvider } from "./contexts/UserContexts.tsx";
 import { ThemeProvider } from "./contexts/ThemeContext.tsx";
+import Upload from "./pages/Upload.tsx";
 
 function App() {
   return (
-    <main className='size-full'>
+    <main className='min-h-screen bg-background text-text-primary'>
       <UserProvider>
         <ThemeProvider>
           <Navbar />
@@ -21,6 +22,7 @@ function App() {
             <Route path='/Artists' element={<Artists />} />
             <Route path='/Tracks' element={<Tracks />} />
             <Route path='/Albums' element={<Albums />} />
+            <Route path='/Upload' element={<Upload />} />
           </Routes>
           <Footer />
         </ThemeProvider>

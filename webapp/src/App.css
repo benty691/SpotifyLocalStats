@@ -1,7 +1,5 @@
 @import "tailwindcss";
 
-@import "tailwindcss";
-
 @theme {
   /*Light mode colours*/
   --color-primary: #1db954;
@@ -21,7 +19,7 @@
   --color-primary-hover: #1aa34a;
   --color-secondary: #191414;
   --color-tertiary: #282828;
-  --color-background: #121212;
+  --color-background: #252525;
   --color-surface: #181818;
   --color-text-primary: #ffffff;
   --color-text-secondary: #b3b3b3;

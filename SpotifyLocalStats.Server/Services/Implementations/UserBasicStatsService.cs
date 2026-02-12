@@ -9,7 +9,7 @@ namespace WebApi.Services.Implementations;
 
 public class UserBasicStatsService : IUserBasicStatsService
 {
-    SpotifyStatsContext _context;
+    private readonly SpotifyStatsContext _context;
     public UserBasicStatsService (SpotifyStatsContext context)
     {
         _context = context ?? throw new ArgumentNullException (nameof (context));
@@ -21,7 +21,7 @@ public class UserBasicStatsService : IUserBasicStatsService
         int albumCount = await GetAlbumStats(id);
         int artistCount = await GetArtistStats(id);
 
-        return new UserSpotifyStatsDto(id) { totalAlbums = albumCount, totalArtists = artistCount, totalTracks = trackCount};
+        return new UserSpotifyStatsDto(id, trackCount, albumCount, artistCount);
     }
 
     private async Task<int> GetTrackStats(Guid id)

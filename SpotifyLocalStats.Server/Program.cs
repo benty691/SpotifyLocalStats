@@ -26,7 +26,7 @@ var app = builder.Build();
 app.Logger.LogInformation("Backend App created...");
 
 // need to check has there been a user created, if there has, nothing, else create one. 
-var user = Dependencies.DoesUserExist(builder.Services);
+//var user = Dependencies.DoesUserExist(builder.Services);
 
 app.UseDefaultFiles();
 app.MapStaticAssets();

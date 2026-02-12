@@ -165,13 +165,9 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
 
                     if (todSameAsTrack is null) //???
                     {
-                        timeOfDayCount = new TimeOfDayStat<AggregatedAlbum>()
+                        timeOfDayCount = new TimeOfDayStat<AggregatedAlbum>(aggAlbum.Id, track.TimeStamp.Hour, 1)
                         {
-                            CreatedAt = DateTime.UtcNow,
                             Aggregate = aggAlbum,
-                            AggregateId = aggAlbum.Id,
-                            TimeOfDay = track.TimeStamp.Hour, // this is a in value 0 - 23
-                            PlayCount = 1
                         };
                     }
                     else
@@ -274,8 +270,8 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
     private async Task CalculateDrySpell()
     {
         var dryStreak = 0;
-        var dryStreakStartDate = new DateTime();
-        var dryStreakEndDate = new DateTime();
+        var drySpellStartDate = new DateTime();
+        var drySpellEndDate = new DateTime();
 
         foreach (var aggAlbum in _aggregatedAlbums)
         {
@@ -287,12 +283,12 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
                 if (dryStreak < (albumTracks[i].TimeStamp.Date - albumTracks[i - 1].TimeStamp.Date).Days)
                 {
                     dryStreak = (albumTracks[i].TimeStamp.Date - albumTracks[i - 1].TimeStamp.Date).Days;
-                    dryStreakStartDate = albumTracks[i].TimeStamp.Date;
-                    dryStreakEndDate = albumTracks[i - 1].TimeStamp.Date;
+                    drySpellStartDate = albumTracks[i].TimeStamp.Date;
+                    drySpellEndDate = albumTracks[i - 1].TimeStamp.Date;
                 }
             }
-            aggAlbum.LongestDrySpellEnd = dryStreakEndDate;
-            aggAlbum.LongestStreakStartDate = dryStreakStartDate;
+            aggAlbum.LongestDrySpellEnd = drySpellEndDate;
+            aggAlbum.LongestDrySpellStart = drySpellStartDate;
             aggAlbum.LongestDrySpell = dryStreak;
         }
     }

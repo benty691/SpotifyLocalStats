@@ -1,6 +1,6 @@
 ﻿namespace SpotifyLocalStats.Server.Models
 {
-    public class Genre
+    public class Genre : BaseModel
     {
     }
 }

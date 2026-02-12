@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace WebApi.Controllers.DTO;
+namespace WebApi.Data.DTOs;
 
 public class CreateUserRequest
 {

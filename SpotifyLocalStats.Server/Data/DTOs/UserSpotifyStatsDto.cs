@@ -5,12 +5,15 @@ namespace WebApi.Data.DTOs;
 // essentially the main user data passed likely to a user profile page?
 public class UserSpotifyStatsDto
 {
-
-    public UserSpotifyStatsDto(Guid userId) // then use gets to retriev that info??
+    public UserSpotifyStatsDto(Guid userId, int trackCount, int albumCount, int artistCount ) // then use gets to retriev that info??
     {
+        UserId = userId; 
+        TrackCount = trackCount;
+        AlbumsCount = albumCount;
+        ArtistCount = artistCount;
     }
-    public UserDto User {get; set;}
-    public int totalTracks {get; set;} // every single imported track count
-    public int totalArtists {get; set;} // every single imported track count
-    public int totalAlbums {get; set;}
+    public Guid UserId {get; set;}
+    public int TrackCount {get; set;} 
+    public int ArtistCount {get; set;} 
+    public int AlbumsCount {get; set;}
 }

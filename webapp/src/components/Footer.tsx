@@ -4,12 +4,10 @@ import Nav from "react-bootstrap/Nav";
 
 function Footer() {
   return (
-    <div className='footer'>
-      <div className='footer-items'>
-        <p>Spotify Local Stats</p>
-        <p>All Rights Reserved</p>
-        <p></p>
-      </div>
+    <div className='flex align-middle justify-around items-center'>
+      <p className=''>Spotify Local Stats</p>
+      <p className=''>All Rights Reserved</p>
+      <p></p>
     </div>
   );
 }

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
-using WebApi.Controllers.DTO;
+using WebApi.Data.DTOs;
 using WebApi.Services.Interfaces;
 
 namespace WebApi.Controllers;

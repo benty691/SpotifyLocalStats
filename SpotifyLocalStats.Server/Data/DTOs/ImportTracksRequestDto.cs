@@ -1,7 +1,6 @@
 ﻿using SpotifyLocalStats.Server.Data;
-using WebApi.Data.DTOs;
 
-namespace WebApi.Controllers.DTO;
+namespace WebApi.Data.DTOs;
 
 public class ImportTracksRequestDto
 {

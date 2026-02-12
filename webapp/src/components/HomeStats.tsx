@@ -54,23 +54,31 @@ function HomeStats() {
             <div className='header'>
               {user && <h2>Welcome Back, {user.userName}</h2>}
             </div>
-            <div className='home-content'>
+            <div className='grid columns-3'>
               {loading ? (
                 <div className='loading'>Loading...</div>
               ) : userSpotifyStats ? (
-                <div className='stats-grid'>
-                  <StatsCard
-                    statNumber={userSpotifyStats.totalAlbums}
-                    statName={"Albums"}
-                  />
-                  <StatsCard
-                    statNumber={userSpotifyStats.totalArtists}
-                    statName={"Artists"}
-                  />
-                  <StatsCard
-                    statNumber={userSpotifyStats.totalTracks}
-                    statName={"Tracks"}
-                  />
+                <div>
+                  <div className='stats-grid'>
+                    <StatsCard
+                      statNumber={userSpotifyStats.totalAlbums}
+                      statName={"Albums"}
+                    />
+                    <StatsCard
+                      statNumber={userSpotifyStats.totalArtists}
+                      statName={"Artists"}
+                    />
+                    <StatsCard
+                      statNumber={userSpotifyStats.totalTracks}
+                      statName={"Tracks"}
+                    />
+                  </div>
+                  <div>
+                    <h3>Upload more data to further enrich statistics</h3>
+                    <button>
+                      <Navigate to='/Upload'></Navigate>
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className='error-grid'>

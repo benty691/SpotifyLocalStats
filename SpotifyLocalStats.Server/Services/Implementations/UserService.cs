@@ -8,11 +8,11 @@ namespace WebApi.Services.Implementations;
 
 public sealed class UserService : IUserService
 {
-    SpotifyStatsContext _context;
+    private readonly SpotifyStatsContext _context;
 
     public UserService(SpotifyStatsContext context) 
     {
-        context = _context ?? throw new ArgumentNullException(nameof(context));
+        _context = context ?? throw new ArgumentNullException(nameof(_context));
     }
 
     public async Task<User> GetUserById(Guid id)
