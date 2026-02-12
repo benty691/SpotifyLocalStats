@@ -5,10 +5,9 @@ namespace SpotifyLocalStats.Server.Models;
 
 public class AggregatedAlbum : AggregateBase
 {
-    public AggregatedAlbum(Album album)
+    public AggregatedAlbum()
     {
         TimeOfDayStats = new List<TimeOfDayStat<AggregatedAlbum>>();
-        Album = album;
     }
     public Album Album { get; set; }
     public ICollection<TimeOfDayStat<AggregatedAlbum>> TimeOfDayStats { get; set; } // morning, afternoon, evening, night || Need to figure this out, map tod from imported then store somewhere?

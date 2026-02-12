@@ -52,8 +52,9 @@ public class AggreationService : IAggregationService
 
             if (aggregateArtists.Count == 0)
             {
-                var newAggArtist = new AggregatedArtist(await _context.Artists.FirstAsync(x => x.Name == track.MasterMetadataArtistName))
+                var newAggArtist = new AggregatedArtist()
                 {
+                    Artist = await _context.Artists.FirstAsync(x => x.Name == track.MasterMetadataArtistName),
                     UniqueTracksPlayed = 1,
                     AlbumsListened = 1,
                     DateTimeFirstListened = track.TimeStamp,
@@ -97,8 +98,9 @@ public class AggreationService : IAggregationService
             {
                 // alot of these values will be calculater, either from wihtin the models get or via a background job???? 
 
-                var newAggAlbum = new AggregatedAlbum(await _context.Albums.Where(x => x.Name == track.MasterMetadataAlbumName).FirstAsync())
+                var newAggAlbum = new AggregatedAlbum()
                 {
+                    Album = await _context.Albums.Where(x => x.Name == track.MasterMetadataAlbumName).FirstAsync(),
                     DateTimeFirstListened = track.TimeStamp,
                     DateTimeLastListened = track.TimeStamp,
                     User = user,
@@ -141,8 +143,9 @@ public class AggreationService : IAggregationService
             {
                 // alot of these values will be calculater, either from wihtin the models get or via a background job???? 
 
-                var newAggTrack = new AggregatedTrack(await _context.Tracks.Where(x => x.Name == track.MasterMetadataTrackName && x.SpotifyTrackUri == track.SpotifyTrackUri).FirstAsync())
+                var newAggTrack = new AggregatedTrack()
                 {
+                    Track = await _context.Tracks.Where(x => x.Name == track.MasterMetadataTrackName && x.SpotifyTrackUri == track.SpotifyTrackUri).FirstAsync(),
                     DateTimeFirstListened = track.TimeStamp,
                     DateTimeLastListened = track.TimeStamp,
                     User = user,
