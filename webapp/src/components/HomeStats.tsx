@@ -13,7 +13,7 @@ import { Navigate } from "react-router-dom";
 
 function HomeStats() {
   const [userSpotifyStats, setUserSpotifyStats] = useState<UserSpotifyStats>(); // thinking this is a stats object, containing total streams, no of artists, albums etc
-  const [loading, setLoading] = useState<boolean>();
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<ApiError>();
 
   const { user } = useUserContext();
@@ -22,9 +22,12 @@ function HomeStats() {
     const loadUserSpotifyStats = async () => {
       let endpoint = "";
 
-      if (!user) return <Navigate to='/login' />;
+      if (!user) {
+        return;
+      }
 
       try {
+        setLoading(true);
         let userSpotifyStats = await userApi.getUserSpotifyStatsBasic(user.id);
         endpoint = userSpotifyStats.data.endpoint;
 
@@ -42,12 +45,12 @@ function HomeStats() {
     };
 
     loadUserSpotifyStats();
-  }, []);
+  }, [user]);
+
+  if (!user) return <LoginPopup />;
 
   return (
     <>
-      {!loading && !user && <LoginPopup />}
-
       <Container fluid='md'>
         <Row>
           <Col sm={8}>

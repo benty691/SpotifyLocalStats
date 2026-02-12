@@ -10,7 +10,8 @@ using WebApi.Services.Interfaces;
 
 namespace WebApi.Controllers;
 
-[Route("/user")]
+[ApiController]
+[Route("api/[controller]")]
 public class UserController : BaseApiController
 {
     ILogger<UserController> _logger;
@@ -22,17 +23,21 @@ public class UserController : BaseApiController
         _logger = logger;
     }
 
-    [HttpGet("/{userId}")]
+    [HttpGet("{userId}")]
     public async Task<ActionResult<UserDto>> GetUserById(Guid userId)
     {
         // call a sertvice, which has the context, get user, return to us in a user dto, or we get the user here, the build the dto from the user
         try
         {
             var user = await _userService.GetUserById(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
 
             var userDto = new UserDto(user.Id, user.UserName);
 
-            return user == null ? NotFound() : Ok(userDto);
+            return Ok(userDto);
 
         }
         catch (ArgumentException ex)
@@ -55,18 +60,20 @@ public class UserController : BaseApiController
     {
         try
         {
+            if (request.UserName is null || request.UserFirstName is null)
+            {
+                return BadRequest();
+            }
+
             var user = await _userService.CreateUser(request.UserName, request.UserFirstName);
 
             var userDto = new UserDto(user.Id, user.UserName);
 
             return CreatedAtAction(
-                nameof(CreateUser),
+                nameof(GetUserById),
+                new { userId = user.Id},
                 userDto
                 );
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { error = ex.Message });
         }
         catch (Exception ex)
         {

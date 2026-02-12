@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NuGet.Common;
 using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
@@ -15,9 +16,9 @@ public sealed class UserService : IUserService
         _context = context ?? throw new ArgumentNullException(nameof(_context));
     }
 
-    public async Task<User> GetUserById(Guid id)
+    public async Task<User?> GetUserById(Guid id)
     {
-       return await _context.Users.FirstAsync(x => x.Id == id);
+        return await _context.Users.SingleOrDefaultAsync(x => x.Id == id);
     }
 
     public async Task<User> CreateUser(string userName, string firstName)

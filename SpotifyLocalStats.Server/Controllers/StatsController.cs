@@ -5,7 +5,8 @@ using WebApi.Services.Interfaces;
 
 namespace WebApi.Controllers;
 
-[Route("/stats")]
+[ApiController]
+[Route("/api/[controller]")]
 public class StatsController : BaseApiController
 {
 

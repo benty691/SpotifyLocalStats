@@ -32,13 +32,16 @@ public static class Dependencies
         services.AddDbContext<SpotifyStatsContext>(c =>
             c.UseSqlServer(configuration.GetConnectionString("SpotifyStatsConnection")));
         services.AddScoped<IImportedTrackService, ImportedTrackService>();
-        //services.AddScoped(typeof(BaseService<>));
         services.AddScoped<IImportOrchestrationService, ImportOrchestrationService>();
         services.AddScoped<IArtistAggregationHelpersService, ArtistAggregationHelpersService>();
         services.AddScoped<IAlbumAggregationHelpersService, AlbumAggregationHelperService>();
         services.AddScoped<ITrackAggregationHelpersService, TrackAggregationHelpersService>();
         services.AddScoped<IAggregationService, AggreationService>();
         services.AddScoped<IModelPopulationService, ModelPopulationService>();
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IUserBasicStatsService, UserBasicStatsService>();
+        //services.AddScoped<ITrackService, TrackService>()
+
     }
 
     public static User DoesUserExist(IServiceCollection services)

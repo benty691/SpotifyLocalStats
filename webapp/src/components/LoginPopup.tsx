@@ -32,7 +32,7 @@ function LoginPopup() {
   };
 
   return ReactDOM.createPortal(
-    <div className='login-overlay'>
+    <div className='flex size-full'>
       <div className='login-grid'>
         <h3 className='login-header'>
           Please Create Account for your convenience:
