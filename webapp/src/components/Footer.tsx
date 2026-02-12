@@ -1,7 +1,3 @@
-import Navbar from "react-bootstrap/Navbar";
-import Container from "react-bootstrap/Container";
-import Nav from "react-bootstrap/Nav";
-
 function Footer() {
   return (
     <div className='flex bottom-0 align-middle justify-around items-center y-'>

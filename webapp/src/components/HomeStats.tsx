@@ -1,6 +1,3 @@
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
 import StatsCard from "./StatsCard";
 import { useState, useEffect, useContext } from "react";
 import { useUserContext } from "../contexts/UserContexts";
@@ -51,9 +48,9 @@ function HomeStats() {
 
   return (
     <>
-      <Container fluid='md'>
-        <Row>
-          <Col sm={8}>
+      <div>
+        <div>
+          <div>
             <div className='header'>
               {user && <h2>Welcome Back, {user.userName}</h2>}
             </div>
@@ -89,9 +86,9 @@ function HomeStats() {
                 </div>
               )}
             </div>
-          </Col>
-        </Row>
-      </Container>
+          </div>
+        </div>
+      </div>
     </>
   );
 }
