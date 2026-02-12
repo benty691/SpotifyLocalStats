@@ -1,53 +1,77 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SpotifyLocalStats.Server.Data;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using SpotifyLocalStats.Server;
-using WebApi.Services.Interfaces;
+using SpotifyLocalStats.Server.Data;
+using SpotifyLocalStats.Server.Models;
+using System.Net;
+using WebApi.Controllers.DTO;
 using WebApi.Data.DTOs;
+using WebApi.Services.Interfaces;
 
 namespace WebApi.Controllers;
 
 [Route("/user")]
 public class UserController : BaseApiController
 {
+    ILogger<UserController> _logger;
     IUserService _userService;
-    IUserBasicStatsService _userBasicStatsService;
 
-    public UserController(IUserService userService, IUserBasicStatsService userBasicStatsService)
+    public UserController(IUserService userService, IUserBasicStatsService userBasicStatsService, ILogger<UserController> logger)
     {
-        _userBasicStatsService = userBasicStatsService;
         _userService = userService;
+        _logger = logger;
     }
 
     [HttpGet("/{userId}")]
-    // kind of useless, because we are trying to get the user form the id, but we dont know there id on the forntend. we need a way to determine their record without their id from the frontend??? Maybe on create of the user, we send the 
-    public ActionResult<UserDto> GetUserById(Guid userId)
+    public async Task<ActionResult<UserDto>> GetUserById(Guid userId)
     {
         // call a sertvice, which has the context, get user, return to us in a user dto, or we get the user here, the build the dto from the user
         try
         {
-            var user = _userService.GetUserById(userId);
+            var user = await _userService.GetUserById(userId);
 
-            return Ok(new UserDto(userId, user.UserName));
+            var userDto = new UserDto(user.Id, user.UserName);
 
+            return user == null ? NotFound() : Ok(userDto);
+
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return StatusCode((int)HttpStatusCode.InternalServerError, $"Error retireiving user with id: {userId}");
+
         }
     }
 
     // not sure if this should be in here or in a seperate 'stats' controller. Leaving here for now. 
-    [HttpGet("/stats/{userId}")]
-    public async Task<ActionResult<UserSpotifyStatsDto>> GetUserSpotifyStatsBasic(Guid userId)
+ 
+
+    [HttpPost]
+    public async Task<ActionResult<UserDto>> CreateUser([FromBody] CreateUserRequest request)
     {
         try
         {
-            var userStats = await _userBasicStatsService.GetUserBasicStats(userId);
-            return Ok(userStats);
+            var user = await _userService.CreateUser(request.UserName, request.UserFirstName);
+
+            var userDto = new UserDto(user.Id, user.UserName);
+
+            return CreatedAtAction(
+                nameof(CreateUser),
+                userDto
+                );
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            _logger.LogError(ex, $"Error creating user with UserName:{request.UserName} and FirstName:{request.UserFirstName}");
+            return StatusCode((int)HttpStatusCode.InternalServerError, "An error occured while creating the user.");
         }
     }
 }

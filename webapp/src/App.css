@@ -1,1 +1,29 @@
 @import "tailwindcss";
+
+@import "tailwindcss";
+
+@theme {
+  /*Light mode colours*/
+  --color-primary: #1db954;
+  --color-primary-hover: #1ed760;
+  --color-secondary: #f6f6f6;
+  --color-tertiary: #e0e0e0;
+  --color-background: #ffffff;
+  --color-surface: #f6f6f6;
+  --color-text-primary: #191414;
+  --color-text-secondary: #535353;
+  --color-text-muted: #737373;
+}
+
+/* Dark mode colors */
+.dark {
+  --color-primary: #1db954;
+  --color-primary-hover: #1aa34a;
+  --color-secondary: #191414;
+  --color-tertiary: #282828;
+  --color-background: #121212;
+  --color-surface: #181818;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #b3b3b3;
+  --color-text-muted: #737373;
+}

@@ -1,6 +1,8 @@
 import { apiClient } from "./apiClient";
-import type { ImportTrackDto } from "../../types/ImportTrackDto";
+import type { ImportTracksDto } from "../../types/ImportTrackDto";
+import type { Guid } from "guid-typescript";
 
 export const importApi = {
-  uploadTrack: () : <> => apiClient.post<ImportTrackDto>("/import"),
+  uploadTrack: (importTrack: ImportTracksDto) =>
+    apiClient.post<ImportTracksDto>("/import", { importTrack }),
 };

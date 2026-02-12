@@ -1,6 +1,7 @@
+import type { Guid } from "guid-typescript";
 import type { User } from "./User";
 
-export interface ImportTrackDto {
-  User: User;
+export interface ImportTracksDto {
+  userId: Guid;
   data: string;
 }
