@@ -20,6 +20,17 @@ builder.Services.AddOpenApi();
 builder.Services.AddLogging(builder => builder.AddConsole());
 builder.Configuration.AddEnvironmentVariables();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowViteDevServer", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") // Your Vite dev server
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 //builder.Configuration.AddConfiguration("appsettings.test.json");
 var app = builder.Build();
 
@@ -39,7 +50,13 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
-app.UseHttpsRedirection();
+if (app.Environment.IsProduction())
+{
+    app.UseHttpsRedirection();
+}
+
+app.UseRouting();
+app.UseCors("AllowViteDevServer");
 app.UseAuthorization();
 app.MapControllers();
 app.MapFallbackToFile("/index.html");

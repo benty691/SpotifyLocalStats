@@ -60,12 +60,12 @@ public class UserController : BaseApiController
     {
         try
         {
-            if (request.UserName is null || request.UserFirstName is null)
+            if (request.UserName is null || request.FirstName is null)
             {
                 return BadRequest();
             }
 
-            var user = await _userService.CreateUser(request.UserName, request.UserFirstName);
+            var user = await _userService.CreateUser(request.UserName, request.FirstName);
 
             var userDto = new UserDto(user.Id, user.UserName);
 
@@ -77,7 +77,7 @@ public class UserController : BaseApiController
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error creating user with UserName:{request.UserName} and FirstName:{request.UserFirstName}");
+            _logger.LogError(ex, $"Error creating user with UserName:{request.UserName} and FirstName:{request.FirstName}");
             return StatusCode((int)HttpStatusCode.InternalServerError, "An error occured while creating the user.");
         }
     }

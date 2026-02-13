@@ -10,5 +10,5 @@ public class CreateUserRequest
 
     [Required]
     [StringLength(35)]
-    public string? UserFirstName { get; set; }
+    public string? FirstName { get; set; }
 }

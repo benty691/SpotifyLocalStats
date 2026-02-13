@@ -24,6 +24,8 @@ function LoginPopup() {
 
     try {
       const res = await userApi.createNewUser(userName, userFirstName);
+      console.log(import.meta.env.VITE_API_URL);
+
       updateUser(res.data);
     } catch (e) {
       setError("Error creating user");
@@ -35,31 +37,34 @@ function LoginPopup() {
   };
 
   return (
-    <div className='flex size-full fixed z-1 left-0 top-0 overflow-auto bg-blur '>
-      <div className='bg-primary absolute translate-1/2 p-5 rounded-md w-2/5 blur-none'>
-        <h3 className='mt-0 text-3xl'>Please create an account</h3>
+    <div className='flex size-full fixed z-1 left-0 top-0 overflow-auto'>
+      <div className='absolute inset-0 backdrop-blur-sm ' />
+      <div className='relative bg-surface border border-border m-auto p-6 rounded-lg w-2/5 max-w-lg shadow-xl'>
+        <h3 className='mt-0 mb-2.5 text-3xl text-text-primary'>
+          Please create an account
+        </h3>
         <form action='' className='login-form' onSubmit={handleSubmit}>
-          <label className='block mb-2.5'>Username:</label>
+          <label className='block mb-2.5 text-text-primary'>Username:</label>
           <input
             id='user_name'
             name='user_name'
             type='text'
-            className='w-full p-1.25 rounded-md border border-primary mb-2.5'
+            className='w-full p-2.5 rounded-md border border-border bg-background text-text-primary mb-2.5 focus:outline-none focus:border-primary'
             placeholder='Please choose your username'
             onChange={(e) => setUserName(e.target.value)}
           />
-          <label>First Name:</label>
+          <label className='block mb-2.5 text-text-primary'>First Name:</label>
           <input
             id='first_name'
             name='first_name'
             type='text'
-            className='w-full p-1.25 rounded-md border border-primary mb-2.5'
+            className='w-full p-2.5 rounded-md border border-border bg-background text-text-primary mb-2.5 focus:outline-none focus:border-primary'
             placeholder='Please enter your first name'
             onChange={(e) => setUserFirstName(e.target.value)}
           />
           <button
             type='submit'
-            className='bg-tertiary text-text-primary border-0 p-2 no-underline inline-block text-xl mr-2.5 mt-2.5 cursor-pointer rounded-md'
+            className='bg-primary hover:bg-primary-hover text-white border-0 px-6 py-2.5 inline-block text-base font-medium mt-2.5 cursor-pointer rounded-md transition-colors'
           >
             Submit Form
           </button>

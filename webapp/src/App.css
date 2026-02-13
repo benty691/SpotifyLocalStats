@@ -2,26 +2,76 @@
 
 @theme {
   /*Light mode colours*/
-  --color-primary: #1db954;
-  --color-primary-hover: #1ed760;
-  --color-secondary: #f6f6f6;
-  --color-tertiary: #e0e0e0;
+  --color-primary: #0066ff;
+  --color-primary-hover: #0052cc;
+  --color-primary-pressed: #0043a8;
+
   --color-background: #ffffff;
-  --color-surface: #f6f6f6;
-  --color-text-primary: #191414;
-  --color-text-secondary: #535353;
-  --color-text-muted: #737373;
+  --color-surface: #f7f8fa;
+  --color-surface-raised: #ffffff;
+  --color-surface-overlay: #ffffff;
+
+  --color-border: #e1e4e8;
+  --color-border-subtle: #f0f2f5;
+
+  --color-text-primary: #1f2937;
+  --color-text-secondary: #6b7280;
+  --color-text-tertiary: #9ca3af;
+  --color-text-disabled: #d1d5db;
+
+  --color-accent-coral: #ff6b5a;
+  --color-accent-coral-hover: #ff5242;
+  --color-accent-teal: #00b8a9;
+  --color-accent-teal-hover: #00a296;
+  --color-accent-orange: #ff8c42;
+  --color-accent-orange-hover: #ff7829;
+  --color-accent-cyan: #00d9ff;
+  --color-accent-cyan-hover: #00c4e6;
+
+  --color-success: #00c853;
+  --color-success-bg: #e8f5e9;
+  --color-warning: #ffa726;
+  --color-warning-bg: #fff3e0;
+  --color-error: #ff5252;
+  --color-error-bg: #ffebee;
+  --color-info: #42a5f5;
+  --color-info-bg: #e3f2fd;
 }
 
 /* Dark mode colors */
 .dark {
-  --color-primary: #1db954;
-  --color-primary-hover: #1aa34a;
-  --color-secondary: #191414;
-  --color-tertiary: #282828;
-  --color-background: #252525;
-  --color-surface: #181818;
+  --color-primary: #0066ff;
+  --color-primary-hover: #3384ff;
+  --color-primary-pressed: #005ce6;
+
+  --color-background: #0d0d0d;
+  --color-surface: #1a1a1a;
+  --color-surface-raised: #242424;
+  --color-surface-overlay: #2e2e2e;
+
+  --color-border: #2e2e2e;
+  --color-border-subtle: #1f1f1f;
+
   --color-text-primary: #ffffff;
-  --color-text-secondary: #b3b3b3;
-  --color-text-muted: #737373;
+  --color-text-secondary: #a8a8a8;
+  --color-text-tertiary: #737373;
+  --color-text-disabled: #4d4d4d;
+
+  --color-accent-coral: #ff6b5a;
+  --color-accent-coral-hover: #ff8470;
+  --color-accent-teal: #00b8a9;
+  --color-accent-teal-hover: #00d4c3;
+  --color-accent-orange: #ff8c42;
+  --color-accent-orange-hover: #ffa05c;
+  --color-accent-cyan: #00d9ff;
+  --color-accent-cyan-hover: #33e3ff;
+
+  --color-success: #00c853;
+  --color-success-bg: #1a3a26;
+  --color-warning: #ffa726;
+  --color-warning-bg: #3d2e1a;
+  --color-error: #ff5252;
+  --color-error-bg: #3d1a1a;
+  --color-info: #42a5f5;
+  --color-info-bg: #1a2d3d;
 }
