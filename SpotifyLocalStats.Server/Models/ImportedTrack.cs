@@ -43,7 +43,7 @@ public class ImportedTrack
     [Key]
     public Guid Id { get; set; }
     // FK to user
-    public required User User { get; set; }
+    public User? User { get; set; }
     public Guid UserId { get; set; }
     [JsonPropertyName("ts")]
     public required DateTime TimeStamp { get; set; } // thbis is actually a string in the json, but we need to convert to dt somehow? 

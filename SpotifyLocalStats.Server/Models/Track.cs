@@ -12,7 +12,7 @@ public class Track : BaseModel
         Albums = new List<Album>();
         Artists = new List<Artist>();
         ExternalIds = new List<ExternalId>();
-        SpotifyTrackUri = spotifyTrackUri;
+        SpotifyTrackUri = spotifyTrackUri ?? string.Empty;
     }
 
     public string Name { get; set; }
@@ -22,7 +22,7 @@ public class Track : BaseModel
     public int? MsPlayed { get; set; }
     public bool? IsSingle { get; set; }
     public bool? IsExplicit { get; set; }
-    public string SpotifyTrackId { get; set; }
+    public string? SpotifyTrackId { get; set; }
     public int? TrackNumber { get; set; }
     public string? ReleaseDate { get; set; }
     public string? ReleaseDatePrecision { get; set; } // enum later

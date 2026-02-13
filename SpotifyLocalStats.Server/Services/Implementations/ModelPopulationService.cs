@@ -39,7 +39,7 @@ public sealed class ModelPopulationService : IModelPopulationService
             if (track.MasterMetadataArtistName != null)
             {
                 // something to note is in json data we do not get spotify artsist url. My thinking is here we should query the webapi and try get it, so we can be definitive in artits, because artist names overlaps, i am sure. 
-                if (_context.Artists.Select(x => x.Name == track.MasterMetadataArtistName).Single())
+                if (_context.Artists.Select(x => x.Name == track.MasterMetadataArtistName).Count() > 0)
                 {
                     continue;
                 }
@@ -72,7 +72,7 @@ public sealed class ModelPopulationService : IModelPopulationService
         {
             if (track.MasterMetadataAlbumName != null)
             {
-                if (_context.Albums.Select(x => x.Name == track.MasterMetadataAlbumName).Single())
+                if (_context.Albums.Select(x => x.Name == track.MasterMetadataAlbumName).Count() > 0)
                 {
                     continue;
                 }
@@ -104,7 +104,7 @@ public sealed class ModelPopulationService : IModelPopulationService
         {
             if (track.MasterMetadataTrackName != null)
             {
-                if (_context.Tracks.Select(x => x.Name == track.MasterMetadataTrackName).Single())
+                if (_context.Tracks.Select(x => x.Name == track.MasterMetadataTrackName).Count() > 0)
                 {
                     continue;
                 }

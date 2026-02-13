@@ -1,4 +1,5 @@
-﻿using SpotifyLocalStats.Server.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
 
 using System;
@@ -24,7 +25,7 @@ public class ImportedTrackService : IImportedTrackService
     {
         var trackList = await ValidateIncomingJson(json);
         var updatedTrackList = AssignUser(trackList, user);
-        await SaveTracksToDb(updatedTrackList);
+        await SaveTracksToDb(updatedTrackList, user);
 
         return updatedTrackList;
     }
@@ -55,9 +56,28 @@ public class ImportedTrackService : IImportedTrackService
         return importedTracks;
     }
 
-    public async Task<int> SaveTracksToDb(IEnumerable<ImportedTrack> importedTracks)
+    public async Task<int> SaveTracksToDb(IEnumerable<ImportedTrack> importedTracks, User user)
     {
-        await _spotifyStatsContext.ImportedTracks.AddRangeAsync(importedTracks);
+
+        var trackKeys = importedTracks.Select(t => new { t.TimeStamp, t.SpotifyTrackUri, UserId = user.Id}).ToList();
+
+        var existingKeys = await _spotifyStatsContext.ImportedTracks
+            .Where(x => x.UserId == user.Id)
+            .Select(x => new { x.TimeStamp, x.SpotifyTrackUri, x.UserId })
+            .ToListAsync();
+
+        // ensure no duplicates
+        var newTracks = importedTracks
+            .Where(track => !existingKeys.Any(existing =>
+                existing.TimeStamp == track.TimeStamp &&
+                existing.SpotifyTrackUri == track.SpotifyTrackUri))
+            .ToList();
+
+        if (newTracks.Any())
+        {
+            await _spotifyStatsContext.ImportedTracks.AddRangeAsync(newTracks);
+        }
+
         var numberOfRecordsSaved = await _spotifyStatsContext.SaveChangesAsync();
         var recordsSkipped = importedTracks.Count() - numberOfRecordsSaved;
 
