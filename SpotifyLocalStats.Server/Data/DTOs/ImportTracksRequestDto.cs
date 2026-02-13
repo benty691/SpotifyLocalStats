@@ -2,8 +2,11 @@
 
 namespace WebApi.Data.DTOs;
 
-public class ImportTracksRequestDto
+public class ImportTrackFilesDto
 {
-    public string Json { get; set; }
-    public Guid UserId { get; set; }
+    public ImportTrackFilesDto()
+    {
+        FormFile = new List<IFormFile>();
+    }
+    public List<IFormFile> FormFile { get; set; }
 }

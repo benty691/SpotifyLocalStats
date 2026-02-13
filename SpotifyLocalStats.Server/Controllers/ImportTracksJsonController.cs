@@ -2,14 +2,16 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol;
 using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
+using System.Text.Json;
 using WebApi.Data.DTOs;
 using WebApi.Services.Interfaces;
 
 namespace WebApi.Controllers;
 
-[Route("/import")]
+[Route("api/[controller]")]
 public class ImportTracksJsonController : BaseApiController
 {
     private readonly ILogger<ImportTracksJsonController> _logger;
@@ -25,27 +27,61 @@ public class ImportTracksJsonController : BaseApiController
 
     [HttpPost]
     // maybe create a user dto and not pass the entire user object, just user id? 
-    public async Task<ActionResult<ImportTracksDTO>> ImportTracks([FromBody] ImportTracksRequestDto importTracksRequest)
+    public async Task<ActionResult<ImportTracksDTO>> ImportTracks([FromForm] string userId,  [FromForm] List<IFormFile> files)
     {
-        try 
-        {
-            var user = await _userService.GetUserById(importTracksRequest.UserId);
-            if (user == null) 
-            {
-                return NotFound(new { error = "User not found" });
-            }
+        if (!Guid.TryParse(userId, out var id)) {
 
-            var result = await _importOrchestrationService.Orchestrate(importTracksRequest.Json, user);
-            return Ok(result);
+            return BadRequest(new { error = "Invalid user ID format" });
         }
-        catch (ArgumentException ex) 
+
+        var user = await _userService.GetUserById(id);
+
+        if (user == null)
         {
-            return BadRequest(new { error = ex.Message });
+            return NotFound(new { error = "User not found"});
         }
-        catch (Exception ex)
+
+        if (files == null || !files.Any())
         {
-            _logger.LogError(ex, $"Error importing tracks for user {importTracksRequest.UserId}");
-            return StatusCode(500, new { error = "An error occurred while importing tracks" });
+            return BadRequest(new { error = "No files provided" });
         }
+
+        foreach (var file in files)
+        {
+            try
+            {
+                if (user == null)
+                {
+                    return NotFound(new { error = "User not found" });
+                }
+
+                if (file.Length == 0)
+                {
+                    _logger.LogWarning($"file {file.Name} is empty, skipping file");
+                    continue;
+                }
+
+                using var stream = file.OpenReadStream();
+                using var reader = new StreamReader(stream);
+                var json = await reader.ReadToEndAsync();
+
+                var result = await _importOrchestrationService.Orchestrate(json, user);
+
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (JsonException ex)
+            {
+                return BadRequest(new { error = $"Invalid JSON in {file.FileName}: {ex.Message}" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error importing tracks for user {user.Id}");
+                return StatusCode(500, new { error = "An error occurred while importing tracks" });
+            }
+        }
+        return Ok(new { message = $"Successfully processed {files.Count} file(s)" });
     }
 }

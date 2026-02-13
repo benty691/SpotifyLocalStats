@@ -86,6 +86,7 @@ public class ImportedTrack
     [JsonPropertyName("offline")]
     public bool? IsOffline { get; set; }
     [JsonPropertyName("offline_timestamp")]
+    [JsonConverter(typeof(UnixTimestampConverter))]
     public DateTime? OfflineTimestamp { get; set; }
     [JsonPropertyName("incognito_mode")]
     public bool? IncognitoMode { get; set; }

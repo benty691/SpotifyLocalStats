@@ -52,9 +52,6 @@ public class UserController : BaseApiController
         }
     }
 
-    // not sure if this should be in here or in a seperate 'stats' controller. Leaving here for now. 
- 
-
     [HttpPost]
     public async Task<ActionResult<UserDto>> CreateUser([FromBody] CreateUserRequest request)
     {

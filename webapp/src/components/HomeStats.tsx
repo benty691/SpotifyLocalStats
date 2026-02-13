@@ -67,47 +67,54 @@ function HomeStats() {
 
   return (
     <>
-      <div>
-        <div>
-          <div>
-            <div className='header'>
-              {user && <h2>Welcome back, {user.userName}</h2>}
+      <div className='flex flex-col items-center justify-center min-h-screen gap-12 bg-surface'>
+        <div className='flex flex-col item-center gap-4'>
+          {user && (
+            <h2 className='text-4xl '>
+              Welcome back,{" "}
+              <strong className='text-accent-cyan'> {user.userName} </strong>
+            </h2>
+          )}
+        </div>
+        <div className='self-center align-middle '>
+          {loading ? (
+            <div className='loading'>Loading...</div>
+          ) : userSpotifyStats ? (
+            <div className='flex flex-col items-center gap-6'>
+              <div className='stats-grid'>
+                <StatsCard
+                  statNumber={userSpotifyStats.totalAlbums}
+                  statName={"Albums"}
+                />
+                <StatsCard
+                  statNumber={userSpotifyStats.totalArtists}
+                  statName={"Artists"}
+                />
+                <StatsCard
+                  statNumber={userSpotifyStats.totalTracks}
+                  statName={"Tracks"}
+                />
+              </div>
+              <div>
+                <h3>Upload more data to further enrich statistics</h3>
+                <button>
+                  <Navigate to='/Upload'></Navigate>
+                </button>
+              </div>
             </div>
-            <div className='grid columns-3'>
-              {loading ? (
-                <div className='loading'>Loading...</div>
-              ) : userSpotifyStats ? (
-                <div>
-                  <div className='stats-grid'>
-                    <StatsCard
-                      statNumber={userSpotifyStats.totalAlbums}
-                      statName={"Albums"}
-                    />
-                    <StatsCard
-                      statNumber={userSpotifyStats.totalArtists}
-                      statName={"Artists"}
-                    />
-                    <StatsCard
-                      statNumber={userSpotifyStats.totalTracks}
-                      statName={"Tracks"}
-                    />
-                  </div>
-                  <div>
-                    <h3>Upload more data to further enrich statistics</h3>
-                    <button>
-                      <Navigate to='/Upload'></Navigate>
-                    </button>
-                  </div>
-                </div>
-              ) : spotifyReturnStatusCode === 500 || 0 ? (
-                <div className='error-grid'>
-                  <p>Error loading User stats</p>
-                </div>
-              ) : (
-                <UploadFiles />
-              )}
+          ) : spotifyReturnStatusCode === 500 || 0 ? (
+            <div className='error-grid'>
+              <p>Error loading User stats</p>
             </div>
-          </div>
+          ) : (
+            <div>
+              <p className='text-text-secondary text-center'>
+                You have no streaming history uploaded. Please upload this below
+              </p>
+
+              <UploadFiles />
+            </div>
+          )}
         </div>
       </div>
     </>

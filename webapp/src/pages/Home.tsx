@@ -12,9 +12,7 @@ function Home() {
 
   return (
     <>
-      <div className="flex justify-center align-middle w">
-        <HomeStats />
-      </div>
+      <HomeStats />
     </>
   );
 }
