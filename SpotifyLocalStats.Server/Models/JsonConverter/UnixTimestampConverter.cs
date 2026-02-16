@@ -11,7 +11,7 @@ public class UnixTimestampConverter : JsonConverter<DateTime?>
         if (reader.TokenType == JsonTokenType.Number)
         {
             var unixTimestamp = reader.GetInt64();
-            return DateTimeOffset.FromUnixTimeSeconds(unixTimestamp).DateTime;
+            return DateTimeOffset.FromUnixTimeMilliseconds(unixTimestamp).DateTime;
         }
 
         throw new JsonException("Expected number for Unix timestamp");

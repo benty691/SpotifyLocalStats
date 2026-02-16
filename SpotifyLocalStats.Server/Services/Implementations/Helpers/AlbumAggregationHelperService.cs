@@ -279,7 +279,7 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
             var albumTracks = await _context.ImportedTracks.Where(x => x.MasterMetadataArtistName == aggAlbum.Album.Name && x.User.Id == aggAlbum.User.Id).OrderBy(x => x.TimeStamp).ToListAsync();
 
             // we have list of tracks in order, we just have to fin dlongest date between date values.. 
-            for (var i = 0; i < albumTracks.Count(); i++)
+            for (var i = 1; i < albumTracks.Count(); i++)
             {
                 if (dryStreak < (albumTracks[i].TimeStamp.Date - albumTracks[i - 1].TimeStamp.Date).Days)
                 {

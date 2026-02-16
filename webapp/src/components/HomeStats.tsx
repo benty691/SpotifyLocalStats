@@ -9,6 +9,7 @@ import type { UserSpotifyStats } from "../types/UserSpotifyStats";
 import { userApi } from "../services/api/userApi";
 import { Navigate, type ErrorResponse } from "react-router-dom";
 import type { AxiosError } from "axios";
+import { userStatsApi } from "../services/api/userStatsApi";
 
 function HomeStats() {
   const [userSpotifyStats, setUserSpotifyStats] = useState<UserSpotifyStats>(); // thinking this is a stats object, containing total streams, no of artists, albums etc
@@ -29,7 +30,7 @@ function HomeStats() {
 
       try {
         setLoading(true);
-        let userSpotifyStatsBasic = await userApi.getUserSpotifyStatsBasic(
+        let userSpotifyStatsBasic = await userStatsApi.getUserBasicStats(
           user.id,
         );
         endpoint = userSpotifyStatsBasic.config.url;

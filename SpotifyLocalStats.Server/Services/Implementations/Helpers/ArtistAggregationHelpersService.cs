@@ -273,8 +273,8 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
         {
             var artistTracks = await _context.ImportedTracks.Where(x => x.MasterMetadataArtistName == aggArtist.Artist.Name && x.User.Id == aggArtist.User.Id).OrderBy(x => x.TimeStamp).ToListAsync();
 
-            // we have list of tracks in order, we just have to fin dlongest date between date values.. 
-            for (var i = 0; i < artistTracks.Count(); i++)
+            // we have list of tracks in order, we just have to find longest date between date values.. 
+            for (var i = 1; i < artistTracks.Count(); i++)
             {
                 if (drySpell < (artistTracks[i].TimeStamp.Date - artistTracks[i - 1].TimeStamp.Date).Days)
                 {

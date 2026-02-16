@@ -230,7 +230,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
             var tracks = await _context.ImportedTracks.Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.User.Id == aggTrack.User.Id).OrderBy(x => x.TimeStamp).ToListAsync();
 
             // we have list of tracks in order, we just have to fin dlongest date between date values.. 
-            for (var i = 0; i < tracks.Count(); i++)
+            for (var i = 1; i < tracks.Count(); i++)
             {
                 if (dryStreak < (tracks[i].TimeStamp.Date - tracks[i - 1].TimeStamp.Date).Days)
                 {

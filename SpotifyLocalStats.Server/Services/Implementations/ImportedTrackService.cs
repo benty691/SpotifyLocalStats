@@ -59,19 +59,27 @@ public class ImportedTrackService : IImportedTrackService
     public async Task<int> SaveTracksToDb(IEnumerable<ImportedTrack> importedTracks, User user)
     {
 
-        var trackKeys = importedTracks.Select(t => new { t.TimeStamp, t.SpotifyTrackUri, UserId = user.Id}).ToList();
-
-        var existingKeys = await _spotifyStatsContext.ImportedTracks
-            .Where(x => x.UserId == user.Id)
-            .Select(x => new { x.TimeStamp, x.SpotifyTrackUri, x.UserId })
-            .ToListAsync();
-
-        // ensure no duplicates
-        var newTracks = importedTracks
-            .Where(track => !existingKeys.Any(existing =>
-                existing.TimeStamp == track.TimeStamp &&
-                existing.SpotifyTrackUri == track.SpotifyTrackUri))
+        // De-duplicate incoming trackList
+        var uniqueImportedTracks = importedTracks
+            .GroupBy(t => new { t.TimeStamp, t.SpotifyTrackUri })
+            .Select(g => g.First()) 
             .ToList();
+
+        var duplicatesInImport = importedTracks.Count() - uniqueImportedTracks.Count;
+        if (duplicatesInImport > 0)
+        {
+            _logger.LogInformation($"Found {duplicatesInImport} duplicates within the imported data");
+        }
+
+        var existingKeys = _spotifyStatsContext.ImportedTracks
+            .Where(x => x.UserId == user.Id)
+            .Select(x => new { x.TimeStamp, x.SpotifyTrackUri })
+            .ToHashSet();
+
+        var newTracks = uniqueImportedTracks
+            .Where(track => !existingKeys.Contains(new { track.TimeStamp, track.SpotifyTrackUri }))
+            .ToList();
+
 
         if (newTracks.Any())
         {
@@ -82,7 +90,6 @@ public class ImportedTrackService : IImportedTrackService
         var recordsSkipped = importedTracks.Count() - numberOfRecordsSaved;
 
         _logger.LogInformation($"Saved {numberOfRecordsSaved} imported tracks to database. {recordsSkipped} were skipped due to rule unique enforcment");
-        // need to figure out how to handle if there is a duplicate imported track?? just skip and ignore, or handle and say these record has been uplaoded before?
         return numberOfRecordsSaved;
     }
 

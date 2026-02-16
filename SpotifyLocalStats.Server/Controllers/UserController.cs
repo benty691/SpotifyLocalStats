@@ -26,7 +26,6 @@ public class UserController : BaseApiController
     [HttpGet("{userId}")]
     public async Task<ActionResult<UserDto>> GetUserById(Guid userId)
     {
-        // call a sertvice, which has the context, get user, return to us in a user dto, or we get the user here, the build the dto from the user
         try
         {
             var user = await _userService.GetUserById(userId);

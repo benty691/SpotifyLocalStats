@@ -2,6 +2,7 @@
 using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
 using System.Diagnostics.Metrics;
+using System.Linq;
 using WebApi.Data.DTOs;
 using WebApi.Services.Interfaces;
 
@@ -30,9 +31,12 @@ public sealed class ModelPopulationService : IModelPopulationService
     private async Task<int> GenerateArtist(IEnumerable<ImportedTrack> tracks)
     {
         var nullArtistCount = 0;
+        // ok this is painfully slow. like minutes. ths is tererible. I think my solution currently is like 0(n^2^2^2) or some shit. 
+
+       var artistList = _context.Artists.Local.Select(x => new {x.Name }).ToHashSet(); // create a hashset we can lookup on for every track 
 
         // logic to generate artist model from imported track
-        foreach (var track in tracks)
+        foreach (var track in tracks) //O(n)
         {
             // for each track, we ideally try create an artist, if that artist already exists, we skip
             if (track.MasterMetadataArtistName != null)
@@ -40,16 +44,16 @@ public sealed class ModelPopulationService : IModelPopulationService
                 // something to note is in json data we do not get spotify artsist url. My thinking is here we should query the webapi and try get it, so we can be definitive in artits, because artist names overlaps, i am sure. 
 
                 // we are checking change tarcker instead of the db. Do this to avoid calling saveChanges after everytime we add an artistt
-                if (_context.Artists.Local.Where(x => x.Name == track.MasterMetadataArtistName).Count() > 0)
-                {
-                    continue;
-                }
-                else
+                if (!artistList.Contains(track.MasterMetadataArtistName)) // O(n^2)
                 {
                     // we need spotify webapi to allow this to occur properly, as we neeed to hit the endpoint to get details, but we need the artist id from spotify to query??? 
                     // appears we can use the search endpoint and search artist nam, and then get aristid from that, then query artist endpoint for details
 
                     await _context.Artists.AddAsync(new Artist(track.MasterMetadataArtistName));
+                }
+                else
+                {
+                    continue;
                 }
             }
             else

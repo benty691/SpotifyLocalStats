@@ -20,8 +20,8 @@ public class StatsController : BaseApiController
     }
 
 
-    [HttpGet("/{userId}")]
-    public async Task<ActionResult<UserSpotifyStatsDto>> GetUserSpotifyStatsBasic(Guid userId)
+    [HttpGet("{userId}")]
+    public async Task<ActionResult<UserSpotifyStatsDto>> GetUserSpotifyStatsBasic([FromRoute] Guid userId)
     {
         try
         {
