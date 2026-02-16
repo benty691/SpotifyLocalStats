@@ -30,8 +30,8 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
 
     public async Task RunCalculations()
     {
-        CalculateLongestStreak();
         await InitializeAggregatedTracksAsync();
+        CalculateLongestStreak();
         await CalculateDrySpell();
         await CalculateMostTimesIn24Hours();
         await CalculateTopListeningDate();

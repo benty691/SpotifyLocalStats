@@ -24,8 +24,7 @@ public sealed class ModelPopulationService : IModelPopulationService
         var albumCount = await GenerateAlbum(tracks);
         var trackCount = await GenerateTrack(tracks);
 
-        return new ImportTracksDTO() {AlbumCount = albumCount, ArtistCount = aritstCount, TrackCount = trackCount }
-        ;
+        return new ImportTracksDTO() { AlbumCount = albumCount, ArtistCount = aritstCount, TrackCount = trackCount };
     }
 
     private async Task<int> GenerateArtist(IEnumerable<ImportedTrack> tracks)
@@ -39,7 +38,9 @@ public sealed class ModelPopulationService : IModelPopulationService
             if (track.MasterMetadataArtistName != null)
             {
                 // something to note is in json data we do not get spotify artsist url. My thinking is here we should query the webapi and try get it, so we can be definitive in artits, because artist names overlaps, i am sure. 
-                if (_context.Artists.Select(x => x.Name == track.MasterMetadataArtistName).Count() > 0)
+
+                // we are checking change tarcker instead of the db. Do this to avoid calling saveChanges after everytime we add an artistt
+                if (_context.Artists.Local.Where(x => x.Name == track.MasterMetadataArtistName).Count() > 0)
                 {
                     continue;
                 }
@@ -58,7 +59,7 @@ public sealed class ModelPopulationService : IModelPopulationService
                 continue;
             }
         }
-        var result = _context.SaveChanges();
+        var result = await _context.SaveChangesAsync();
         _logger.LogInformation($"Generated {result} new artists from imported tracks.\n {nullArtistCount} tracks with null artist.");
 
         return result; ;
@@ -72,7 +73,8 @@ public sealed class ModelPopulationService : IModelPopulationService
         {
             if (track.MasterMetadataAlbumName != null)
             {
-                if (_context.Albums.Select(x => x.Name == track.MasterMetadataAlbumName).Count() > 0)
+                // we are checking change tarcker instead of the db. Do this to avoid calling saveChanges after everytime we add an Album
+                if (_context.Albums.Local.Where(x => x.Name == track.MasterMetadataAlbumName).Count() > 0)
                 {
                     continue;
                 }
@@ -91,7 +93,7 @@ public sealed class ModelPopulationService : IModelPopulationService
                 continue;
             }
         }
-        var result = _context.SaveChanges();
+        var result = await _context.SaveChangesAsync();
         _logger.LogInformation($"Generated {result} new albums from imported tracks.\n {nullAlbumCount} tracks with null album.");
         return result;
     }
@@ -104,7 +106,9 @@ public sealed class ModelPopulationService : IModelPopulationService
         {
             if (track.MasterMetadataTrackName != null)
             {
-                if (_context.Tracks.Select(x => x.Name == track.MasterMetadataTrackName).Count() > 0)
+
+                // we are checking change tarcker instead of the db. Do this to avoid calling saveChanges after everytime we add an track
+                if (_context.Tracks.Local.Where(x => x.Name == track.MasterMetadataTrackName).Count() > 0)
                 {
                     continue;
                 }
@@ -126,7 +130,7 @@ public sealed class ModelPopulationService : IModelPopulationService
                 continue;
             }
         }
-        var result = _context.SaveChanges();
+        var result = await _context.SaveChangesAsync();
         _logger.LogInformation($"Generated {result} new albums from imported tracks.\n {nullTrackCount} tracks with null album.");
         return result;
     }

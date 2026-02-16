@@ -32,8 +32,9 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
 
     public async Task RunCalculations()
     {
-        CalculateLongestStreak();
         await InitializeAggregatedArtistsAsync();
+
+        CalculateLongestStreak();
         await CalculateDrySpell();
         await CalculateMostTimesIn24Hours();
         await CalculateTopListeningDate();

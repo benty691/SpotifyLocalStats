@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
+using System.Transactions;
 using WebApi.Data.DTOs;
 using WebApi.Services.Interfaces;
 
@@ -25,14 +26,28 @@ namespace WebApi.Services.Implementations
 
         public async Task<ImportTracksDTO> Orchestrate(string json, User user)
         {
-            var trackList = await _importedTrackService.HandleImport(json, user);
+            using var transaction = await _context.Database.BeginTransactionAsync();
 
-            var result = await _modelPopulationService.PopulateModelsFromImportedTracks(trackList);
-            await _aggreationService.UpdateAggregatedDataForUser(user, trackList);
+            try
+            {
+                var trackList = await _importedTrackService.HandleImport(json, user);
 
-            // return amount of records processed, few other smaller details, via a dto creation? 
-            // maybe return loading until processing is finished?
-            return result;
+                var result = await _modelPopulationService.PopulateModelsFromImportedTracks(trackList);
+                await _aggreationService.UpdateAggregatedDataForUser(user, trackList);
+
+                // return amount of records processed, few other smaller details, via a dto creation? 
+                // maybe return loading until processing is finished?
+                await transaction.CommitAsync();
+
+                return result;
+            }
+            catch (Exception ex) 
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError($"Error: {ex.Message}");
+                throw;
+            }
+            
         }
     }
 }

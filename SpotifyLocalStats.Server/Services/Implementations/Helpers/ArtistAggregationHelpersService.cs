@@ -30,10 +30,10 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
 
     public async Task RunCalculations()
     {
+        await InitializeAggregatedTracksAsync();
         CalculateLongestStreak();
         CalculateUniqueArtistTracksListened();
         CalculateAlbumsListened();
-        await InitializeAggregatedTracksAsync();
         await CalculateDrySpell();
         await CalculateMostTimesIn24Hours();
         await CalculateTopListeningDate();
