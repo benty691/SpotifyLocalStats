@@ -5,19 +5,19 @@ namespace SpotifyLocalStats.Server.Models;
 //Tracks are generated via imported tracks. We do not have a catalog of all tracks.
 public class Track : BaseModel
 {
-    public Track(string name ,string spotifyTrackUri)
+    public Track(Artist artist, Album album , string name ,string spotifyTrackUri)
     {
         ExternalIds = new List<ExternalId>();
         Name = name;
-        Albums = new List<Album>();
-        Artists = new List<Artist>();
+        Album = album;
+        Artist = artist;
         ExternalIds = new List<ExternalId>();
         SpotifyTrackUri = spotifyTrackUri ?? string.Empty;
     }
 
     public string Name { get; set; }
-    public ICollection<Album> Albums { get; set; } // can in theory be on multiple albums 
-    public ICollection<Artist> Artists { get; set; }
+    public Album Album { get; set; } // can in theory be on multiple albums 
+    public Artist Artist { get; set; }
     public string? SpotifyTrackUri { get; set; } = string.Empty;
     public int? MsPlayed { get; set; }
     public bool? IsSingle { get; set; }

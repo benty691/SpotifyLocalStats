@@ -5,11 +5,11 @@ namespace SpotifyLocalStats.Server.Models;
 
 public class Album : BaseModel
 {
-    public Album(string name)
+    public Album(string name, Artist artist)
     {
         Images = new List<Image>();
-        Artists = new List<Artist>();
         Tracks = new List<Track>();
+        Artist = artist;
         ExternalIds = new List<ExternalId>();
         Name = name;
     }
@@ -17,7 +17,7 @@ public class Album : BaseModel
     public string Name { get; set; }
     public string? Type { get; set; } // album, single, compilation
     public int? TotalTracks { get; set; }
-    public ICollection<Artist> Artists { get; set; } // can be multiple artists
+    public Artist Artist { get; set; } // can be multiple artists, techincally, but imported stats dont give mulitpe artist for a track, so is a single artsist (in future when calling spotify api, we can set this to multiple)
     public string[]? AvaliableMarkets { get; set; }
     public string? Href { get; set; }
     public string? SpotifyId { get; set; }

@@ -12,7 +12,7 @@ public class ImportedTrack
         "platform": "windows",
         "ms_played": 197760,
         "conn_country": "AU",
-        "ip_addr": "2001:8003:43d0:3800:60c9:f135:d727:43ba",
+        "ip_addr": xxxxxxx,
         "master_metadata_track_name": "The National Anthem",
         "master_metadata_album_artist_name": "Radiohead",
         "master_metadata_album_album_name": "Kid A",
@@ -43,7 +43,7 @@ public class ImportedTrack
     [Key]
     public Guid Id { get; set; }
     // FK to user
-    public User? User { get; set; }
+    public User User { get; set; } = null!;
     public Guid UserId { get; set; }
     [JsonPropertyName("ts")]
     public required DateTime TimeStamp { get; set; } // thbis is actually a string in the json, but we need to convert to dt somehow? 
