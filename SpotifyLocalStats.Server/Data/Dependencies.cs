@@ -4,11 +4,13 @@ using Microsoft.EntityFrameworkCore.SqlServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SpotifyLocalStats.Server.Models;
+using WebApi.Data.Jobs;
 using WebApi.Services;
 using WebApi.Services.Implementations;
 using WebApi.Services.Implementations.Helpers;
 using WebApi.Services.Interfaces;
 using WebApi.Services.Interfaces.Helpers;
+using WebApi.Services.Workers;
 
 namespace SpotifyLocalStats.Server.Data;
 
@@ -40,7 +42,8 @@ public static class Dependencies
         services.AddScoped<IModelPopulationService, ModelPopulationService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IUserBasicStatsService, UserBasicStatsService>();
-        //services.AddScoped<ITrackService, TrackService>()
+        services.AddSingleton<ImportJobQueue>();
+        services.AddHostedService<ImportBackgroundWorker>();
 
     }
 

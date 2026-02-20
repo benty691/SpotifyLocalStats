@@ -18,7 +18,7 @@ public sealed class UserService : IUserService
 
     public async Task<User?> GetUserById(Guid id)
     {
-        return await _context.Users.SingleOrDefaultAsync(x => x.Id == id);
+        return await _context.Users.FindAsync(id);
     }
 
     public async Task<User> CreateUser(string userName, string firstName)

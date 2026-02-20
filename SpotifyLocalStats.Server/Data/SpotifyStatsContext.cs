@@ -3,6 +3,7 @@ using SpotifyLocalStats.Server.Models;
 using System.Reflection;
 using System.Reflection.Emit;
 using WebApi.Models;
+using WebApi.Models.Jobs;
 
 namespace SpotifyLocalStats.Server.Data;
 
@@ -21,6 +22,8 @@ public class SpotifyStatsContext : DbContext
     public DbSet<TimeOfDayStat<AggregatedArtist>> ArtistTimeOfDaysStats { get; set; }
     public DbSet<TimeOfDayStat<AggregatedTrack>> TrackTimeOfDaysStats { get; set; }
     public DbSet<TimeOfDayStat<AggregatedAlbum>> AlbumTimeOfDaysStats { get; set; }
+    public DbSet<ImportJobStatus> ImportJobStatuses { get; set; }
+
     //public DbSet<CopyrightContent> CopyrightContents { get; set; }
     //public DbSet<Image> Images { get; set; }
     //public DbSet<ExternalId> ExternalIds { get; set; }
@@ -41,5 +44,18 @@ public class SpotifyStatsContext : DbContext
         }
 
         builder.Entity<AggregateBase>().Ignore(x => x.MinsListened);
+    }
+
+    public async Task<(List<T>, int)> SaveChangesWithResultAsync<T>() where T : class
+    {
+        var changedEntities = ChangeTracker.Entries()
+            .Where(x => x.State is EntityState.Added or EntityState.Modified)
+            .Select(x => x.Entity)
+            .OfType<T>()
+            .ToList();
+
+        var count = await base.SaveChangesAsync();
+
+        return (changedEntities, count);
     }
 }

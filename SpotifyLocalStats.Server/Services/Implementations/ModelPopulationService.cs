@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
@@ -20,6 +21,8 @@ public sealed class ModelPopulationService : IModelPopulationService
         _context = context;
     }
 
+
+    // we need to retunr a list of succesfulkly saved records from each tables, so maybe create a new class represnting this retunr type.. 
     public async Task<ImportTracksDTO> PopulateModelsFromImportedTracks(IEnumerable<ImportedTrack> tracks)
     {
         var artistCount = await GenerateArtist(tracks);
@@ -29,7 +32,8 @@ public sealed class ModelPopulationService : IModelPopulationService
         return new ImportTracksDTO() { AlbumCount = albumCount, ArtistCount = artistCount, TrackCount = trackCount };
     }
 
-    private async Task<int> GenerateArtist(IEnumerable<ImportedTrack> tracks)
+
+    private async Task<(List<Artist>, int)> GenerateArtist(IEnumerable<ImportedTrack> tracks)
     {
         var nullArtistCount = 0;
 
@@ -60,10 +64,11 @@ public sealed class ModelPopulationService : IModelPopulationService
             }
         }
 
-        var result = await _context.SaveChangesAsync();
-        _logger.LogInformation($"Generated {result} new artists from imported tracks.\n {nullArtistCount} tracks with null artist.");
+        var (artists, count) = await _context.SaveChangesWithResultAsync<Artist>();
 
-        return result;
+        _logger.LogInformation($"Generated {count} new artists from imported tracks.\n {nullArtistCount} tracks with null artist.");
+
+        return (artists, count);
     }
 
     private async Task<int> GenerateAlbum(IEnumerable<ImportedTrack> tracks)

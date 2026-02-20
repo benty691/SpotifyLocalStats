@@ -48,19 +48,30 @@ public class AggreationService : IAggregationService
     private async Task UpdateAggregateArtist(User user, IEnumerable<ImportedTrack> tracks)
     {
         var updatedCount = 0;
+        var artistDict = _context.Artists.ToDictionary(x => x.Name, x => x);
+        var aggArtistDict = _context.AggregatedArtists.Where(x => x.UserId == user.Id).Include(x => x.Artist.Name).ToDictionary(x => x.Artist.Name , x => x);
+        var addedAggArtists = new Dictionary<string, AggregatedArtist>();
+
 
         // for each track that was upl;aoded, we must check that trackj for the artist, if artist stats exist, increase count on things, esle create new agg stats 
-        foreach(var track in tracks)
+        foreach(var track in tracks) // o(n)
         {
-            var artist = await _context.Artists
-                .FirstAsync(x => x.Name == track.MasterMetadataArtistName);
-
-            if (artist == null)
+            
+            if(!artistDict.TryGetValue(track.MasterMetadataArtistName, out var artist))
             {
-                throw new ArgumentNullException($"Artist is null for masterMetaDataArtistName: {track.MasterMetadataArtistName}");
+
             }
 
-            var aggregateArtists = _context.AggregatedArtists.Local.Where(x => artist.Name == track.MasterMetadataArtistName && x.User.Id == user.Id).ToList();
+            if(aggArtistDict.TryGetValue(track.MasterMetadataArtistName, out var aggregatedArtist))
+            {
+                continue;
+            }
+            if (aggArtistDict.TryGetValue(track.MasterMetadataArtistName, out var aggregated))
+            {
+                continue;
+            }
+
+            var aggregateArtists = _context.AggregatedArtists.Local.Where(x => artist.Name == track.MasterMetadataArtistName && x.User.Id == user.Id).ToList(); //O(2n^2) which is o(n^2)
 
             if (aggregateArtists.Count == 0)
             {
@@ -76,6 +87,8 @@ public class AggreationService : IAggregationService
                 };
 
                 await _context.AggregatedArtists.AddAsync(newAggArtist);
+                aggArtistDict.Add(newAggArtist.Artist.Name, newAggArtist);
+
             }
             else if (aggregateArtists.Count == 1)
             {

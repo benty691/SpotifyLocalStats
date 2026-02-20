@@ -24,16 +24,33 @@ namespace WebApi.Services.Implementations
             _context = context;
         }
 
-        public async Task<ImportTracksDTO> Orchestrate(string json, User user)
+        public async Task ProcessAsync(string json, User user, Guid jobId, CancellationToken cancellationToken)
+        {
+
+            await Orchestrate(json, user, jobId, cancellationToken);
+
+        }
+
+
+        public async Task<ImportTracksDTO> Orchestrate(string json, User user, Guid jobId, CancellationToken cancellationToken)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
+            int progress;
+            var job = _context.ImportJobStatuses.Find(jobId);
 
             try
             {
                 var trackList = await _importedTrackService.HandleImport(json, user);
+                job.ProgressPercent = 10;
+                await _context.SaveChangesAsync(); 
 
                 var result = await _modelPopulationService.PopulateModelsFromImportedTracks(trackList);
+                job.ProgressPercent = 55;
+                await _context.SaveChangesAsync();
+
                 await _aggreationService.UpdateAggregatedDataForUser(user, trackList);
+                job.ProgressPercent = 100;
+                await _context.SaveChangesAsync(); 
 
                 // return amount of records processed, few other smaller details, via a dto creation? 
                 // maybe return loading until processing is finished?
