@@ -33,6 +33,7 @@
 
   <ItemGroup>
     <Folder Include="Controllers\DTO\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>

@@ -12,7 +12,7 @@ using SpotifyLocalStats.Server.Data;
 namespace WebApi.Migrations
 {
     [DbContext(typeof(SpotifyStatsContext))]
-    [Migration("20260203081130_InitialCreate")]
+    [Migration("20260220050309_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -25,50 +25,16 @@ namespace WebApi.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("AlbumArtist", b =>
-                {
-                    b.Property<Guid>("AlbumsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ArtistsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("AlbumsId", "ArtistsId");
-
-                    b.HasIndex("ArtistsId");
-
-                    b.ToTable("AlbumArtist");
-                });
-
-            modelBuilder.Entity("AlbumTrack", b =>
-                {
-                    b.Property<Guid>("AlbumId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TracksId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("AlbumId", "TracksId");
-
-                    b.HasIndex("TracksId");
-
-                    b.ToTable("AlbumTrack");
-                });
-
-            modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregatedAlbum", b =>
+            modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregateBase", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AlbumId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CurrentStreakDays")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DateTimeFirstListened")
@@ -95,91 +61,10 @@ namespace WebApi.Migrations
                     b.Property<DateTime>("LongestStreakStartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<double>("MinsListened")
-                        .HasColumnType("float");
-
                     b.Property<int>("MostTimesIn24Hours")
                         .HasColumnType("int");
 
-                    b.Property<int>("MsListened")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PlayCount")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TimesCompleted")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("TopListeningDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId1")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AlbumId");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("UserId1");
-
-                    b.ToTable("AggregatedAlbums");
-                });
-
-            modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregatedArtist", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("AlbumsListened")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("ArtistId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CurrentStreakDays")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DateTimeFirstListened")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DateTimeLastListened")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("LongestDrySpell")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("LongestDrySpellEnd")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("LongestDrySpellStart")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("LongestStreakDays")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("LongestStreakEndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("LongestStreakStartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<double>("MinsListened")
-                        .HasColumnType("float");
-
-                    b.Property<int>("MostTimesIn24Hours")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MsListened")
+                    b.Property<int?>("MsListened")
                         .HasColumnType("int");
 
                     b.Property<int>("PlayCount")
@@ -188,96 +73,16 @@ namespace WebApi.Migrations
                     b.Property<DateTime>("TopListeningDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UniqueTracksPlayed")
-                        .HasColumnType("int");
-
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId1")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ArtistId");
-
                     b.HasIndex("UserId");
 
-                    b.HasIndex("UserId1");
+                    b.ToTable("AggregateBase");
 
-                    b.ToTable("AggregatedArtists");
-                });
-
-            modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregatedTrack", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CurrentStreakDays")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DateTimeFirstListened")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DateTimeLastListened")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("LongestDrySpell")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("LongestDrySpellEnd")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("LongestDrySpellStart")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("LongestStreakDays")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("LongestStreakEndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("LongestStreakStartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<double>("MinsListened")
-                        .HasColumnType("float");
-
-                    b.Property<int>("MostTimesIn24Hours")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MsListened")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PlayCount")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("TopListeningDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("TrackId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId1")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TrackId");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("UserId1");
-
-                    b.ToTable("AggregatedTracks");
+                    b.UseTptMappingStrategy();
                 });
 
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.Album", b =>
@@ -286,22 +91,22 @@ namespace WebApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("ArtistId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.PrimitiveCollection<string>("AvaliableMarkets")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("CopyrightId")
+                    b.Property<Guid?>("CopyrightId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Href")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Label")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -309,32 +114,29 @@ namespace WebApi.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RealeaseDate")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ReleaseDatePrecision")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SpotifyId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SpotifyUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TimesPlayed")
+                    b.Property<int?>("TimesPlayed")
                         .HasColumnType("int");
 
-                    b.Property<int>("TotalTracks")
+                    b.Property<int?>("TotalTracks")
                         .HasColumnType("int");
 
                     b.Property<string>("Type")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ArtistId");
 
                     b.HasIndex("CopyrightId");
 
@@ -354,14 +156,12 @@ namespace WebApi.Migrations
                         .HasColumnType("date");
 
                     b.Property<string>("Genres")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Href")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsBand")
+                    b.Property<bool?>("IsBand")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
@@ -369,22 +169,15 @@ namespace WebApi.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SpotifyId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SpotifyUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TimesPlayed")
+                    b.Property<int?>("TimesPlayed")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("TrackId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("TrackId");
 
                     b.ToTable("Artists");
                 });
@@ -395,12 +188,13 @@ namespace WebApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Text")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Type")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -420,19 +214,19 @@ namespace WebApi.Migrations
                     b.Property<Guid?>("ArtistId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Ean")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Isrc")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("TrackId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Upc")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -458,19 +252,19 @@ namespace WebApi.Migrations
                     b.Property<Guid?>("ArtistId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Height")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Url")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Width")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -491,27 +285,22 @@ namespace WebApi.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("AudiobookChapterTitle")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "audiobook_chapter_title");
 
                     b.Property<string>("AudiobookChapterUri")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "audiobook_chapter_uri");
 
                     b.Property<string>("AudiobookTitle")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "audiobook_title");
 
                     b.Property<string>("AudiobookUri")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "audiobook_uri");
 
                     b.Property<string>("ConnCountry")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "conn_country");
 
@@ -519,76 +308,66 @@ namespace WebApi.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("EpisodeName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "episode_name");
 
                     b.Property<string>("EpisodeShowName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "episode_show_name");
 
-                    b.Property<bool>("IncognitoMode")
+                    b.Property<bool?>("IncognitoMode")
                         .HasColumnType("bit")
                         .HasAnnotation("Relational:JsonPropertyName", "incognito_mode");
 
-                    b.Property<bool>("IsOffline")
+                    b.Property<bool?>("IsOffline")
                         .HasColumnType("bit")
                         .HasAnnotation("Relational:JsonPropertyName", "offline");
 
-                    b.Property<bool>("IsShuffle")
+                    b.Property<bool?>("IsShuffle")
                         .HasColumnType("bit")
                         .HasAnnotation("Relational:JsonPropertyName", "shuffle");
 
-                    b.Property<bool>("IsSkipped")
+                    b.Property<bool?>("IsSkipped")
                         .HasColumnType("bit")
                         .HasAnnotation("Relational:JsonPropertyName", "skipped");
 
                     b.Property<string>("MasterMetadataAlbumName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "master_metadata_album_album_name");
 
                     b.Property<string>("MasterMetadataArtistName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "master_metadata_album_artist_name");
 
                     b.Property<string>("MasterMetadataTrackName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "master_metadata_track_name");
 
-                    b.Property<int>("MsPlayed")
+                    b.Property<int?>("MsPlayed")
                         .HasColumnType("int")
                         .HasAnnotation("Relational:JsonPropertyName", "ms_played");
 
-                    b.Property<DateTime>("OfflineTimestamp")
+                    b.Property<DateTime?>("OfflineTimestamp")
                         .HasColumnType("datetime2")
                         .HasAnnotation("Relational:JsonPropertyName", "offline_timestamp");
 
                     b.Property<string>("Platform")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "platform");
 
                     b.Property<string>("ReasonEnd")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "reason_end");
 
                     b.Property<string>("ReasonStart")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "reason_start");
 
                     b.Property<string>("SpotifyEpisodeUri")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "spotify_episode_uri");
 
                     b.Property<string>("SpotifyTrackUri")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)")
                         .HasAnnotation("Relational:JsonPropertyName", "spotify_track_uri");
 
@@ -604,7 +383,8 @@ namespace WebApi.Migrations
                     b.HasIndex("UserId");
 
                     b.HasIndex(new[] { "TimeStamp", "SpotifyTrackUri", "UserId" }, "IX_TsAndSpotifyUriAndUserId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[SpotifyTrackUri] IS NOT NULL");
 
                     b.ToTable("ImportedTracks");
                 });
@@ -615,60 +395,63 @@ namespace WebApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("AlbumId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ArtistId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.PrimitiveCollection<string>("AvaliableMarkets")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("DiscNumber")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Duration")
+                    b.Property<int?>("DiscNumber")
                         .HasColumnType("int");
 
                     b.Property<string>("Href")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsExplicit")
+                    b.Property<bool?>("IsExplicit")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsSingle")
+                    b.Property<bool?>("IsSingle")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("MsPlayed")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PreviewUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ReleaseDate")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ReleaseDatePrecision")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SpotifyTrackId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SpotifyTrackUri")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TimesPlayed")
+                    b.Property<int?>("TimesPlayed")
                         .HasColumnType("int");
 
-                    b.Property<int>("TrackNumber")
+                    b.Property<int?>("TrackNumber")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AlbumId");
+
+                    b.HasIndex("ArtistId");
 
                     b.ToTable("Tracks");
                 });
@@ -692,6 +475,7 @@ namespace WebApi.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("HasImportedHistorical")
@@ -728,11 +512,38 @@ namespace WebApi.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("WebApi.Models.Jobs.ImportJobStatus", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProgressPercent")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ImportJobStatuses");
                 });
 
             modelBuilder.Entity("WebApi.Models.TimeOfDayStat<SpotifyLocalStats.Server.Models.AggregatedAlbum>", b =>
@@ -819,127 +630,77 @@ namespace WebApi.Migrations
                     b.ToTable("TrackTimeOfDaysStats");
                 });
 
-            modelBuilder.Entity("AlbumArtist", b =>
-                {
-                    b.HasOne("SpotifyLocalStats.Server.Models.Album", null)
-                        .WithMany()
-                        .HasForeignKey("AlbumsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SpotifyLocalStats.Server.Models.Artist", null)
-                        .WithMany()
-                        .HasForeignKey("ArtistsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AlbumTrack", b =>
-                {
-                    b.HasOne("SpotifyLocalStats.Server.Models.Album", null)
-                        .WithMany()
-                        .HasForeignKey("AlbumId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SpotifyLocalStats.Server.Models.Track", null)
-                        .WithMany()
-                        .HasForeignKey("TracksId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregatedAlbum", b =>
                 {
-                    b.HasOne("SpotifyLocalStats.Server.Models.Album", "Album")
-                        .WithMany()
-                        .HasForeignKey("AlbumId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasBaseType("SpotifyLocalStats.Server.Models.AggregateBase");
 
-                    b.HasOne("SpotifyLocalStats.Server.Models.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                    b.Property<Guid>("AlbumId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.HasOne("SpotifyLocalStats.Server.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<int>("TimesCompleted")
+                        .HasColumnType("int");
 
-                    b.Navigation("Album");
+                    b.HasIndex("AlbumId");
 
-                    b.Navigation("User");
+                    b.ToTable("AggregatedAlbums", (string)null);
                 });
 
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregatedArtist", b =>
                 {
-                    b.HasOne("SpotifyLocalStats.Server.Models.Artist", "Artist")
-                        .WithMany()
-                        .HasForeignKey("ArtistId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasBaseType("SpotifyLocalStats.Server.Models.AggregateBase");
 
-                    b.HasOne("SpotifyLocalStats.Server.Models.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                    b.Property<int>("AlbumsListened")
+                        .HasColumnType("int");
 
-                    b.HasOne("SpotifyLocalStats.Server.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<Guid>("ArtistId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Navigation("Artist");
+                    b.Property<int>("UniqueTracksPlayed")
+                        .HasColumnType("int");
 
-                    b.Navigation("User");
+                    b.HasIndex("ArtistId");
+
+                    b.ToTable("AggregatedArtists", (string)null);
                 });
 
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregatedTrack", b =>
                 {
-                    b.HasOne("SpotifyLocalStats.Server.Models.Track", "Track")
-                        .WithMany()
-                        .HasForeignKey("TrackId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasBaseType("SpotifyLocalStats.Server.Models.AggregateBase");
 
-                    b.HasOne("SpotifyLocalStats.Server.Models.User", null)
+                    b.Property<Guid>("TrackId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasIndex("TrackId");
+
+                    b.ToTable("AggregatedTracks", (string)null);
+                });
+
+            modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregateBase", b =>
+                {
+                    b.HasOne("SpotifyLocalStats.Server.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.HasOne("SpotifyLocalStats.Server.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Track");
 
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.Album", b =>
                 {
-                    b.HasOne("SpotifyLocalStats.Server.Models.CopyrightContent", "Copyright")
-                        .WithMany()
-                        .HasForeignKey("CopyrightId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("SpotifyLocalStats.Server.Models.Artist", "Artist")
+                        .WithMany("Albums")
+                        .HasForeignKey("ArtistId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Copyright");
-                });
+                    b.HasOne("SpotifyLocalStats.Server.Models.CopyrightContent", "Copyright")
+                        .WithMany()
+                        .HasForeignKey("CopyrightId");
 
-            modelBuilder.Entity("SpotifyLocalStats.Server.Models.Artist", b =>
-                {
-                    b.HasOne("SpotifyLocalStats.Server.Models.Track", null)
-                        .WithMany("Artists")
-                        .HasForeignKey("TrackId");
+                    b.Navigation("Artist");
+
+                    b.Navigation("Copyright");
                 });
 
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.ExternalId", b =>
@@ -983,6 +744,25 @@ namespace WebApi.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SpotifyLocalStats.Server.Models.Track", b =>
+                {
+                    b.HasOne("SpotifyLocalStats.Server.Models.Album", "Album")
+                        .WithMany("Tracks")
+                        .HasForeignKey("AlbumId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("SpotifyLocalStats.Server.Models.Artist", "Artist")
+                        .WithMany()
+                        .HasForeignKey("ArtistId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Album");
+
+                    b.Navigation("Artist");
+                });
+
             modelBuilder.Entity("WebApi.Models.TimeOfDayStat<SpotifyLocalStats.Server.Models.AggregatedAlbum>", b =>
                 {
                     b.HasOne("SpotifyLocalStats.Server.Models.AggregatedAlbum", "Aggregate")
@@ -1018,6 +798,85 @@ namespace WebApi.Migrations
 
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregatedAlbum", b =>
                 {
+                    b.HasOne("SpotifyLocalStats.Server.Models.Album", "Album")
+                        .WithMany()
+                        .HasForeignKey("AlbumId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SpotifyLocalStats.Server.Models.AggregateBase", null)
+                        .WithOne()
+                        .HasForeignKey("SpotifyLocalStats.Server.Models.AggregatedAlbum", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Album");
+                });
+
+            modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregatedArtist", b =>
+                {
+                    b.HasOne("SpotifyLocalStats.Server.Models.Artist", "Artist")
+                        .WithMany()
+                        .HasForeignKey("ArtistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SpotifyLocalStats.Server.Models.AggregateBase", null)
+                        .WithOne()
+                        .HasForeignKey("SpotifyLocalStats.Server.Models.AggregatedArtist", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Artist");
+                });
+
+            modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregatedTrack", b =>
+                {
+                    b.HasOne("SpotifyLocalStats.Server.Models.AggregateBase", null)
+                        .WithOne()
+                        .HasForeignKey("SpotifyLocalStats.Server.Models.AggregatedTrack", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SpotifyLocalStats.Server.Models.Track", "Track")
+                        .WithMany()
+                        .HasForeignKey("TrackId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Track");
+                });
+
+            modelBuilder.Entity("SpotifyLocalStats.Server.Models.Album", b =>
+                {
+                    b.Navigation("ExternalIds");
+
+                    b.Navigation("Images");
+
+                    b.Navigation("Tracks");
+                });
+
+            modelBuilder.Entity("SpotifyLocalStats.Server.Models.Artist", b =>
+                {
+                    b.Navigation("Albums");
+
+                    b.Navigation("ExternalIds");
+
+                    b.Navigation("Images");
+                });
+
+            modelBuilder.Entity("SpotifyLocalStats.Server.Models.Track", b =>
+                {
+                    b.Navigation("ExternalIds");
+                });
+
+            modelBuilder.Entity("SpotifyLocalStats.Server.Models.User", b =>
+                {
+                    b.Navigation("Images");
+                });
+
+            modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregatedAlbum", b =>
+                {
                     b.Navigation("TimeOfDayStats");
                 });
 
@@ -1029,32 +888,6 @@ namespace WebApi.Migrations
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregatedTrack", b =>
                 {
                     b.Navigation("TimeOfDayStats");
-                });
-
-            modelBuilder.Entity("SpotifyLocalStats.Server.Models.Album", b =>
-                {
-                    b.Navigation("ExternalIds");
-
-                    b.Navigation("Images");
-                });
-
-            modelBuilder.Entity("SpotifyLocalStats.Server.Models.Artist", b =>
-                {
-                    b.Navigation("ExternalIds");
-
-                    b.Navigation("Images");
-                });
-
-            modelBuilder.Entity("SpotifyLocalStats.Server.Models.Track", b =>
-                {
-                    b.Navigation("Artists");
-
-                    b.Navigation("ExternalIds");
-                });
-
-            modelBuilder.Entity("SpotifyLocalStats.Server.Models.User", b =>
-                {
-                    b.Navigation("Images");
                 });
 #pragma warning restore 612, 618
         }

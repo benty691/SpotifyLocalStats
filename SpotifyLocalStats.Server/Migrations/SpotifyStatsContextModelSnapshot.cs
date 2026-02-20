@@ -22,36 +22,6 @@ namespace WebApi.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("AlbumArtist", b =>
-                {
-                    b.Property<Guid>("AlbumsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ArtistsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("AlbumsId", "ArtistsId");
-
-                    b.HasIndex("ArtistsId");
-
-                    b.ToTable("AlbumArtist");
-                });
-
-            modelBuilder.Entity("AlbumTrack", b =>
-                {
-                    b.Property<Guid>("AlbumsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TracksId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("AlbumsId", "TracksId");
-
-                    b.HasIndex("TracksId");
-
-                    b.ToTable("AlbumTrack");
-                });
-
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregateBase", b =>
                 {
                     b.Property<Guid>("Id")
@@ -69,11 +39,6 @@ namespace WebApi.Migrations
 
                     b.Property<DateTime>("DateTimeLastListened")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(21)
-                        .HasColumnType("nvarchar(21)");
 
                     b.Property<int>("LongestDrySpell")
                         .HasColumnType("int");
@@ -110,17 +75,20 @@ namespace WebApi.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("AggregateBase");
 
-                    b.HasDiscriminator().HasValue("AggregateBase");
-
-                    b.UseTphMappingStrategy();
+                    b.UseTptMappingStrategy();
                 });
 
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.Album", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ArtistId")
                         .HasColumnType("uniqueidentifier");
 
                     b.PrimitiveCollection<string>("AvaliableMarkets")
@@ -165,6 +133,8 @@ namespace WebApi.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ArtistId");
+
                     b.HasIndex("CopyrightId");
 
                     b.ToTable("Albums");
@@ -204,12 +174,7 @@ namespace WebApi.Migrations
                     b.Property<int?>("TimesPlayed")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("TrackId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("TrackId");
 
                     b.ToTable("Artists");
                 });
@@ -427,6 +392,12 @@ namespace WebApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("AlbumId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ArtistId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.PrimitiveCollection<string>("AvaliableMarkets")
                         .HasColumnType("nvarchar(max)");
 
@@ -474,6 +445,10 @@ namespace WebApi.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AlbumId");
+
+                    b.HasIndex("ArtistId");
 
                     b.ToTable("Tracks");
                 });
@@ -540,6 +515,32 @@ namespace WebApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("WebApi.Models.Jobs.ImportJobStatus", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProgressPercent")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ImportJobStatuses");
                 });
 
             modelBuilder.Entity("WebApi.Models.TimeOfDayStat<SpotifyLocalStats.Server.Models.AggregatedAlbum>", b =>
@@ -638,9 +639,7 @@ namespace WebApi.Migrations
 
                     b.HasIndex("AlbumId");
 
-                    b.HasIndex("UserId");
-
-                    b.HasDiscriminator().HasValue("AggregatedAlbum");
+                    b.ToTable("AggregatedAlbums", (string)null);
                 });
 
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregatedArtist", b =>
@@ -658,9 +657,7 @@ namespace WebApi.Migrations
 
                     b.HasIndex("ArtistId");
 
-                    b.HasIndex("UserId");
-
-                    b.HasDiscriminator().HasValue("AggregatedArtist");
+                    b.ToTable("AggregatedArtists", (string)null);
                 });
 
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregatedTrack", b =>
@@ -672,55 +669,35 @@ namespace WebApi.Migrations
 
                     b.HasIndex("TrackId");
 
-                    b.HasIndex("UserId");
-
-                    b.HasDiscriminator().HasValue("AggregatedTrack");
+                    b.ToTable("AggregatedTracks", (string)null);
                 });
 
-            modelBuilder.Entity("AlbumArtist", b =>
+            modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregateBase", b =>
                 {
-                    b.HasOne("SpotifyLocalStats.Server.Models.Album", null)
+                    b.HasOne("SpotifyLocalStats.Server.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("AlbumsId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("SpotifyLocalStats.Server.Models.Artist", null)
-                        .WithMany()
-                        .HasForeignKey("ArtistsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AlbumTrack", b =>
-                {
-                    b.HasOne("SpotifyLocalStats.Server.Models.Album", null)
-                        .WithMany()
-                        .HasForeignKey("AlbumsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SpotifyLocalStats.Server.Models.Track", null)
-                        .WithMany()
-                        .HasForeignKey("TracksId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.Album", b =>
                 {
+                    b.HasOne("SpotifyLocalStats.Server.Models.Artist", "Artist")
+                        .WithMany("Albums")
+                        .HasForeignKey("ArtistId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("SpotifyLocalStats.Server.Models.CopyrightContent", "Copyright")
                         .WithMany()
                         .HasForeignKey("CopyrightId");
 
-                    b.Navigation("Copyright");
-                });
+                    b.Navigation("Artist");
 
-            modelBuilder.Entity("SpotifyLocalStats.Server.Models.Artist", b =>
-                {
-                    b.HasOne("SpotifyLocalStats.Server.Models.Track", null)
-                        .WithMany("Artists")
-                        .HasForeignKey("TrackId");
+                    b.Navigation("Copyright");
                 });
 
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.ExternalId", b =>
@@ -764,6 +741,25 @@ namespace WebApi.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SpotifyLocalStats.Server.Models.Track", b =>
+                {
+                    b.HasOne("SpotifyLocalStats.Server.Models.Album", "Album")
+                        .WithMany("Tracks")
+                        .HasForeignKey("AlbumId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("SpotifyLocalStats.Server.Models.Artist", "Artist")
+                        .WithMany()
+                        .HasForeignKey("ArtistId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Album");
+
+                    b.Navigation("Artist");
+                });
+
             modelBuilder.Entity("WebApi.Models.TimeOfDayStat<SpotifyLocalStats.Server.Models.AggregatedAlbum>", b =>
                 {
                     b.HasOne("SpotifyLocalStats.Server.Models.AggregatedAlbum", "Aggregate")
@@ -805,15 +801,13 @@ namespace WebApi.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SpotifyLocalStats.Server.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                    b.HasOne("SpotifyLocalStats.Server.Models.AggregateBase", null)
+                        .WithOne()
+                        .HasForeignKey("SpotifyLocalStats.Server.Models.AggregatedAlbum", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Album");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregatedArtist", b =>
@@ -824,34 +818,30 @@ namespace WebApi.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SpotifyLocalStats.Server.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                    b.HasOne("SpotifyLocalStats.Server.Models.AggregateBase", null)
+                        .WithOne()
+                        .HasForeignKey("SpotifyLocalStats.Server.Models.AggregatedArtist", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Artist");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.AggregatedTrack", b =>
                 {
+                    b.HasOne("SpotifyLocalStats.Server.Models.AggregateBase", null)
+                        .WithOne()
+                        .HasForeignKey("SpotifyLocalStats.Server.Models.AggregatedTrack", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("SpotifyLocalStats.Server.Models.Track", "Track")
                         .WithMany()
                         .HasForeignKey("TrackId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SpotifyLocalStats.Server.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.Navigation("Track");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.Album", b =>
@@ -859,10 +849,14 @@ namespace WebApi.Migrations
                     b.Navigation("ExternalIds");
 
                     b.Navigation("Images");
+
+                    b.Navigation("Tracks");
                 });
 
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.Artist", b =>
                 {
+                    b.Navigation("Albums");
+
                     b.Navigation("ExternalIds");
 
                     b.Navigation("Images");
@@ -870,8 +864,6 @@ namespace WebApi.Migrations
 
             modelBuilder.Entity("SpotifyLocalStats.Server.Models.Track", b =>
                 {
-                    b.Navigation("Artists");
-
                     b.Navigation("ExternalIds");
                 });
 

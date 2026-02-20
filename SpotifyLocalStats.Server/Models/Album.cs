@@ -5,15 +5,19 @@ namespace SpotifyLocalStats.Server.Models;
 
 public class Album : BaseModel
 {
-    public Album(string name, Artist artist)
+    public Album()
     {
         Images = new List<Image>();
         Tracks = new List<Track>();
-        Artist = artist;
         ExternalIds = new List<ExternalId>();
+    }
+    public Album(string name, Artist artist)
+    {
+        Artist = artist;
         Name = name;
     }
 
+    
     public string Name { get; set; }
     public string? Type { get; set; } // album, single, compilation
     public int? TotalTracks { get; set; }
