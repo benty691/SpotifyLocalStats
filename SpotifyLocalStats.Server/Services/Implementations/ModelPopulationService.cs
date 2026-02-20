@@ -89,7 +89,7 @@ public sealed class ModelPopulationService : IModelPopulationService
             if (!albumList.ContainsKey(track.MasterMetadataAlbumName))
             {
                     
-                if(artistList.TryGetValue(track.MasterMetadataArtistName, out Artist artist)) 
+                if(artistList.TryGetValue(track.MasterMetadataArtistName, out var artist)) 
                 {
                     await _context.Albums.AddAsync(new Album(track.MasterMetadataAlbumName, artist));
                 } 
@@ -136,13 +136,13 @@ public sealed class ModelPopulationService : IModelPopulationService
             if (!trackList.ContainsKey(track.MasterMetadataTrackName))
             {
 
-                if(!artistList.TryGetValue(track.MasterMetadataArtistName, out Artist artist))
+                if(!artistList.TryGetValue(track.MasterMetadataArtistName, out var artist))
                 {
                     _logger.LogDebug($"No artist found when attempting to create track. Skipping track create for {track.MasterMetadataTrackName} and trackId: {track.SpotifyTrackUri}. Artist Name:{track.MasterMetadataArtistName}");
 
                     continue;
                 }
-                if (!albumList.TryGetValue(track.MasterMetadataAlbumName, out Album album))
+                if (!albumList.TryGetValue(track.MasterMetadataAlbumName, out var album))
                 {
                     _logger.LogDebug($"No Album found when attempting to create track. Skipping track create for {track.MasterMetadataTrackName} and trackId: {track.SpotifyTrackUri}. Album Name:{track.MasterMetadataAlbumName}");
                     continue;

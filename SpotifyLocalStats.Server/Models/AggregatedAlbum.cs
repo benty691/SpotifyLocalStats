@@ -5,8 +5,9 @@ namespace SpotifyLocalStats.Server.Models;
 
 public class AggregatedAlbum : AggregateBase
 {
-    public AggregatedAlbum()
+    public AggregatedAlbum(Album album)
     {
+        Album = album;
         TimeOfDayStats = new List<TimeOfDayStat<AggregatedAlbum>>();
     }
     public Album Album { get; set; }

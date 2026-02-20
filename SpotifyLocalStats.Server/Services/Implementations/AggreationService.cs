@@ -53,7 +53,7 @@ public class AggreationService : IAggregationService
         foreach(var track in tracks)
         {
             var artist = await _context.Artists
-                .FirstOrDefaultAsync(x => x.Name == track.MasterMetadataArtistName);
+                .FirstAsync(x => x.Name == track.MasterMetadataArtistName);
 
             if (artist == null)
             {
@@ -64,9 +64,8 @@ public class AggreationService : IAggregationService
 
             if (aggregateArtists.Count == 0)
             {
-                var newAggArtist = new AggregatedArtist()
+                var newAggArtist = new AggregatedArtist(artist)
                 {
-                    Artist = artist,
                     UniqueTracksPlayed = 1,
                     AlbumsListened = 1,
                     DateTimeFirstListened = track.TimeStamp,
@@ -119,9 +118,8 @@ public class AggreationService : IAggregationService
             {
                 // alot of these values will be calculater, either from wihtin the models get or via a background job???? 
 
-                var newAggAlbum = new AggregatedAlbum()
+                var newAggAlbum = new AggregatedAlbum(album)
                 {
-                    Album = album,
                     DateTimeFirstListened = track.TimeStamp,
                     DateTimeLastListened = track.TimeStamp,
                     User = user,
@@ -165,9 +163,8 @@ public class AggreationService : IAggregationService
 
             if (aggregatedTracks.Count == 0)
             {
-                var newAggTrack = new AggregatedTrack()
+                var newAggTrack = new AggregatedTrack(trackLookup)
                 {
-                    Track = trackLookup,
                     DateTimeFirstListened = track.TimeStamp,
                     DateTimeLastListened = track.TimeStamp,
                     User = user,

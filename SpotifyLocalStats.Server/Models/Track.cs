@@ -5,7 +5,7 @@ namespace SpotifyLocalStats.Server.Models;
 //Tracks are generated via imported tracks. We do not have a catalog of all tracks.
 public class Track : BaseModel
 {
-    public Track(Artist artist, Album album , string name ,string spotifyTrackUri)
+    public Track(Artist artist, Album album, string name, string spotifyTrackUri)
     {
         ExternalIds = new List<ExternalId>();
         Name = name;
