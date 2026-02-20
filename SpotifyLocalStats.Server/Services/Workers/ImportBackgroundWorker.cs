@@ -25,7 +25,7 @@ public class ImportBackgroundWorker : BackgroundService
     {
         await foreach (var data in _queue.ReadAllAsync(stoppingToken))
         {
-           var importJob = _context.ImportJobStatuses.Find(data.JobId);
+            var importJob = _context.ImportJobStatuses.Find(data.JobId);
             importJob.Status = JobStatus.Processing;
 
             try
@@ -42,8 +42,9 @@ public class ImportBackgroundWorker : BackgroundService
                 importJob.ErrorMessage = ex.Message;
 
                 await _context.SaveChangesAsync();
+            }
         }
+
+
     }
-
-
 }

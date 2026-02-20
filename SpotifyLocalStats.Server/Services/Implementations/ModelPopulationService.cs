@@ -29,7 +29,7 @@ public sealed class ModelPopulationService : IModelPopulationService
         var albumCount = await GenerateAlbum(tracks);
         var trackCount = await GenerateTrack(tracks);
 
-        return new ImportTracksDTO() { AlbumCount = albumCount, ArtistCount = artistCount, TrackCount = trackCount };
+        return new ImportTracksDTO() { AlbumCount = albumCount, ArtistCount = artistCount.Item2, TrackCount = trackCount };
     }
 
 
