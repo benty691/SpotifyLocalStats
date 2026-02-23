@@ -6,9 +6,11 @@ function StatsCard({
   statName: string;
 }) {
   return (
-    <div className='stats-card'>
-      <h2 className='stat-header'>{statName}</h2>
-      <p className='stat-number'>{statNumber}</p>
+    <div className='flex-col grow border-accent-cyan border rounded-2xl bg-surface-raised hover:bg-surface-overlay pr-12 pl-12 pb-15 pt-15'>
+      <h2 className='flex-1'>{statName}</h2>
+      <p className='text-center'>
+        <strong className='text-3xl'>{statNumber}</strong>
+      </p>
     </div>
   );
 }

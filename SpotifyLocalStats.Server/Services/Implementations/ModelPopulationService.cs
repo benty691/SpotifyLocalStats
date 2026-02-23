@@ -1,10 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.Extensions.Logging;
-using SpotifyLocalStats.Server.Data;
+﻿using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
-using System.Diagnostics.Metrics;
-using System.Linq;
 using WebApi.Data.DTOs;
 using WebApi.Services.Interfaces;
 
@@ -15,7 +10,7 @@ public sealed class ModelPopulationService : IModelPopulationService
     private readonly ILogger<ModelPopulationService> _logger;
     private readonly SpotifyStatsContext _context;
 
-    public ModelPopulationService(ILogger<ModelPopulationService> logger, SpotifyStatsContext context) 
+    public ModelPopulationService(ILogger<ModelPopulationService> logger, SpotifyStatsContext context)
     {
         _logger = logger;
         _context = context;
@@ -37,10 +32,16 @@ public sealed class ModelPopulationService : IModelPopulationService
     {
         var nullArtistCount = 0;
 
-        var artistList = _context.Artists.Local.ToDictionary(x=> x.Name, x => x); // create a hashset we can lookup on for every track (O(n))
+        // ensure we deduplicate
+        var uniqueImportedArtists = tracks
+            .GroupBy(t => new { t.MasterMetadataArtistName })
+            .Select(g => g.First())
+            .ToList();
+
+        var artistList = _context.Artists.Local.ToDictionary(x => x.Name, x => x); // create a hashset we can lookup on for every track (O(n))
 
         // logic to generate artist from imported track
-        foreach (var track in tracks) 
+        foreach (var track in uniqueImportedArtists)
         {
             // for each track, we ideally try create an artist, if that artist already exists, we skip
             if (track.MasterMetadataArtistName == null)
@@ -55,7 +56,9 @@ public sealed class ModelPopulationService : IModelPopulationService
                 // we need spotify webapi to allow this to occur properly, as we neeed to hit the endpoint to get details, but we need the artist id from spotify to query??? 
                 // appears we can use the search endpoint and search artist nam, and then get aristid from that, then query artist endpoint for details
 
-                await _context.Artists.AddAsync(new Artist(track.MasterMetadataArtistName));
+                var newArtist = new Artist(track.MasterMetadataArtistName);
+                await _context.Artists.AddAsync(newArtist);
+                artistList[track.MasterMetadataArtistName] = newArtist;
             }
             else
             {
@@ -74,11 +77,15 @@ public sealed class ModelPopulationService : IModelPopulationService
     private async Task<int> GenerateAlbum(IEnumerable<ImportedTrack> tracks)
     {
         var nullAlbumCount = 0;
+        var uniqueAlbumList = tracks
+            .GroupBy(x => new { x.MasterMetadataAlbumName })
+            .Select(g => g.First())
+            .ToList();
 
         var albumList = _context.Albums.Local.ToDictionary(x => x.Name, x => x); //O(n)
         var artistList = _context.Artists.Local.ToDictionary((x => x.Name), x => x);
 
-        foreach (var track in tracks) // O(n)
+        foreach (var track in uniqueAlbumList) // O(n)
         {
             if (track.MasterMetadataAlbumName == null)
             {
@@ -87,17 +94,15 @@ public sealed class ModelPopulationService : IModelPopulationService
                 continue;
 
             }
-            if (track.MasterMetadataArtistName == null)
-            {
-                continue;
-            }
+
             if (!albumList.ContainsKey(track.MasterMetadataAlbumName))
             {
-                    
-                if(artistList.TryGetValue(track.MasterMetadataArtistName, out var artist)) 
+                if (artistList.TryGetValue(track.MasterMetadataArtistName, out var artist))
                 {
-                    await _context.Albums.AddAsync(new Album(track.MasterMetadataAlbumName, artist));
-                } 
+                    var newAlbum = new Album(track.MasterMetadataAlbumName, artist);
+                    await _context.Albums.AddAsync(newAlbum);
+                    albumList[track.MasterMetadataAlbumName] = newAlbum;
+                }
                 else
                 {
                     _logger.LogDebug($"No artist found when attempting to create album. Skipping album create for {track.MasterMetadataAlbumName} and trackId: {track.SpotifyTrackUri}. Artist Name:{track.MasterMetadataArtistName}");
@@ -118,30 +123,22 @@ public sealed class ModelPopulationService : IModelPopulationService
     private async Task<int> GenerateTrack(IEnumerable<ImportedTrack> tracks)
     {
         var nullTrackCount = 0;
+        var uniqueTrackList = tracks.GroupBy(x => x.MasterMetadataTrackName).Select(g => g.First()).ToList();
+
         var trackList = _context.Tracks.Local.ToDictionary((x => x.Name), x => x);
         var artistList = _context.Artists.Local.ToDictionary((x => x.Name), x => x);
         var albumList = _context.Albums.Local.ToDictionary((x => x.Name), x => x);
 
-        foreach (var track in tracks)
+        foreach (var track in uniqueTrackList)
         {
             if (track.MasterMetadataTrackName == null)
             {
                 continue;
             }
-            if (track.MasterMetadataAlbumName == null)
-            {
-                continue;
-            }
-            if (track.MasterMetadataArtistName == null)
-            {
-                continue;
-            }
 
-            // we are checking change tarcker instead of the db. Do this to avoid calling saveChanges after everytime we add an track
             if (!trackList.ContainsKey(track.MasterMetadataTrackName))
             {
-
-                if(!artistList.TryGetValue(track.MasterMetadataArtistName, out var artist))
+                if (!artistList.TryGetValue(track.MasterMetadataArtistName, out var artist))
                 {
                     _logger.LogDebug($"No artist found when attempting to create track. Skipping track create for {track.MasterMetadataTrackName} and trackId: {track.SpotifyTrackUri}. Artist Name:{track.MasterMetadataArtistName}");
 
@@ -155,6 +152,7 @@ public sealed class ModelPopulationService : IModelPopulationService
 
                 var newTrack = new Track(artist, album, track.MasterMetadataTrackName, track.SpotifyTrackUri);
                 await _context.Tracks.AddAsync(newTrack);
+                trackList[track.MasterMetadataTrackName] = newTrack;
             }
             else
             {

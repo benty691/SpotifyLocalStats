@@ -3,6 +3,7 @@ using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
 
 using System;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -50,7 +51,7 @@ public class ImportedTrackService : IImportedTrackService
         // we might want the user to sign in? or generate user for person on startup, so we have the user, can assign, rather than needing to generate on import?
         foreach (var track in importedTracks)
         {
-            track.User = user; 
+            track.UserId = user.Id; 
         }
 
         return importedTracks;
@@ -71,6 +72,14 @@ public class ImportedTrackService : IImportedTrackService
             _logger.LogInformation($"Found {duplicatesInImport} duplicates within the imported data");
         }
 
+        // fresh import
+        if (_spotifyStatsContext.ImportedTracks.Count() == 0)
+        {
+            await _spotifyStatsContext.ImportedTracks.AddRangeAsync(uniqueImportedTracks);
+            var newTracksImported = await _spotifyStatsContext.SaveChangesAsync();
+            return newTracksImported;
+        }
+
         var existingKeys = _spotifyStatsContext.ImportedTracks
             .Where(x => x.UserId == user.Id)
             .Select(x => new { x.TimeStamp, x.SpotifyTrackUri })
@@ -79,7 +88,6 @@ public class ImportedTrackService : IImportedTrackService
         var newTracks = uniqueImportedTracks
             .Where(track => !existingKeys.Contains(new { track.TimeStamp, track.SpotifyTrackUri }))
             .ToList();
-
 
         if (newTracks.Any())
         {
@@ -92,29 +100,4 @@ public class ImportedTrackService : IImportedTrackService
         _logger.LogInformation($"Saved {numberOfRecordsSaved} imported tracks to database. {recordsSkipped} were skipped due to rule unique enforcment");
         return numberOfRecordsSaved;
     }
-
-    private string HashJsonContent(string json)
-    {
-        return GetHash(SHA256.Create(), json);
-    }
-
-    private string GetHash(HashAlgorithm hash, string input)
-    {
-        byte[] data = hash.ComputeHash(Encoding.UTF8.GetBytes(input));
-
-        // Create a new Stringbuilder to collect the bytes
-        // and create a string.
-        var sBuilder = new StringBuilder();
-
-        // Loop through each byte of the hashed data
-        // and format each one as a hexadecimal string.
-        for (int i = 0; i < data.Length; i++)
-        {
-            sBuilder.Append(data[i].ToString("x2"));
-        }
-
-        // Return the hexadecimal string.
-        return sBuilder.ToString();
-    }
-
 }

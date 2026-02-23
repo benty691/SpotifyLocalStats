@@ -13,16 +13,16 @@ function LoginPopup() {
   const { updateUser } = useUserContext();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    //e.preventDefault();
 
     if (!userName?.trim()) return;
     if (!userFirstName?.trim()) return;
 
-    setLoading(true);
-
     if (loading) return;
 
     try {
+      setLoading(true);
+
       const res = await userApi.createNewUser(userName, userFirstName);
       console.log(import.meta.env.VITE_API_URL);
 

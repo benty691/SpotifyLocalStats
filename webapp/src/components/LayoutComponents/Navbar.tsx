@@ -1,10 +1,10 @@
 // import navbar buttons (tutorial, artists etc)
 import { Link, Navigate, Route } from "react-router-dom";
-import "../App.css";
-import { importApi } from "../services/api/importApi";
+import "../../App.css";
+import { importApi } from "../../services/api/importApi";
 import { useState, type HtmlHTMLAttributes } from "react";
-import { useThemeContext } from "../contexts/ThemeContext";
-import ThemeToggle from "./ThemeToggle";
+import { useThemeContext } from "../../contexts/ThemeContext";
+import ThemeToggle from "../ThemeToggle";
 
 function NavBarMenu() {
   return (

@@ -28,18 +28,18 @@ public class AggreationService : IAggregationService
 
     public async Task UpdateAggregatedDataForUser(User user, IEnumerable<ImportedTrack> tracks)
     {
-            await UpdateAggregateArtist(user, tracks);
-            await UpdateAggregateAlbum(user, tracks);
-            await UpdateAggregateTrack(user, tracks);
+        await UpdateAggregateArtist(user, tracks);
+        await UpdateAggregateAlbum(user, tracks);
+        await UpdateAggregateTrack(user, tracks);
 
-            await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
 
-            // should we have an orchestrator that calls all of these?
-            await _artistAggregationHelpersService.RunCalculations();
-            await _albumAggregationHelpersService.RunCalculations();
-            await _TrackAggregationHelpersService.RunCalculations();
+        // should we have an orchestrator that calls all of these?
+        await _artistAggregationHelpersService.RunCalculations();
+        await _albumAggregationHelpersService.RunCalculations();
+        await _TrackAggregationHelpersService.RunCalculations();
 
-            await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
 
         // so in theolry here, we should have populated all the dbs now.. including calculated values, no idea how long this would take? fairly quick I would guess... 
         // then run 'baxkground' aggragtion helpers to fill in rest of the values... considering having this on a background service that updates daily when webapi opens (runs once after import of tracks, but for now, i think we just call after aggregates are created, essentially here. 
@@ -49,58 +49,34 @@ public class AggreationService : IAggregationService
     {
         var updatedCount = 0;
         var artistDict = _context.Artists.ToDictionary(x => x.Name, x => x);
-        var aggArtistDict = _context.AggregatedArtists.Where(x => x.UserId == user.Id).Include(x => x.Artist.Name).ToDictionary(x => x.Artist.Name , x => x);
-        var addedAggArtists = new Dictionary<string, AggregatedArtist>();
-
+        var aggArtistDict = _context.AggregatedArtists.Where(x => x.UserId == user.Id).Include(x => x.Artist).ToDictionary(x => x.Artist.Name, x => x);
 
         // for each track that was upl;aoded, we must check that trackj for the artist, if artist stats exist, increase count on things, esle create new agg stats 
-        foreach(var track in tracks) // o(n)
+        foreach (var track in tracks) // o(n)
         {
-            
-            if(!artistDict.TryGetValue(track.MasterMetadataArtistName, out var artist))
+            if (!artistDict.TryGetValue(track.MasterMetadataArtistName, out var artist))
             {
+                if (aggArtistDict[artist.Name] is not null)
+                {
 
-            }
 
-            if(aggArtistDict.TryGetValue(track.MasterMetadataArtistName, out var aggregatedArtist))
-            {
-                continue;
-            }
-            if (aggArtistDict.TryGetValue(track.MasterMetadataArtistName, out var aggregated))
-            {
-                continue;
-            }
+                }
 
-            var aggregateArtists = _context.AggregatedArtists.Local.Where(x => artist.Name == track.MasterMetadataArtistName && x.User.Id == user.Id).ToList(); //O(2n^2) which is o(n^2)
-
-            if (aggregateArtists.Count == 0)
-            {
                 var newAggArtist = new AggregatedArtist(artist)
                 {
                     UniqueTracksPlayed = 1,
                     AlbumsListened = 1,
                     DateTimeFirstListened = track.TimeStamp,
                     DateTimeLastListened = track.TimeStamp,
-                    User = user,
+                    UserId = user.Id,
                     PlayCount = 1,
                     MsListened = track.MsPlayed,
                 };
 
                 await _context.AggregatedArtists.AddAsync(newAggArtist);
                 aggArtistDict.Add(newAggArtist.Artist.Name, newAggArtist);
-
             }
-            else if (aggregateArtists.Count == 1)
-            {
 
-                var aggregateArtist = aggregateArtists.Single();
-
-                aggregateArtist.DateTimeLastListened = track.TimeStamp > aggregateArtist.DateTimeLastListened ? track.TimeStamp : aggregateArtist.DateTimeLastListened;
-                aggregateArtist.PlayCount += 1;
-                aggregateArtist.MsListened += track.MsPlayed;
-
-                updatedCount++;
-            }
             else
             {
                 _logger.LogWarning("Multiple artists found with the same name, this is unhandable");
@@ -120,7 +96,7 @@ public class AggreationService : IAggregationService
         {
             var album = await _context.Albums.Where(x => x.Name == track.MasterMetadataAlbumName).FirstOrDefaultAsync();
 
-            if ( album is null)
+            if (album is null)
             {
                 throw new ArgumentNullException($"Album is null for album: {track.MasterMetadataAlbumName}");
             }
@@ -135,12 +111,12 @@ public class AggreationService : IAggregationService
                 {
                     DateTimeFirstListened = track.TimeStamp,
                     DateTimeLastListened = track.TimeStamp,
-                    User = user,
+                    UserId = user.Id,
                     PlayCount = 1,
                     MsListened = track.MsPlayed,
                 };
 
-               await _context.AggregatedAlbums.AddAsync(newAggAlbum);
+                await _context.AggregatedAlbums.AddAsync(newAggAlbum);
             }
             else if (aggregatedAlbums.Count == 1)
             {
@@ -180,7 +156,7 @@ public class AggreationService : IAggregationService
                 {
                     DateTimeFirstListened = track.TimeStamp,
                     DateTimeLastListened = track.TimeStamp,
-                    User = user,
+                    UserId = user.Id,
                     PlayCount = 1,
                     MsListened = track.MsPlayed,
                 };

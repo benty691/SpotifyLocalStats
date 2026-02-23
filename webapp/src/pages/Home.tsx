@@ -1,5 +1,5 @@
 import React from "react";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/LayoutComponents/Navbar";
 import { useState, useEffect, useContext } from "react";
 
 import HomeStats from "../components/HomeStats";
@@ -12,7 +12,9 @@ function Home() {
 
   return (
     <>
-      <HomeStats />
+      <div className='flex-col justify-center'>
+        <HomeStats />
+      </div>
     </>
   );
 }

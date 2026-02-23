@@ -10,6 +10,7 @@ public class User : BaseModel
         UserName = userName ?? throw new ArgumentNullException(nameof(userName));
         FirstName = firstName ?? throw new ArgumentNullException(nameof(firstName));
         Images = new List<Image>();
+        LastTimeUsed = DateTime.UtcNow;
     }
 
     public DateTime LastUpdatedAt { get; set; }

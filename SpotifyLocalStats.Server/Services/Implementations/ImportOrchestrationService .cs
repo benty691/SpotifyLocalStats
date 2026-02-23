@@ -26,16 +26,12 @@ namespace WebApi.Services.Implementations
 
         public async Task ProcessAsync(string json, User user, Guid jobId, CancellationToken cancellationToken)
         {
-
             await Orchestrate(json, user, jobId, cancellationToken);
-
         }
 
-
-        public async Task<ImportTracksDTO> Orchestrate(string json, User user, Guid jobId, CancellationToken cancellationToken)
+        private async Task<ImportTracksDTO> Orchestrate(string json, User user, Guid jobId, CancellationToken cancellationToken)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
-            int progress;
             var job = _context.ImportJobStatuses.Find(jobId);
 
             try

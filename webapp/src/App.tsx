@@ -1,11 +1,11 @@
 import { Route, Routes } from "react-router";
-import Navbar from "./components/Navbar.tsx";
+import Navbar from "./components/LayoutComponents/Navbar.tsx";
 import Home from "./pages/Home.tsx";
 import Stats from "./pages/Stats.tsx";
 import Artists from "./pages/Artists.tsx";
 import Tracks from "./pages/Tracks.tsx";
 import Albums from "./pages/Albums.tsx";
-import Footer from "./components/Footer.tsx";
+import Footer from "./components/LayoutComponents/Footer.tsx";
 import { UserProvider } from "./contexts/UserContexts.tsx";
 import { ThemeProvider } from "./contexts/ThemeContext.tsx";
 import Upload from "./pages/Upload.tsx";

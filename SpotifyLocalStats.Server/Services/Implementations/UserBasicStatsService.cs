@@ -21,7 +21,7 @@ public class UserBasicStatsService : IUserBasicStatsService
         int albumCount = await GetAlbumStats(id);
         int artistCount = await GetArtistStats(id);
 
-        return new UserSpotifyStatsDto(id, trackCount, albumCount, artistCount);
+        return new UserSpotifyStatsDto(trackCount, albumCount, artistCount);
     }
 
     private async Task<int> GetTrackStats(Guid id)
