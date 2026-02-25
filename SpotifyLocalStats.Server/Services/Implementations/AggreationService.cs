@@ -48,138 +48,137 @@ public class AggreationService : IAggregationService
     private async Task UpdateAggregateArtist(User user, IEnumerable<ImportedTrack> tracks)
     {
         var updatedCount = 0;
+        // probs dont need
         var artistDict = _context.Artists.ToDictionary(x => x.Name, x => x);
         var aggArtistDict = _context.AggregatedArtists.Where(x => x.UserId == user.Id).Include(x => x.Artist).ToDictionary(x => x.Artist.Name, x => x);
 
         // for each track that was upl;aoded, we must check that trackj for the artist, if artist stats exist, increase count on things, esle create new agg stats 
         foreach (var track in tracks) // o(n)
         {
-            if (!artistDict.TryGetValue(track.MasterMetadataArtistName, out var artist))
+            if (!aggArtistDict.TryGetValue(track.MasterMetadataArtistName, out var artist))
             {
-                if (aggArtistDict[artist.Name] is not null)
+                var artistValue = artistDict.GetValueOrDefault(track.MasterMetadataArtistName);
+
+                if (artistValue != null)
                 {
+                    var newAggArtist = new AggregatedArtist(artistValue)
+                    {
+                        UniqueTracksPlayed = 1,
+                        AlbumsListened = 1,
+                        DateTimeFirstListened = track.TimeStamp,
+                        DateTimeLastListened = track.TimeStamp,
+                        UserId = user.Id,
+                        PlayCount = 1,
+                        MsListened = track.MsPlayed,
+                    };
 
-
+                    await _context.AggregatedArtists.AddAsync(newAggArtist);
+                    aggArtistDict.Add(newAggArtist.Artist.Name, newAggArtist);
                 }
-
-                var newAggArtist = new AggregatedArtist(artist)
+                else
                 {
-                    UniqueTracksPlayed = 1,
-                    AlbumsListened = 1,
-                    DateTimeFirstListened = track.TimeStamp,
-                    DateTimeLastListened = track.TimeStamp,
-                    UserId = user.Id,
-                    PlayCount = 1,
-                    MsListened = track.MsPlayed,
-                };
-
-                await _context.AggregatedArtists.AddAsync(newAggArtist);
-                aggArtistDict.Add(newAggArtist.Artist.Name, newAggArtist);
+                    _logger.LogWarning($"cannot get artist from artist dictionary for artisdt name: {track.MasterMetadataArtistName}");
+                }
             }
 
             else
             {
-                _logger.LogWarning("Multiple artists found with the same name, this is unhandable");
-            }
+                artist.MsListened += track.MsPlayed;
+                artist.DateTimeLastListened = track.TimeStamp;
+                artist.PlayCount += 1;
 
-            _logger.LogInformation($"Updated {updatedCount} records");
+                _context.AggregatedArtists.Update(artist);
+            }
         }
+        _logger.LogInformation($"Updated {updatedCount} records");
     }
 
     private async Task UpdateAggregateAlbum(User user, IEnumerable<ImportedTrack> tracks)
     {
         var updatedCount = 0;
+        var albumDict = _context.Albums.ToDictionary(x => x.Name, x => x);
+        var aggAlbumDict = _context.AggregatedAlbums.Where(x => x.UserId == user.Id).Include(x => x.Album).ToDictionary(x => x.Album.Name, x => x);
 
-
-        // for each track that was uplaoded, we must check that trackj for the artist, if artist stats exist, increase count on things, esle create new agg stats 
-        foreach (var track in tracks)
+        // for each track that was upl;aoded, we must check that trackj for the artist, if artist stats exist, increase count on things, esle create new agg stats 
+        foreach (var track in tracks) // o(n)
         {
-            var album = await _context.Albums.Where(x => x.Name == track.MasterMetadataAlbumName).FirstOrDefaultAsync();
-
-            if (album is null)
+            if (!aggAlbumDict.TryGetValue(track.MasterMetadataAlbumName, out var album))
             {
-                throw new ArgumentNullException($"Album is null for album: {track.MasterMetadataAlbumName}");
-            }
+                var albumValue = albumDict.GetValueOrDefault(track.MasterMetadataAlbumName);
 
-            var aggregatedAlbums = _context.AggregatedAlbums.Local.Where(x => album.Name == track.MasterMetadataAlbumName && x.User.Id == user.Id).ToList(); // done bby name which gets eh, we need ids 
-
-            if (aggregatedAlbums.Count == 0)
-            {
-                // alot of these values will be calculater, either from wihtin the models get or via a background job???? 
-
-                var newAggAlbum = new AggregatedAlbum(album)
+                if (albumValue != null)
                 {
-                    DateTimeFirstListened = track.TimeStamp,
-                    DateTimeLastListened = track.TimeStamp,
-                    UserId = user.Id,
-                    PlayCount = 1,
-                    MsListened = track.MsPlayed,
-                };
+                    var newAggAlbum = new AggregatedAlbum(album.Album)
+                    {
+                        DateTimeFirstListened = track.TimeStamp,
+                        DateTimeLastListened = track.TimeStamp,
+                        UserId = user.Id,
+                        PlayCount = 1,
+                        MsListened = track.MsPlayed,
+                    };
 
-                await _context.AggregatedAlbums.AddAsync(newAggAlbum);
+                    await _context.AggregatedAlbums.AddAsync(newAggAlbum);
+                    aggAlbumDict.Add(newAggAlbum.Album.Name, newAggAlbum);
+                }
+                else
+                {
+                    _logger.LogWarning($"cannot get album from album dictionary for artist name: {track.MasterMetadataAlbumName}");
+                }
             }
-            else if (aggregatedAlbums.Count == 1)
-            {
 
-                var aggregatedAlbum = aggregatedAlbums.Single();
-
-                aggregatedAlbum.DateTimeLastListened = track.TimeStamp > aggregatedAlbum.DateTimeLastListened ? track.TimeStamp : aggregatedAlbum.DateTimeLastListened;
-                aggregatedAlbum.PlayCount += 1;
-                aggregatedAlbum.MsListened += track.MsPlayed;
-
-                updatedCount++;
-            }
             else
             {
-                _logger.LogWarning("Multiple albums found with the same name, this is unhandable atm.");
+                album.MsListened += track.MsPlayed;
+                album.DateTimeLastListened = track.TimeStamp;
+                album.PlayCount += 1;
 
+                _context.AggregatedAlbums.Update(album);
             }
-            _logger.LogInformation($"Updated {updatedCount} records");
-
         }
+        _logger.LogInformation($"Updated {updatedCount} records");
     }
 
     private async Task UpdateAggregateTrack(User user, IEnumerable<ImportedTrack> tracks)
     {
+
         var updatedCount = 0;
+        var trackDict = _context.Tracks.ToDictionary(x => x.Name, x => x);
+        var aggTrackDict = _context.AggregatedTracks.Where(x => x.UserId == user.Id).Include(x => x.Track).ToDictionary(x => x.Track.Name, x => x);
 
-        // for each track that was uplaoded, we must check that trackj for the artist, if artist stats exist, increase count on things, esle create new agg stats 
-        foreach (var track in tracks)
+        // for each track that was upl;aoded, we must check that trackj for the artist, if artist stats exist, increase count on things, esle create new agg stats 
+        foreach (var track in tracks) // o(n)
         {
-            var trackLookup = await _context.Tracks.Where(x => x.Name == track.MasterMetadataTrackName).FirstAsync();
-
-            var aggregatedTracks = _context.AggregatedTracks.Local.Where(x => trackLookup.SpotifyTrackUri == track.SpotifyTrackUri && x.User.Id == user.Id).ToList();
-
-            if (aggregatedTracks.Count == 0)
+            if (!aggTrackDict.TryGetValue(track.MasterMetadataTrackName, out var trackValue))
             {
-                var newAggTrack = new AggregatedTrack(trackLookup)
+                var trackValueLookup = trackDict.GetValueOrDefault(track.MasterMetadataTrackName);
+
+                if (trackValueLookup != null)
                 {
-                    DateTimeFirstListened = track.TimeStamp,
-                    DateTimeLastListened = track.TimeStamp,
-                    UserId = user.Id,
-                    PlayCount = 1,
-                    MsListened = track.MsPlayed,
-                };
+                    var newAggTrack = new AggregatedTrack(trackValue.Track)
+                    {
+                        DateTimeFirstListened = track.TimeStamp,
+                        DateTimeLastListened = track.TimeStamp,
+                        UserId = user.Id,
+                        PlayCount = 1,
+                        MsListened = track.MsPlayed,
+                    };
 
-                await _context.AggregatedTracks.AddAsync(newAggTrack);
+                    await _context.AggregatedTracks.AddAsync(newAggTrack);
+                    aggTrackDict.Add(newAggTrack.Track.Name, newAggTrack);
+                }
+                else
+                {
+                    _logger.LogWarning($"cannot get album from album dictionary for artist name: {track.MasterMetadataAlbumName}");
+                }
             }
-            else if (aggregatedTracks.Count == 1)
-            {
 
-                var aggregatedTrack = aggregatedTracks.Single();
-
-                // we need to calcualte alot here. we should either delegate to functions, handle in the model that wokrs as a background service, or just do it here.
-
-                aggregatedTrack.DateTimeLastListened = track.TimeStamp > aggregatedTrack.DateTimeLastListened ? track.TimeStamp : aggregatedTrack.DateTimeLastListened;
-                aggregatedTrack.PlayCount += 1;
-                aggregatedTrack.MsListened += track.MsPlayed;
-
-                updatedCount++;
-            }
             else
             {
-                _logger.LogWarning("Multiple tracks found with the same name, this is unhandable atm.");
+                trackValue.MsListened += track.MsPlayed;
+                trackValue.DateTimeLastListened = track.TimeStamp;
+                trackValue.PlayCount += 1;
 
+                _context.AggregatedTracks.Update(trackValue);
             }
         }
         _logger.LogInformation($"Updated {updatedCount} records");
