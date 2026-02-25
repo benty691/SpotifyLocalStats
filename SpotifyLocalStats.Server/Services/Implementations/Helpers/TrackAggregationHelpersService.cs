@@ -51,7 +51,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
         {
             foreach (var aggTrack in _aggregatedTracks)
             {
-                var importedTracks = _context.ImportedTracks.Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.User.Id == aggTrack.User.Id);
+                var importedTracks = _context.ImportedTracks.Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.UserId == aggTrack.UserId);
 
                 var topDay = await importedTracks.GroupBy(x => x.TimeStamp.Date).Select(g => new
                 {
@@ -87,7 +87,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
             // set time frame from track time, then search 24 hours back, count numbver of times artist appears
 
             var tracksOfTracks = await _context.ImportedTracks
-                 .Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.User.Id == aggTrack.User.Id).ToListAsync();
+                 .Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.UserId == aggTrack.UserId).ToListAsync();
 
             foreach (var track in tracksOfTracks)
             {
@@ -123,7 +123,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
         foreach (var aggTrack in _aggregatedTracks)
         {
             var artistTracks = await _context.ImportedTracks
-                .Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.User.Id == aggTrack.User.Id)
+                .Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.UserId == aggTrack.UserId)
                 .ToListAsync();
 
             // not sure if this will workl, as we need to span from 0000-1000 etc etc, if in this range, increment count
@@ -134,7 +134,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
             foreach (var track in artistTracks)
             {
                 // dont create a new one eveyrtime, just increase count by 1 if it exists, if nt create it
-                var timeOfDayStatsForUser = await _context.TrackTimeOfDaysStats.Where(x => x.Aggregate.User.Id == track.UserId).ToListAsync();
+                var timeOfDayStatsForUser = await _context.TrackTimeOfDaysStats.Where(x => x.Aggregate.UserId == track.UserId).ToListAsync();
 
                 if (timeOfDayStatsForUser.Count != 0)
                 {

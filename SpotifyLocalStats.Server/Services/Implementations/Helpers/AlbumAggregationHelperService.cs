@@ -1,5 +1,4 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
 using WebApi.Models;
@@ -52,7 +51,7 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
         {
             foreach (var aggAlbum in _aggregatedAlbums)
             {
-                var importedTracks = _context.ImportedTracks.Where(x => x.MasterMetadataAlbumName == aggAlbum.Album.Name && x.User.Id == aggAlbum.User.Id);
+                var importedTracks = _context.ImportedTracks.Where(x => x.MasterMetadataAlbumName == aggAlbum.Album.Name && x.User.Id == aggAlbum.UserId);
 
                 var topDay = await importedTracks.GroupBy(x => x.TimeStamp.Date).Select(g => new
                 {
@@ -223,7 +222,7 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
         {
 
             // ideally ordered by date from oldest to newest
-            var albumTracks = _context.ImportedTracks.Where(x => x.MasterMetadataAlbumName == aggAlbum.Album.Name && x.User.Id == aggAlbum.User.Id).OrderBy(x => x.TimeStamp);
+            var albumTracks = _context.ImportedTracks.Where(x => x.MasterMetadataAlbumName == aggAlbum.Album.Name && x.UserId == aggAlbum.UserId).OrderBy(x => x.TimeStamp);
 
             var date = new DateTime();
             DateTime oneDateAhead = date.AddDays(1);
@@ -276,7 +275,7 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
 
         foreach (var aggAlbum in _aggregatedAlbums)
         {
-            var albumTracks = await _context.ImportedTracks.Where(x => x.MasterMetadataArtistName == aggAlbum.Album.Name && x.User.Id == aggAlbum.User.Id).OrderBy(x => x.TimeStamp).ToListAsync();
+            var albumTracks = await _context.ImportedTracks.Where(x => x.MasterMetadataArtistName == aggAlbum.Album.Name && x.UserId == aggAlbum.UserId).OrderBy(x => x.TimeStamp).ToListAsync();
 
             // we have list of tracks in order, we just have to fin dlongest date between date values.. 
             for (var i = 1; i < albumTracks.Count(); i++)

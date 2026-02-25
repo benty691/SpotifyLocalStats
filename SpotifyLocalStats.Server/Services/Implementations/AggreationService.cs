@@ -86,8 +86,6 @@ public class AggreationService : IAggregationService
                 artist.MsListened += track.MsPlayed;
                 artist.DateTimeLastListened = track.TimeStamp;
                 artist.PlayCount += 1;
-
-                _context.AggregatedArtists.Update(artist);
             }
         }
         _logger.LogInformation($"Updated {updatedCount} records");
@@ -108,7 +106,7 @@ public class AggreationService : IAggregationService
 
                 if (albumValue != null)
                 {
-                    var newAggAlbum = new AggregatedAlbum(album.Album)
+                    var newAggAlbum = new AggregatedAlbum(albumValue)
                     {
                         DateTimeFirstListened = track.TimeStamp,
                         DateTimeLastListened = track.TimeStamp,
@@ -131,8 +129,6 @@ public class AggreationService : IAggregationService
                 album.MsListened += track.MsPlayed;
                 album.DateTimeLastListened = track.TimeStamp;
                 album.PlayCount += 1;
-
-                _context.AggregatedAlbums.Update(album);
             }
         }
         _logger.LogInformation($"Updated {updatedCount} records");
@@ -154,7 +150,7 @@ public class AggreationService : IAggregationService
 
                 if (trackValueLookup != null)
                 {
-                    var newAggTrack = new AggregatedTrack(trackValue.Track)
+                    var newAggTrack = new AggregatedTrack(trackValueLookup)
                     {
                         DateTimeFirstListened = track.TimeStamp,
                         DateTimeLastListened = track.TimeStamp,
@@ -177,8 +173,6 @@ public class AggreationService : IAggregationService
                 trackValue.MsListened += track.MsPlayed;
                 trackValue.DateTimeLastListened = track.TimeStamp;
                 trackValue.PlayCount += 1;
-
-                _context.AggregatedTracks.Update(trackValue);
             }
         }
         _logger.LogInformation($"Updated {updatedCount} records");

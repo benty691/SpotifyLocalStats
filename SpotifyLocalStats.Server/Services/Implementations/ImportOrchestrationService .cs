@@ -1,7 +1,5 @@
-﻿using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
-using SpotifyLocalStats.Server.Data;
+﻿using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
-using System.Transactions;
 using WebApi.Data.DTOs;
 using WebApi.Services.Interfaces;
 
@@ -38,15 +36,18 @@ namespace WebApi.Services.Implementations
             {
                 var trackList = await _importedTrackService.HandleImport(json, user);
                 job.ProgressPercent = 10;
-                await _context.SaveChangesAsync(); 
+                _context.ImportJobStatuses.Update(job);
+                await _context.SaveChangesAsync();
 
                 var result = await _modelPopulationService.PopulateModelsFromImportedTracks(trackList);
                 job.ProgressPercent = 55;
+                _context.ImportJobStatuses.Update(job);
                 await _context.SaveChangesAsync();
 
                 await _aggreationService.UpdateAggregatedDataForUser(user, trackList);
                 job.ProgressPercent = 100;
-                await _context.SaveChangesAsync(); 
+                _context.ImportJobStatuses.Update(job);
+                await _context.SaveChangesAsync();
 
                 // return amount of records processed, few other smaller details, via a dto creation? 
                 // maybe return loading until processing is finished?
@@ -54,13 +55,13 @@ namespace WebApi.Services.Implementations
 
                 return result;
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync();
                 _logger.LogError($"Error: {ex.Message}");
                 throw;
             }
-            
+
         }
     }
 }

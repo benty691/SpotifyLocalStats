@@ -1,7 +1,6 @@
 ﻿using SpotifyLocalStats.Server.Data;
 using WebApi.Data.Jobs;
 using WebApi.Models.Jobs;
-using WebApi.Services.Implementations;
 using WebApi.Services.Interfaces;
 
 namespace WebApi.Services.Workers;
@@ -38,6 +37,8 @@ public class ImportBackgroundWorker : BackgroundService
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Import Job failed for id: {JobId}", data.JobId);
+
+                await context.Entry(importJob).ReloadAsync();
                 importJob.Status = JobStatus.Failed;
                 importJob.ErrorMessage = ex.Message;
                 await context.SaveChangesAsync();
