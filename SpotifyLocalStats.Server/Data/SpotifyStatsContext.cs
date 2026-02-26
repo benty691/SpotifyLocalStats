@@ -58,6 +58,12 @@ public class SpotifyStatsContext : DbContext
             .HasForeignKey("ArtistId")
             .OnDelete(DeleteBehavior.NoAction);
 
+        builder.Entity<ImportedTrack>()
+            .HasOne(t => t.UploadHistory)
+            .WithMany()
+            .HasForeignKey("UploadHistoryId")
+            .OnDelete(DeleteBehavior.NoAction);
+
         builder.Entity<AggregatedArtist>().ToTable("AggregatedArtists");
         builder.Entity<AggregatedAlbum>().ToTable("AggregatedAlbums");
         builder.Entity<AggregatedTrack>().ToTable("AggregatedTracks");

@@ -34,10 +34,8 @@ public class UploadHistoryService : IUploadHistoryService
                     CreatedAt = uploadHistory.CreatedAt
                 }
             );
-
         }
 
         return uploadHistoryResponse;
-
     }
 }

@@ -1,4 +1,5 @@
-﻿using SpotifyLocalStats.Server.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
 using WebApi.Data.DTOs;
 using WebApi.Services.Interfaces;
@@ -38,7 +39,7 @@ public sealed class ModelPopulationService : IModelPopulationService
             .Select(g => g.First())
             .ToList();
 
-        var artistList = _context.Artists.Local.ToDictionary(x => x.Name, x => x); // create a hashset we can lookup on for every track (O(n))
+        var artistList = _context.Artists.ToDictionary(x => x.Name, x => x); // create a hashset we can lookup on for every track (O(n))
 
         // logic to generate artist from imported track
         foreach (var track in uniqueImportedArtists)
@@ -58,7 +59,7 @@ public sealed class ModelPopulationService : IModelPopulationService
 
                 var newArtist = new Artist(track.MasterMetadataArtistName);
                 await _context.Artists.AddAsync(newArtist);
-                artistList[track.MasterMetadataArtistName] = newArtist;
+                artistList.Add(track.MasterMetadataArtistName, newArtist);
             }
             else
             {
@@ -82,8 +83,12 @@ public sealed class ModelPopulationService : IModelPopulationService
             .Select(g => g.First())
             .ToList();
 
-        var albumList = _context.Albums.Local.ToDictionary(x => x.Name, x => x); //O(n)
-        var artistList = _context.Artists.Local.ToDictionary((x => x.Name), x => x);
+        var albumList = _context.Albums.ToDictionary(x => x.Name, x => x); //O(n)
+
+        var artistFromDb = await _context.Artists.ToListAsync();
+        var artistList = _context.Artists.Local.ToList();
+
+        var combinedArtists = artistFromDb.Concat(artistList).ToDictionary(x => (x.Name), x => x);
 
         foreach (var track in uniqueAlbumList) // O(n)
         {
@@ -97,11 +102,11 @@ public sealed class ModelPopulationService : IModelPopulationService
 
             if (!albumList.ContainsKey(track.MasterMetadataAlbumName))
             {
-                if (artistList.TryGetValue(track.MasterMetadataArtistName, out var artist))
+                if (combinedArtists.TryGetValue(track.MasterMetadataArtistName, out var artist))
                 {
                     var newAlbum = new Album(track.MasterMetadataAlbumName, artist);
                     await _context.Albums.AddAsync(newAlbum);
-                    albumList[track.MasterMetadataAlbumName] = newAlbum;
+                    albumList.Add(track.MasterMetadataAlbumName, newAlbum);
                 }
                 else
                 {
@@ -125,9 +130,17 @@ public sealed class ModelPopulationService : IModelPopulationService
         var nullTrackCount = 0;
         var uniqueTrackList = tracks.GroupBy(x => x.MasterMetadataTrackName).Select(g => g.First()).ToList();
 
-        var trackList = _context.Tracks.Local.ToDictionary((x => x.Name), x => x);
-        var artistList = _context.Artists.Local.ToDictionary((x => x.Name), x => x);
-        var albumList = _context.Albums.Local.ToDictionary((x => x.Name), x => x);
+        var trackList = _context.Tracks.ToDictionary((x => x.Name), x => x);
+
+        var artistFromDb = await _context.Artists.ToListAsync();
+        var artistList = _context.Artists.Local.ToList();
+
+        var combinedArtists = artistFromDb.Concat(artistList).ToDictionary(x => (x.Name), x => x);
+
+        var albumsFromDB = await _context.Albums.ToListAsync();
+        var albumList = _context.Albums.Local.ToList();
+
+        var combinedAlbums = albumsFromDB.Concat(albumList).ToDictionary((x => x.Name), x => x);
 
         foreach (var track in uniqueTrackList)
         {
@@ -138,13 +151,13 @@ public sealed class ModelPopulationService : IModelPopulationService
 
             if (!trackList.ContainsKey(track.MasterMetadataTrackName))
             {
-                if (!artistList.TryGetValue(track.MasterMetadataArtistName, out var artist))
+                if (!combinedArtists.TryGetValue(track.MasterMetadataArtistName, out var artist))
                 {
                     _logger.LogDebug($"No artist found when attempting to create track. Skipping track create for {track.MasterMetadataTrackName} and trackId: {track.SpotifyTrackUri}. Artist Name:{track.MasterMetadataArtistName}");
 
                     continue;
                 }
-                if (!albumList.TryGetValue(track.MasterMetadataAlbumName, out var album))
+                if (!combinedAlbums.TryGetValue(track.MasterMetadataAlbumName, out var album))
                 {
                     _logger.LogDebug($"No Album found when attempting to create track. Skipping track create for {track.MasterMetadataTrackName} and trackId: {track.SpotifyTrackUri}. Album Name:{track.MasterMetadataAlbumName}");
                     continue;
@@ -152,7 +165,7 @@ public sealed class ModelPopulationService : IModelPopulationService
 
                 var newTrack = new Track(artist, album, track.MasterMetadataTrackName, track.SpotifyTrackUri);
                 await _context.Tracks.AddAsync(newTrack);
-                trackList[track.MasterMetadataTrackName] = newTrack;
+                trackList.Add(track.MasterMetadataTrackName, newTrack);
             }
             else
             {

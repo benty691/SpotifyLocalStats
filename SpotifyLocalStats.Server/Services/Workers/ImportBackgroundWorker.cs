@@ -32,7 +32,7 @@ public class ImportBackgroundWorker : BackgroundService
 
             try
             {
-                await importService.ProcessAsync(data.Json, data.User, data.JobId, stoppingToken);
+                await importService.ProcessAsync(data.Json, data.File, data.User, data.JobId, stoppingToken);
             }
             catch (Exception ex)
             {

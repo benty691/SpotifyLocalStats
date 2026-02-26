@@ -7,7 +7,7 @@ namespace WebApi.Services.Interfaces
         // essentially just want to ensure that the imported json is valid format, no null values where there shouldn't be, and then save to db
         Task<IEnumerable<ImportedTrack>> HandleImport(string json, User user, IFormFile file);
         Task<IEnumerable<ImportedTrack>> ValidateIncomingJson(string json);
-        Task<IEnumerable<ImportedTrack>> AssignUser(IEnumerable<ImportedTrack> importedTracks, User user, IFormFile file);
+        Task<IEnumerable<ImportedTrack>> AssignUserAndUpload(IEnumerable<ImportedTrack> importedTracks, User user, IFormFile file);
         Task<int> SaveTracksToDb(IEnumerable<ImportedTrack> importedTracks, User user);
 
     }

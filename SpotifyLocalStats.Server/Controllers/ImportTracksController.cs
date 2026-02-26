@@ -60,7 +60,7 @@ public class ImportTracksController : BaseApiController
             await _context.SaveChangesAsync();
 
             var jobId = job.Entity.Id;
-            await _queue.EnqueAsync(new ImportJobData { JobId = jobId, Json = json, User = user });
+            await _queue.EnqueAsync(new ImportJobData { JobId = jobId, File = file, Json = json, User = user });
 
             response.Add(
                 new ImportJobResponseDto

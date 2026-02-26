@@ -10,8 +10,8 @@ namespace WebApi.Controllers;
 public class StatsController : BaseApiController
 {
 
-    ILogger<StatsController> _logger;
-    IUserBasicStatsService _userBasicStatsService;
+    private ILogger<StatsController> _logger;
+    private IUserBasicStatsService _userBasicStatsService;
 
     public StatsController(ILogger<StatsController> logger, IUserBasicStatsService userBasicStatsService)
     {
@@ -36,7 +36,7 @@ public class StatsController : BaseApiController
         catch (Exception ex)
         {
             _logger.LogError(ex, $"Error getting user stats with id: {userId}");
-            return StatusCode((int)HttpStatusCode.InternalServerError, $"Error retireiving user stats for id: {userId}");
+            return StatusCode((int)HttpStatusCode.InternalServerError, new { Message = $"Error retireiving user stats for id: {userId}", Error = ex });
         }
     }
 

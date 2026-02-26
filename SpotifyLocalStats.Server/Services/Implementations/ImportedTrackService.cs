@@ -47,7 +47,6 @@ public class ImportedTrackService : IImportedTrackService
         var uploadHistory = new UploadHistory()
         {
             UserId = user.Id,
-            User = user,
             FileName = file.FileName,
             FileSize = file.Headers.ContentLength
         };

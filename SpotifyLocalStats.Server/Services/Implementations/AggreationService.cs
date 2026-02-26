@@ -49,7 +49,7 @@ public class AggreationService : IAggregationService
     {
         var updatedCount = 0;
         // probs dont need
-        var artistDict = _context.Artists.ToDictionary(x => x.Name, x => x);
+        var artistDict = _context.Artists.ToList().ToDictionary(x => x.Name, x => x);
         var aggArtistDict = _context.AggregatedArtists.Where(x => x.UserId == user.Id).Include(x => x.Artist).ToDictionary(x => x.Artist.Name, x => x);
 
         // for each track that was upl;aoded, we must check that trackj for the artist, if artist stats exist, increase count on things, esle create new agg stats 

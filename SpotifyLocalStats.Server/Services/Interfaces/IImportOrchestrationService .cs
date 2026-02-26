@@ -5,7 +5,7 @@ namespace WebApi.Services.Interfaces
 {
     public interface IImportOrchestrationService
     {
-        Task ProcessAsync(string jsonData, User user, Guid jobId, CancellationToken cancellationToken);
+        Task ProcessAsync(string jsonData, IFormFile file, User user, Guid jobId, CancellationToken cancellationToken);
         //Task<ImportTracksDTO> Orchestrate(string jsonData, User user, Guid jobId, CancellationToken cancellationToken);
         /*
         Task <IEnumerable<ImportedTrack>> ImportTracks(string json, User user); // or return number of records imported?

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SpotifyLocalStats.Server.Data;
 
@@ -11,9 +12,11 @@ using SpotifyLocalStats.Server.Data;
 namespace WebApi.Migrations
 {
     [DbContext(typeof(SpotifyStatsContext))]
-    partial class SpotifyStatsContextModelSnapshot : ModelSnapshot
+    [Migration("20260226103717_CreateUploadHistory")]
+    partial class CreateUploadHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
