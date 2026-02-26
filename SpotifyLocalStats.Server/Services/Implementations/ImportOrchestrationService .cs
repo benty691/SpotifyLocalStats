@@ -22,19 +22,19 @@ namespace WebApi.Services.Implementations
             _context = context;
         }
 
-        public async Task ProcessAsync(string json, User user, Guid jobId, CancellationToken cancellationToken)
+        public async Task ProcessAsync(Stream stream, User user, Guid jobId, CancellationToken cancellationToken)
         {
-            await Orchestrate(json, user, jobId, cancellationToken);
+            await Orchestrate(stream, user, jobId, cancellationToken);
         }
 
-        private async Task<ImportTracksDTO> Orchestrate(string json, User user, Guid jobId, CancellationToken cancellationToken)
+        private async Task<ImportTracksDTO> Orchestrate(Stream stream, User user, Guid jobId, CancellationToken cancellationToken)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
             var job = _context.ImportJobStatuses.Find(jobId);
 
             try
             {
-                var trackList = await _importedTrackService.HandleImport(json, user);
+                var trackList = await _importedTrackService.HandleImport(stream, user);
                 job.ProgressPercent = 10;
                 _context.ImportJobStatuses.Update(job);
                 await _context.SaveChangesAsync();

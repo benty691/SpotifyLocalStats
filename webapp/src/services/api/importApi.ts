@@ -1,9 +1,9 @@
 import { apiClient } from "./apiClient";
-import type { ImportTracksDto } from "../../types/ImportTrackDto";
-import type { ImportJobStatusDto } from "../../types/ImportJobStatusDto";
+import type { ImportTracksDto } from "../../types/DTOs/ImportTrackDto";
+import type { ImportJobStatusDto } from "../../types/DTOs/ImportJobStatusDto";
 import type { Guid } from "guid-typescript";
 import type { Axios, AxiosResponse } from "axios";
-import type { ImportJobResponseDto } from "../../types/ImportJobResponseDto";
+import type { ImportJobResponseDto } from "../../types/DTOs/ImportJobResponseDto";
 
 export const importApi = {
   uploadTrack: async (

@@ -1,31 +1,26 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SpotifyLocalStats.Server.Data;
+﻿using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
-
-using System;
-using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-
+using WebApi.Models;
 using WebApi.Services.Interfaces;
 
 
 public class ImportedTrackService : IImportedTrackService
 {
-	private readonly SpotifyStatsContext _spotifyStatsContext;
-	private readonly ILogger _logger;
+    private readonly SpotifyStatsContext _spotifyStatsContext;
+    private readonly ILogger _logger;
 
     public ImportedTrackService(SpotifyStatsContext ctx, ILogger<ImportedTrackService> logger)
-	{
-		_spotifyStatsContext = ctx;
-		_logger = logger;
+    {
+        _spotifyStatsContext = ctx;
+        _logger = logger;
     }
 
-    public async Task<IEnumerable<ImportedTrack>> HandleImport(string json, User user)
+    public async Task<IEnumerable<ImportedTrack>> HandleImport(string json, User user, IFormFile file)
     {
         var trackList = await ValidateIncomingJson(json);
-        var updatedTrackList = AssignUser(trackList, user);
+        var updatedTrackList = await AssignUserAndUpload(trackList, user, file);
         await SaveTracksToDb(updatedTrackList, user);
 
         return updatedTrackList;
@@ -46,12 +41,24 @@ public class ImportedTrackService : IImportedTrackService
         return importedTracks;
     }
 
-    public IEnumerable<ImportedTrack> AssignUser(IEnumerable<ImportedTrack> importedTracks, User user) // user will come from controller
+    public async Task<IEnumerable<ImportedTrack>> AssignUserAndUpload(IEnumerable<ImportedTrack> importedTracks, User user, IFormFile file) // user will come from controller
     {
         // we might want the user to sign in? or generate user for person on startup, so we have the user, can assign, rather than needing to generate on import?
+        var uploadHistory = new UploadHistory()
+        {
+            UserId = user.Id,
+            User = user,
+            FileName = file.FileName,
+            FileSize = file.Headers.ContentLength
+        };
+
+        await _spotifyStatsContext.UploadHistories.AddAsync(uploadHistory);
+
+
         foreach (var track in importedTracks)
         {
-            track.UserId = user.Id; 
+            track.UserId = user.Id;
+            track.UploadHistoryId = uploadHistory.Id;
         }
 
         return importedTracks;
@@ -63,7 +70,7 @@ public class ImportedTrackService : IImportedTrackService
         // De-duplicate incoming trackList
         var uniqueImportedTracks = importedTracks
             .GroupBy(t => new { t.TimeStamp, t.SpotifyTrackUri })
-            .Select(g => g.First()) 
+            .Select(g => g.First())
             .ToList();
 
         var duplicatesInImport = importedTracks.Count() - uniqueImportedTracks.Count;

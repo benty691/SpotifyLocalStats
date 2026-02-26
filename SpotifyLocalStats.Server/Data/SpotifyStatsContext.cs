@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SpotifyLocalStats.Server.Models;
-using System.Reflection;
-using System.Reflection.Emit;
 using WebApi.Models;
 using WebApi.Models.Jobs;
 
@@ -9,7 +7,7 @@ namespace SpotifyLocalStats.Server.Data;
 
 public class SpotifyStatsContext : DbContext
 {
-    public SpotifyStatsContext(DbContextOptions<SpotifyStatsContext> options) : base(options) {}
+    public SpotifyStatsContext(DbContextOptions<SpotifyStatsContext> options) : base(options) { }
 
     public DbSet<User> Users { get; set; }
     public DbSet<ImportedTrack> ImportedTracks { get; set; }
@@ -23,6 +21,7 @@ public class SpotifyStatsContext : DbContext
     public DbSet<TimeOfDayStat<AggregatedTrack>> TrackTimeOfDaysStats { get; set; }
     public DbSet<TimeOfDayStat<AggregatedAlbum>> AlbumTimeOfDaysStats { get; set; }
     public DbSet<ImportJobStatus> ImportJobStatuses { get; set; }
+    public DbSet<UploadHistory> UploadHistories { get; set; }
 
     //public DbSet<CopyrightContent> CopyrightContents { get; set; }
     //public DbSet<Image> Images { get; set; }
@@ -43,20 +42,20 @@ public class SpotifyStatsContext : DbContext
 
         builder.Entity<Album>()
             .HasOne(a => a.Artist)
-            .WithMany(a => a.Albums)  
+            .WithMany(a => a.Albums)
             .HasForeignKey("ArtistId")
             .OnDelete(DeleteBehavior.NoAction);
 
         builder.Entity<Track>()
             .HasOne(t => t.Album)
             .WithMany(a => a.Tracks)
-            .HasForeignKey("AlbumId")  
+            .HasForeignKey("AlbumId")
             .OnDelete(DeleteBehavior.NoAction);
 
         builder.Entity<Track>()
             .HasOne(t => t.Artist)
             .WithMany()
-            .HasForeignKey("ArtistId")  
+            .HasForeignKey("ArtistId")
             .OnDelete(DeleteBehavior.NoAction);
 
         builder.Entity<AggregatedArtist>().ToTable("AggregatedArtists");

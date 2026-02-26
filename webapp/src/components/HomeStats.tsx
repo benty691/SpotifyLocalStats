@@ -8,7 +8,7 @@ import Welcome from "./HomeComponents/Welcome";
 import type { ApiError } from "../types/ApiError";
 import type { UserSpotifyStats } from "../types/UserSpotifyStats";
 import { userApi } from "../services/api/userApi";
-import { Navigate, type ErrorResponse } from "react-router-dom";
+import { Link, Navigate, type ErrorResponse } from "react-router-dom";
 import type { AxiosError } from "axios";
 import { userStatsApi } from "../services/api/userStatsApi";
 
@@ -70,38 +70,55 @@ function HomeStats() {
 
   return (
     <>
-      <div className='flex flex-col items-center justify-center min-h-screen gap-12 bg-surface'>
-        <div className='self-center m-4 p4'>
-          <Welcome />
-          {loading ? (
-            <div>Loading...</div>
-          ) : spotifyReturnStatusCode && spotifyReturnStatusCode >= 300 ? (
-            <div className='error-grid'>
-              <p>Error loading User Stats {spotifyReturnStatusCode}</p>
-            </div>
-          ) : userSpotifyStats ? (
-            <div className='flex gap-10'>
-              <StatsCard
-                statNumber={userSpotifyStats.trackCount}
-                statName='Tracks'
-              />
-              <StatsCard
-                statNumber={userSpotifyStats.albumCount}
-                statName='Albums'
-              />
-              <StatsCard
-                statNumber={userSpotifyStats.artistCount}
-                statName='Artists'
-              />
-            </div>
-          ) : (
-            <div>
-              <p className='text-text-secondary text-center mb-4'>
-                You have no streaming history uploaded. Please upload this below
-              </p>
-              <UploadFiles />
-            </div>
-          )}
+      <div className='relative flex h-[calc(100svh-4rem)] w-full flex-col justify-between'>
+        <div className='flex h-full w-full flex-col justify-center'>
+          <div className='duration-short ease-curve-a flex flex-col items-center justify-center opacity-100 transition-opacity'>
+            <Welcome />
+            {loading ? (
+              <div>Loading...</div>
+            ) : spotifyReturnStatusCode && spotifyReturnStatusCode >= 300 ? (
+              <div className='error-grid'>
+                <p>Error loading User Stats {spotifyReturnStatusCode}</p>
+              </div>
+            ) : userSpotifyStats ? (
+              <div>
+                <div className='flex gap-5 w-full max-w-3xl'>
+                  <StatsCard
+                    statNumber={userSpotifyStats.trackCount}
+                    statName='Tracks'
+                  />
+                  <StatsCard
+                    statNumber={userSpotifyStats.albumCount}
+                    statName='Albums'
+                  />
+                  <StatsCard
+                    statNumber={userSpotifyStats.artistCount}
+                    statName='Artists'
+                  />
+                </div>
+                <div>
+                  <h3>
+                    To increase these numbers, please{" "}
+                    <Link
+                      to={"/upload"}
+                      className='text-accent-cyan font-medium'
+                    >
+                      upload
+                    </Link>{" "}
+                    more streaming history data, if available.
+                  </h3>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <p className='text-text-secondary text-center mb-4'>
+                  You have no streaming history uploaded. Please upload this
+                  below
+                </p>
+                <UploadFiles />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </>

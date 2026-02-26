@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using WebApi.Models;
 
 namespace SpotifyLocalStats.Server.Models;
 
@@ -45,6 +46,9 @@ public class ImportedTrack
     // FK to user
     public User User { get; set; } = null!;
     public Guid UserId { get; set; }
+    public UploadHistory UploadHistory { get; set; }
+    public Guid UploadHistoryId { get; set; }
+
     [JsonPropertyName("ts")]
     public required DateTime TimeStamp { get; set; } // thbis is actually a string in the json, but we need to convert to dt somehow? 
     [JsonPropertyName("platform")]

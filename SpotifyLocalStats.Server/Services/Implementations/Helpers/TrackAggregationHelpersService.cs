@@ -12,6 +12,8 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
     private readonly SpotifyStatsContext _context;
     private List<AggregatedTrack> _aggregatedTracks = new List<AggregatedTrack>();
 
+    private string DEFAULT_DATE = "0001-01-01 00:00:00";
+
     // really thinking this can be a helper class, where we pass in the aggergate we want to calc for, instead of having three separte aggreggate helpers that do pretty muhc smae thing? 
     public TrackAggregationHelpersService(ILogger<TrackAggregationHelpersService> logger, SpotifyStatsContext context)
     {
@@ -25,13 +27,19 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
 
     private async Task<List<AggregatedTrack>> GetAggregatedTracks()
     {
-        return await _context.AggregatedTracks.ToListAsync();
+        var aggTracks = await _context.AggregatedTracks.ToListAsync();
+
+        if (!aggTracks.Any())
+        {
+            throw new InvalidOperationException("No aggregated tracks found.");
+        }
+        return aggTracks;
     }
 
     public async Task RunCalculations()
     {
         await InitializeAggregatedTracksAsync();
-        CalculateLongestStreak();
+        await CalculateLongestStreak();
         await CalculateDrySpell();
         await CalculateMostTimesIn24Hours();
         await CalculateTopListeningDate();
@@ -71,10 +79,8 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
 
     private async Task CalculateMostTimesIn24Hours()
     {
-        // have to determine if I want set 24 hours at 0000-2400 or rolling 24 hours (leaning rolling)
         var playsIn24Hours = 0;
 
-        //int timesListend24Hours = 0;
 
         if (_aggregatedTracks.Count == 0)
         {
@@ -83,11 +89,8 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
 
         foreach (var aggTrack in _aggregatedTracks)
         {
-            // need to get the max number of plays in any 24 hour period for this artist
-            // set time frame from track time, then search 24 hours back, count numbver of times artist appears
-
             var tracksOfTracks = await _context.ImportedTracks
-                 .Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.UserId == aggTrack.UserId).ToListAsync();
+                 .Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.UserId == aggTrack.UserId).OrderBy(x => x.TimeStamp).ToListAsync();
 
             foreach (var track in tracksOfTracks)
             {
@@ -158,7 +161,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
     }
 
     // probably should get longest streak date start and end here. 
-    private void CalculateLongestStreak()
+    private async Task CalculateLongestStreak()
     {
         // goal here is find the most amount of days in a row the artist was listened to
         var longestStreak = 0;
@@ -166,41 +169,41 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
 
         var longestStreakEndDate = new DateTime();
 
-        if (_aggregatedTracks.Count == 0)
+        foreach (var aggTrack in _aggregatedTracks) //O(n)
         {
-            throw new InvalidOperationException("No aggregated artists found.");
-        }
-
-        foreach (var aggTrack in _aggregatedTracks)
-        {
-
-            // ideally ordered by date from oldest to newest
-            var tracks = _context.ImportedTracks.Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.User.Id == aggTrack.User.Id).OrderBy(x => x.TimeStamp);
+            var artistTracks = await _context.ImportedTracks.Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.UserId == aggTrack.UserId).OrderBy(x => x.TimeStamp).ToListAsync(); // O(n) 
 
             var date = new DateTime();
             DateTime oneDateAhead = date.AddDays(1);
 
-            foreach (var artistTrack in tracks)
+            foreach (var artistTrack in artistTracks) //O(n)
             {
-                if (date.Date == DateTime.Parse("0001-01-01 00:00:00")) // ?? default date
+                //first iteration, using defauilt date as check
+                if (date.Date == DateTime.Parse(DEFAULT_DATE)) // ?? default date
                 {
                     tempStreak = longestStreak++;
 
                     date = artistTrack.TimeStamp;
-                    oneDateAhead = date.Date.AddDays(1);
+                    oneDateAhead = date.AddDays(1);
+
+                    if (artistTracks.Count == 1)
+                    {
+                        longestStreakEndDate = date;
+                    }
                     continue;
                 }
-                else if (date == artistTrack.TimeStamp)
+                else if (date.Date == artistTrack.TimeStamp.Date)
                 {
-                    // same day, we just move onto next track
+                    longestStreakEndDate = artistTrack.TimeStamp.Date;
                     continue;
                 }
-                else if (date == oneDateAhead)
+                else if (oneDateAhead.Date == artistTrack.TimeStamp.Date)
                 {
                     tempStreak++;
                     if (tempStreak > longestStreak)
                     {
                         longestStreak = tempStreak;
+                        longestStreakEndDate = date;
                     }
 
                     date = artistTrack.TimeStamp;
@@ -208,11 +211,16 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
                 }
                 else
                 {
-                    longestStreakEndDate = date;
+                    if (tempStreak > longestStreak)
+                    {
+                        longestStreak = tempStreak;
+                        longestStreakEndDate = date;
+                    }
                     tempStreak = 0;
+
+                    date = new DateTime();
                 }
             }
-            // hopefully works
             aggTrack.LongestStreakDays = longestStreak;
             aggTrack.LongestStreakEndDate = longestStreakEndDate;
             aggTrack.LongestStreakStartDate = longestStreakEndDate.AddDays(-longestStreak);
@@ -221,27 +229,33 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
 
     private async Task CalculateDrySpell()
     {
-        var dryStreak = 0;
-        var dryStreakStartDate = new DateTime();
-        var dryStreakEndDate = new DateTime();
-
         foreach (var aggTrack in _aggregatedTracks)
         {
-            var tracks = await _context.ImportedTracks.Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.User.Id == aggTrack.User.Id).OrderBy(x => x.TimeStamp).ToListAsync();
+            var drySpellStartDate = new DateTime();
+            var dryStreakEndDate = new DateTime();
+            var drySpell = 0;
 
-            // we have list of tracks in order, we just have to fin dlongest date between date values.. 
-            for (var i = 1; i < tracks.Count(); i++)
+            var artistTracks = await _context.ImportedTracks.Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.UserId == aggTrack.UserId).OrderBy(x => x.TimeStamp).ToListAsync();
+
+            for (var i = 0; i < artistTracks.Count; i++)
             {
-                if (dryStreak < (tracks[i].TimeStamp.Date - tracks[i - 1].TimeStamp.Date).Days)
+                if (i == 0)
                 {
-                    dryStreak = (tracks[i].TimeStamp.Date - tracks[i - 1].TimeStamp.Date).Days;
-                    dryStreakStartDate = tracks[i].TimeStamp.Date;
-                    dryStreakEndDate = tracks[i - 1].TimeStamp.Date;
+                    drySpellStartDate = artistTracks[i].TimeStamp.Date;
+                    dryStreakEndDate = artistTracks[i].TimeStamp.Date;
+                    continue;
+                }
+
+                if (drySpell < (artistTracks[i].TimeStamp.Date - artistTracks[i - 1].TimeStamp.Date).Days)
+                {
+                    drySpell = (artistTracks[i].TimeStamp.Date - artistTracks[i - 1].TimeStamp.Date).Days;
+                    drySpellStartDate = artistTracks[i - 1].TimeStamp.Date;
+                    dryStreakEndDate = artistTracks[i].TimeStamp.Date;
                 }
             }
             aggTrack.LongestDrySpellEnd = dryStreakEndDate;
-            aggTrack.LongestDrySpellStart = dryStreakStartDate;
-            aggTrack.LongestDrySpell = dryStreak;
+            aggTrack.LongestDrySpellStart = drySpellStartDate;
+            aggTrack.LongestDrySpell = drySpell;
         }
     }
 }
