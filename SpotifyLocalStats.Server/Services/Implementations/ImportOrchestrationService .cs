@@ -36,17 +36,16 @@ namespace WebApi.Services.Implementations
             {
                 var trackList = await _importedTrackService.HandleImport(json, user, file);
                 job.ProgressPercent = 10;
-                _context.ImportJobStatuses.Update(job);
                 await _context.SaveChangesAsync();
 
                 var result = await _modelPopulationService.PopulateModelsFromImportedTracks(trackList);
                 job.ProgressPercent = 55;
-                _context.ImportJobStatuses.Update(job);
                 await _context.SaveChangesAsync();
 
                 await _aggreationService.UpdateAggregatedDataForUser(user, trackList);
                 job.ProgressPercent = 100;
-                _context.ImportJobStatuses.Update(job);
+                job.Status = Models.Jobs.JobStatus.Completed;
+                job.CompletedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
 
                 // return amount of records processed, few other smaller details, via a dto creation? 

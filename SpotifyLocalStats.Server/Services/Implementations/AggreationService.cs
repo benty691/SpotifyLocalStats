@@ -55,6 +55,12 @@ public class AggreationService : IAggregationService
         // for each track that was upl;aoded, we must check that trackj for the artist, if artist stats exist, increase count on things, esle create new agg stats 
         foreach (var track in tracks) // o(n)
         {
+            if (track.MasterMetadataArtistName == null)
+            {
+                throw new ArgumentException($"This is null somehow: {track.MasterMetadataTrackName}, {track.MasterMetadataAlbumName}, track id: {track.Id}");
+
+            }
+
             if (!aggArtistDict.TryGetValue(track.MasterMetadataArtistName, out var artist))
             {
                 var artistValue = artistDict.GetValueOrDefault(track.MasterMetadataArtistName);
@@ -72,6 +78,10 @@ public class AggreationService : IAggregationService
                         MsListened = track.MsPlayed,
                     };
 
+                    if (newAggArtist.Artist.Name == null)
+                    {
+                        throw new ArgumentException($"This is null somehow: {newAggArtist.Artist}, artist id: {newAggArtist.Artist.Id}");
+                    }
                     await _context.AggregatedArtists.AddAsync(newAggArtist);
                     aggArtistDict.Add(newAggArtist.Artist.Name, newAggArtist);
                 }

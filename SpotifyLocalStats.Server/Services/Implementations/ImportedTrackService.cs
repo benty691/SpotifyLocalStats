@@ -38,7 +38,12 @@ public class ImportedTrackService : IImportedTrackService
             throw new ArgumentNullException(nameof(importedTracks));
         }
 
-        return importedTracks;
+        importedTracks.Where(x => x.MasterMetadataArtistName != null && x.MasterMetadataArtistName != string.Empty).ToList();
+
+        // removes null data from the beginning.
+        return importedTracks
+            .Where(x => x.MasterMetadataArtistName != null && x.MasterMetadataArtistName != string.Empty && x.MasterMetadataAlbumName != null && x.MasterMetadataAlbumName != string.Empty && x.MasterMetadataTrackName != null && x.MasterMetadataTrackName != string.Empty)
+            .ToList();
     }
 
     public async Task<IEnumerable<ImportedTrack>> AssignUserAndUpload(IEnumerable<ImportedTrack> importedTracks, User user, IFormFile file) // user will come from controller

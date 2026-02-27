@@ -81,7 +81,6 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
     {
         var playsIn24Hours = 0;
 
-
         if (_aggregatedTracks.Count == 0)
         {
             throw new InvalidOperationException("No aggregated artists found.");
@@ -129,6 +128,8 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
                 .Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.UserId == aggTrack.UserId)
                 .ToListAsync();
 
+            var timeOfDayStatsForUser = await _context.TrackTimeOfDaysStats.Where(x => x.Aggregate.UserId == aggTrack.UserId && x.Aggregate.Id == aggTrack.Id).ToListAsync();
+
             // not sure if this will workl, as we need to span from 0000-1000 etc etc, if in this range, increment count
             // need to get old stats, then update them with new, or make old obselete, or somehting?? 
             // create new for now, but we need to delete all old after we get new... 
@@ -137,7 +138,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
             foreach (var track in artistTracks)
             {
                 // dont create a new one eveyrtime, just increase count by 1 if it exists, if nt create it
-                var timeOfDayStatsForUser = await _context.TrackTimeOfDaysStats.Where(x => x.Aggregate.UserId == track.UserId).ToListAsync();
+
 
                 if (timeOfDayStatsForUser.Count != 0)
                 {
@@ -164,7 +165,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
     private async Task CalculateLongestStreak()
     {
         // goal here is find the most amount of days in a row the artist was listened to
-        var longestStreak = 0;
+        var longestStreak = 1;
         var tempStreak = 0;
 
         var longestStreakEndDate = new DateTime();
@@ -181,7 +182,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
                 //first iteration, using defauilt date as check
                 if (date.Date == DateTime.Parse(DEFAULT_DATE)) // ?? default date
                 {
-                    tempStreak = longestStreak++;
+                    tempStreak = longestStreak;
 
                     date = artistTrack.TimeStamp;
                     oneDateAhead = date.AddDays(1);

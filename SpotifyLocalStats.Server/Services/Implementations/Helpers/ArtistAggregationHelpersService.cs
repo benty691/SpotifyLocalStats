@@ -127,7 +127,7 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
                 .Where(x => x.MasterMetadataArtistName == aggArtist.Artist.Name && x.UserId == aggArtist.UserId)
                 .ToListAsync();
 
-            var timeOfDayStatsForUser = _context.ArtistTimeOfDaysStats.Where(x => x.Aggregate.UserId == aggArtist.UserId).ToDictionary(x => x.TimeOfDay);
+            var timeOfDayStatsForUser = _context.ArtistTimeOfDaysStats.Where(x => x.Aggregate.Id == aggArtist.Id && aggArtist.UserId == x.Aggregate.UserId).ToDictionary(x => x.TimeOfDay, x => x);
 
             foreach (var track in artistTracks)
             {
@@ -170,7 +170,7 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
     private async Task CalculateLongestStreak()
     {
         // goal here is find the most amount of days in a row the artist was listened to
-        var longestStreak = 0;
+        var longestStreak = 1;
         var tempStreak = 0;
 
         var longestStreakEndDate = new DateTime();
@@ -190,7 +190,7 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
                 if (date.Date == DateTime.Parse(DEFAULT_DATE)) // ?? default date
                 {
                     // set temp streak to longeststreak +1 (= 1) 
-                    tempStreak = longestStreak++;
+                    tempStreak = longestStreak;
 
                     // setting date to the time we first listened to this track 
                     date = artistTrack.TimeStamp;

@@ -102,7 +102,7 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
                 .Where(x => x.MasterMetadataAlbumName == aggAlbum.Album.Name && x.UserId == aggAlbum.UserId)
                 .ToListAsync();
 
-            var timeOfDayStatsForUser = _context.AlbumTimeOfDaysStats.Where(x => x.Aggregate.UserId == aggAlbum.UserId).ToDictionary(x => x.TimeOfDay);
+            var timeOfDayStatsForUser = _context.AlbumTimeOfDaysStats.Where(x => x.Aggregate.UserId == aggAlbum.UserId && x.Aggregate.Id == aggAlbum.Id).ToDictionary(x => x.TimeOfDay);
 
             foreach (var albumTrack in albumTracks)
             {
@@ -128,7 +128,7 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
 
     private async Task CalculateLongestStreak()
     {
-        var longestStreak = 0;
+        var longestStreak = 1;
         var tempStreak = 0;
 
         var longestStreakEndDate = new DateTime();
@@ -145,7 +145,7 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
                 //first iteration, using defauilt date as check
                 if (date.Date == DateTime.Parse(DEFAULT_DATE)) // ?? default date
                 {
-                    tempStreak = longestStreak++;
+                    tempStreak = longestStreak;
 
                     // setting date to the time we first listened to this track 
                     date = albumTrack.TimeStamp;
