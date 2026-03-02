@@ -20,11 +20,27 @@ public class UserAggregateArtistService : IUserAggregateArtistService
 
     public async Task<List<AggregateArtistDto>> GetAggregateArtists(User user)
     {
-        var aggregateArtists = await _context.AggregatedArtists.Where(x => x.UserId == user.Id).Include(x => x.Artist).OrderByDescending(x => x.PlayCount).ToListAsync();
+        var aggregateArtists = await _context.AggregatedArtists
+            .Where(x => x.UserId == user.Id)
+            .Include(x => x.Artist)
+            .Include(x => x.TimeOfDayStats)
+            .OrderByDescending(x => x.PlayCount)
+            .ToListAsync();
+
         var returnList = new List<AggregateArtistDto>();
 
         foreach (var aggregateArtist in aggregateArtists)
         {
+            var aggArtistTimeOfDay = aggregateArtist.TimeOfDayStats
+                .Select(timeOfDayStat => new TimeOfDayStatDto<AggregatedArtist>()
+                {
+                    AggregateId = aggregateArtist.Id,
+                    LastUpdatedAt = timeOfDayStat.LastUpdatedAt,
+                    PlayCount = timeOfDayStat.PlayCount,
+                    TimeOfDay = timeOfDayStat.TimeOfDay
+                })
+                .ToList();
+
             var newAggArtistRes = new AggregateArtistDto()
             {
                 FirstListened = aggregateArtist.DateTimeFirstListened,
@@ -40,6 +56,7 @@ public class UserAggregateArtistService : IUserAggregateArtistService
                 Name = aggregateArtist.Artist.Name,
                 PlayCount = aggregateArtist.PlayCount,
                 TopListeningDate = aggregateArtist.TopListeningDate,
+                TimeOfDayStats = aggArtistTimeOfDay
             };
 
             returnList.Add(newAggArtistRes);

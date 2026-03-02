@@ -38,6 +38,7 @@ public static class Dependencies
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IUserBasicStatsService, UserBasicStatsService>();
         services.AddScoped<IUserAggregateArtistService, UserAggregateArtistService>();
+        services.AddScoped<IUploadHistoryService, UploadHistoryService>();
         services.AddSingleton<ImportJobQueue>();
         services.AddHostedService<ImportBackgroundWorker>();
 

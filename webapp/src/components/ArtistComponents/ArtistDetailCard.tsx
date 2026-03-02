@@ -1,5 +1,6 @@
 import type { AggregateArtistDto } from "../../types/DTOs/AggregateArtistDto";
 import { format, formatDuration } from "../Helpers/ArtistFormatHelper";
+import TimeOfDayStats from "../TimeOfDayStats";
 
 function ArtistDetailCard({
   aggregateArtist,
@@ -39,16 +40,17 @@ function ArtistDetailCard({
 
         {/* Body — 2-col on md+, stacked on mobile */}
         <div className='grid grid-cols-1 md:grid-cols-[2fr_3fr]'>
-
-          {/* Left col — name + key metrics */}
-          <div className='flex flex-col justify-between gap-6 p-8 border-b md:border-b-0 md:border-r border-border'>
+          {/* Left col — name, donut chart, key metrics */}
+          <div className='flex flex-col gap-5 p-8 border-b md:border-b-0 md:border-r border-border'>
             <h1 className='text-5xl md:text-6xl font-black tracking-tighter leading-[0.88] text-text-primary uppercase break-words'>
               {aggregateArtist.name}
             </h1>
 
+            <TimeOfDayStats stats={aggregateArtist.timeOfDayStats} />
+
             <div className='grid grid-cols-3 gap-3'>
-              <div className='rounded-2xl bg-surface border border-border p-4 flex flex-col gap-2'>
-                <p className='text-2xl font-black text-text-primary tabular-nums leading-none'>
+              <div className='rounded-2xl bg-surface border border-border p-5 flex flex-col justify-between'>
+                <p className='text-3xl font-black text-text-primary tabular-nums leading-none'>
                   {aggregateArtist.playCount.toLocaleString()}
                 </p>
                 <p className='text-[10px] text-text-tertiary uppercase tracking-widest font-semibold'>
@@ -56,8 +58,8 @@ function ArtistDetailCard({
                 </p>
               </div>
 
-              <div className='rounded-2xl bg-surface border border-border p-4 flex flex-col gap-2'>
-                <p className='text-2xl font-black text-text-primary tabular-nums leading-none'>
+              <div className='rounded-2xl bg-surface border border-border p-5 flex flex-col justify-between'>
+                <p className='text-3xl font-black text-text-primary tabular-nums leading-none'>
                   {formatDuration(aggregateArtist.minsListened)}
                 </p>
                 <p className='text-[10px] text-text-tertiary uppercase tracking-widest font-semibold'>
@@ -65,8 +67,8 @@ function ArtistDetailCard({
                 </p>
               </div>
 
-              <div className='rounded-2xl bg-surface border border-border p-4 flex flex-col gap-2'>
-                <p className='text-2xl font-black text-text-primary tabular-nums leading-none'>
+              <div className='rounded-2xl bg-surface border border-border p-5 flex flex-col justify-between'>
+                <p className='text-3xl font-black text-text-primary tabular-nums leading-none'>
                   ×{aggregateArtist.mostTimesIn24Hours}
                 </p>
                 <p className='text-[10px] text-text-tertiary uppercase tracking-widest font-semibold'>
@@ -78,7 +80,6 @@ function ArtistDetailCard({
 
           {/* Right col — journey, streak, peak day */}
           <div className='p-8 flex flex-col gap-5'>
-
             {/* Listening journey timeline */}
             <div>
               <p className='text-[10px] font-bold text-text-tertiary uppercase tracking-[0.2em] mb-3'>
@@ -165,7 +166,6 @@ function ArtistDetailCard({
                 <div className='w-2.5 h-2.5 rounded-full bg-accent-cyan/40' />
               </div>
             </div>
-
           </div>
         </div>
       </div>

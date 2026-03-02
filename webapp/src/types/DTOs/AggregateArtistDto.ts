@@ -1,3 +1,5 @@
+import type { TimeOfDayStatDto } from "./TimeOfDayDtos";
+
 export type AggregateArtistDto = {
   name: string;
   playCount: number;
@@ -12,4 +14,5 @@ export type AggregateArtistDto = {
   longestDrySpellStart: Date;
   longestDrySpellEnd: Date;
   mostTimesIn24Hours: number;
+  timeOfDayStats: TimeOfDayStatDto<AggregateArtistDto>[];
 };

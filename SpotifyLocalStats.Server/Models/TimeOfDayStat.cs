@@ -1,11 +1,8 @@
-﻿using SpotifyLocalStats.Server.Models;
-using System.ComponentModel.DataAnnotations;
-
-namespace WebApi.Models
+﻿namespace WebApi.Models
 {
     public class TimeOfDayStat<T> where T : class
     {
-        public TimeOfDayStat(Guid aggregateId, int timeOfDay, int playCount) 
+        public TimeOfDayStat(Guid aggregateId, int timeOfDay, int playCount)
         {
             Id = new Guid();
             AggregateId = aggregateId;

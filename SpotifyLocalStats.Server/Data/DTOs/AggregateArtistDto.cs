@@ -1,4 +1,6 @@
-﻿namespace WebApi.Data.DTOs;
+﻿using SpotifyLocalStats.Server.Models;
+
+namespace WebApi.Data.DTOs;
 
 public class AggregateArtistDto
 {
@@ -15,4 +17,5 @@ public class AggregateArtistDto
     public DateTime LongestDrySpellStart { get; set; }
     public DateTime LongestDrySpellEnd { get; set; }
     public int MostTimesIn24Hours { get; set; }
+    public List<TimeOfDayStatDto<AggregatedArtist>> TimeOfDayStats { get; set; }
 }

@@ -8,7 +8,7 @@ function UploadHistoryCard({
   return (
     <>
       <div className='flex '>
-        <p>{uploadHistory.createdAt.getDate()}</p>
+        <p>{new Date(uploadHistory.createdAt).toLocaleDateString()}</p>
         <p>{uploadHistory.fileName}</p>
         <p>{uploadHistory.importedTrackCount}</p>
       </div>

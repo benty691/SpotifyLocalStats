@@ -44,7 +44,6 @@ public class AggregateArtistController : BaseApiController
             var aggArtists = await _userAggregateArtistService.GetAggregateArtists(user);
 
             return aggArtists == null ? StatusCode((int)HttpStatusCode.NotFound, $"User Aggregate Artist Stats not found for userId: {userId}") : Ok(aggArtists);
-
         }
         catch (ArgumentException ex)
         {
