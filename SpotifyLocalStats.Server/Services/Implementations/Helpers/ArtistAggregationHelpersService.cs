@@ -170,16 +170,14 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
     private async Task CalculateLongestStreak()
     {
         // goal here is find the most amount of days in a row the artist was listened to
-        var longestStreak = 1;
-        var tempStreak = 0;
-
-        var longestStreakEndDate = new DateTime();
-
         foreach (var aggArtist in _aggregateArtists) //O(n)
         {
+            var longestStreak = 1;
+            var tempStreak = 0;
+            var longestStreakEndDate = new DateTime();
 
             // ideally ordered by date from oldest to newest
-            var artistTracks = await _context.ImportedTracks.Where(x => x.MasterMetadataArtistName == aggArtist.Artist.Name && x.UserId == aggArtist.UserId).OrderBy(x => x.TimeStamp).ToListAsync(); // O(n) 
+            var artistTracks = await _context.ImportedTracks.Where(x => x.MasterMetadataArtistName == aggArtist.Artist.Name && x.UserId == aggArtist.UserId).OrderBy(x => x.TimeStamp).ToListAsync(); // O(n)
 
             var date = new DateTime();
             DateTime oneDateAhead = date.AddDays(1);
@@ -196,10 +194,8 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
                     date = artistTrack.TimeStamp;
                     oneDateAhead = date.AddDays(1);
 
-                    if (artistTracks.Count == 1)
-                    {
-                        longestStreakEndDate = date;
-                    }
+
+                    longestStreakEndDate = date;
                     continue;
                 }
                 else if (date.Date == artistTrack.TimeStamp.Date)

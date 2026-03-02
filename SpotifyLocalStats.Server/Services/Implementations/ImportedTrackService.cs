@@ -42,7 +42,7 @@ public class ImportedTrackService : IImportedTrackService
 
         // removes null data from the beginning.
         return importedTracks
-            .Where(x => x.MasterMetadataArtistName != null && x.MasterMetadataArtistName != string.Empty && x.MasterMetadataAlbumName != null && x.MasterMetadataAlbumName != string.Empty && x.MasterMetadataTrackName != null && x.MasterMetadataTrackName != string.Empty)
+            .Where(x => x.MasterMetadataArtistName != null && x.MasterMetadataArtistName != string.Empty && x.MasterMetadataAlbumName != null && x.MasterMetadataAlbumName != string.Empty && x.MasterMetadataTrackName != null && x.MasterMetadataTrackName != string.Empty).OrderBy(x => x.TimeStamp)
             .ToList();
     }
 

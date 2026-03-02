@@ -50,9 +50,8 @@ function Upload() {
       } finally {
         setLoading(false);
       }
-
-      loadUploadHistory();
     };
+    loadUploadHistory();
   }, [user]);
 
   return (

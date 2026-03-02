@@ -161,18 +161,17 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
         }
     }
 
-    // probably should get longest streak date start and end here. 
+    // probably should get longest streak date start and end here.
     private async Task CalculateLongestStreak()
     {
         // goal here is find the most amount of days in a row the artist was listened to
-        var longestStreak = 1;
-        var tempStreak = 0;
-
-        var longestStreakEndDate = new DateTime();
-
         foreach (var aggTrack in _aggregatedTracks) //O(n)
         {
-            var artistTracks = await _context.ImportedTracks.Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.UserId == aggTrack.UserId).OrderBy(x => x.TimeStamp).ToListAsync(); // O(n) 
+            var longestStreak = 1;
+            var tempStreak = 0;
+            var longestStreakEndDate = new DateTime();
+
+            var artistTracks = await _context.ImportedTracks.Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.UserId == aggTrack.UserId).OrderBy(x => x.TimeStamp).ToListAsync(); // O(n)
 
             var date = new DateTime();
             DateTime oneDateAhead = date.AddDays(1);
@@ -187,10 +186,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
                     date = artistTrack.TimeStamp;
                     oneDateAhead = date.AddDays(1);
 
-                    if (artistTracks.Count == 1)
-                    {
-                        longestStreakEndDate = date;
-                    }
+                    longestStreakEndDate = date;
                     continue;
                 }
                 else if (date.Date == artistTrack.TimeStamp.Date)

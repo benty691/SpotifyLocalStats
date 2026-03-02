@@ -1,11 +1,6 @@
-﻿using Microsoft.Build.Utilities;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.SqlServer;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.EntityFrameworkCore;
 using SpotifyLocalStats.Server.Models;
 using WebApi.Data.Jobs;
-using WebApi.Services;
 using WebApi.Services.Implementations;
 using WebApi.Services.Implementations.Helpers;
 using WebApi.Services.Interfaces;
@@ -29,7 +24,7 @@ public static class Dependencies
             services.AddDbContext<SpotifyStatsContext>(c =>
                c.UseInMemoryDatabase("SpotifyStats"));
         }*/
-            // use SQL server
+        // use SQL server
 
         services.AddDbContext<SpotifyStatsContext>(c =>
             c.UseSqlServer(configuration.GetConnectionString("SpotifyStatsConnection")));
@@ -42,6 +37,7 @@ public static class Dependencies
         services.AddScoped<IModelPopulationService, ModelPopulationService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IUserBasicStatsService, UserBasicStatsService>();
+        services.AddScoped<IUserAggregateArtistService, UserAggregateArtistService>();
         services.AddSingleton<ImportJobQueue>();
         services.AddHostedService<ImportBackgroundWorker>();
 

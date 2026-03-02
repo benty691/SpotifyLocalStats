@@ -28,7 +28,7 @@ function HomeStats() {
       let endpoint;
 
       if (!user) {
-        return;
+        return; // maybe login popup
       }
 
       try {
@@ -83,18 +83,14 @@ function HomeStats() {
             ) : userSpotifyStats ? (
               <div>
                 <div className='flex gap-5 w-full max-w-3xl'>
-                  <StatsCard
-                    statNumber={userSpotifyStats.trackCount}
-                    statName='Tracks'
-                  />
-                  <StatsCard
-                    statNumber={userSpotifyStats.albumCount}
-                    statName='Albums'
-                  />
-                  <StatsCard
-                    statNumber={userSpotifyStats.artistCount}
-                    statName='Artists'
-                  />
+                  {Object.entries(userSpotifyStats).map(([key, value]) => (
+                    <StatsCard
+                      key={key}
+                      link={`${key.split("C")[0]}s`}
+                      statNumber={value}
+                      statName={`${key.split("C")[0]}s`}
+                    />
+                  ))}
                 </div>
                 <div>
                   <h3>

@@ -128,14 +128,13 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
 
     private async Task CalculateLongestStreak()
     {
-        var longestStreak = 1;
-        var tempStreak = 0;
-
-        var longestStreakEndDate = new DateTime();
-
         foreach (var aggAlbum in _aggregatedAlbums) //O(n)
         {
-            var albumTracks = await _context.ImportedTracks.Where(x => x.MasterMetadataAlbumName == aggAlbum.Album.Name && x.UserId == aggAlbum.UserId).OrderBy(x => x.TimeStamp).ToListAsync(); // O(n) 
+            var longestStreak = 1;
+            var tempStreak = 0;
+            var longestStreakEndDate = new DateTime();
+
+            var albumTracks = await _context.ImportedTracks.Where(x => x.MasterMetadataAlbumName == aggAlbum.Album.Name && x.UserId == aggAlbum.UserId).OrderBy(x => x.TimeStamp).ToListAsync(); // O(n)
 
             var date = new DateTime();
             DateTime oneDateAhead = date.AddDays(1);
@@ -151,10 +150,8 @@ public sealed class AlbumAggregationHelperService : IAlbumAggregationHelpersServ
                     date = albumTrack.TimeStamp;
                     oneDateAhead = date.AddDays(1);
 
-                    if (albumTracks.Count == 1)
-                    {
-                        longestStreakEndDate = date;
-                    }
+
+                    longestStreakEndDate = date;
                     continue;
                 }
                 else if (date.Date == albumTrack.TimeStamp.Date)

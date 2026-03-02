@@ -41,6 +41,7 @@ function UploadFiles() {
         formData.append("files", file);
       });
 
+      console.log(formData.values());
       let res = await importApi.uploadTrack(formData);
 
       setTracksImport(null);

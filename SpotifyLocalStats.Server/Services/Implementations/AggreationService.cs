@@ -94,7 +94,10 @@ public class AggreationService : IAggregationService
             else
             {
                 artist.MsListened += track.MsPlayed;
-                artist.DateTimeLastListened = track.TimeStamp;
+                if (track.TimeStamp > artist.DateTimeLastListened)
+                    artist.DateTimeLastListened = track.TimeStamp;
+                if (track.TimeStamp < artist.DateTimeFirstListened)
+                    artist.DateTimeFirstListened = track.TimeStamp;
                 artist.PlayCount += 1;
             }
         }
@@ -137,7 +140,10 @@ public class AggreationService : IAggregationService
             else
             {
                 album.MsListened += track.MsPlayed;
-                album.DateTimeLastListened = track.TimeStamp;
+                if (track.TimeStamp > album.DateTimeLastListened)
+                    album.DateTimeLastListened = track.TimeStamp;
+                if (track.TimeStamp < album.DateTimeFirstListened)
+                    album.DateTimeFirstListened = track.TimeStamp;
                 album.PlayCount += 1;
             }
         }
@@ -181,7 +187,10 @@ public class AggreationService : IAggregationService
             else
             {
                 trackValue.MsListened += track.MsPlayed;
-                trackValue.DateTimeLastListened = track.TimeStamp;
+                if (track.TimeStamp > trackValue.DateTimeLastListened)
+                    trackValue.DateTimeLastListened = track.TimeStamp;
+                if (track.TimeStamp < trackValue.DateTimeFirstListened)
+                    trackValue.DateTimeFirstListened = track.TimeStamp;
                 trackValue.PlayCount += 1;
             }
         }
