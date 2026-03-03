@@ -18,24 +18,15 @@ public class UploadHistoryService : IUploadHistoryService
 
     public async Task<List<UploadHistoryResponseDto>> GetUploadHistory(Guid userId)
     {
-        var uploadHistoryList = await _context.UploadHistories.Where(x => x.UserId == userId).ToListAsync();
-
-        var uploadHistoryResponse = new List<UploadHistoryResponseDto>();
-
-        foreach (var uploadHistory in uploadHistoryList)
+        return await _context.UploadHistories
+        .Where(x => x.UserId == userId)
+        .Select(x => new UploadHistoryResponseDto
         {
-            var importedTrackUploadHistory = await _context.ImportedTracks.Where(x => x.UserId == userId && x.UploadHistoryId == uploadHistory.Id).ToListAsync();
-
-            uploadHistoryResponse.Add(
-                new UploadHistoryResponseDto()
-                {
-                    FileName = uploadHistory.FileName,
-                    ImportedTrackCount = importedTrackUploadHistory.Count,
-                    CreatedAt = uploadHistory.CreatedAt
-                }
-            );
-        }
-
-        return uploadHistoryResponse;
+            CreatedAt = x.CreatedAt,
+            FileName = x.FileName,
+            ImportedTrackCount = _context.ImportedTracks
+                .Count(t => t.UploadHistoryId == x.Id)
+        })
+        .ToListAsync();
     }
 }

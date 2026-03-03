@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SpotifyLocalStats.Server.Models;
 using WebApi.Data.Jobs;
+using WebApi.Models.TimeOfDayConcretes;
 using WebApi.Services.Implementations;
 using WebApi.Services.Implementations.Helpers;
 using WebApi.Services.Interfaces;
@@ -29,16 +30,40 @@ public static class Dependencies
         services.AddDbContext<SpotifyStatsContext>(c =>
             c.UseSqlServer(configuration.GetConnectionString("SpotifyStatsConnection")));
         services.AddScoped<IImportedTrackService, ImportedTrackService>();
-        services.AddScoped<IImportOrchestrationService, ImportOrchestrationService>();
-        services.AddScoped<IArtistAggregationHelpersService, ArtistAggregationHelpersService>();
-        services.AddScoped<IAlbumAggregationHelpersService, AlbumAggregationHelperService>();
-        services.AddScoped<ITrackAggregationHelpersService, TrackAggregationHelpersService>();
         services.AddScoped<IAggregationService, AggreationService>();
+        services.AddScoped<IImportOrchestrationService, ImportOrchestrationService>();
         services.AddScoped<IModelPopulationService, ModelPopulationService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IUserBasicStatsService, UserBasicStatsService>();
         services.AddScoped<IUserAggregateArtistService, UserAggregateArtistService>();
         services.AddScoped<IUploadHistoryService, UploadHistoryService>();
+        services.AddScoped<IAggregationHelpersService<AggregatedAlbum, AlbumTimeOfDayStat>>(sp =>
+                    new AggregationHelperService<AggregatedAlbum, AlbumTimeOfDayStat>(
+                        sp.GetRequiredService<ILogger<AggregationHelperService<AggregatedAlbum, AlbumTimeOfDayStat>>>(),
+                        sp.GetRequiredService<SpotifyStatsContext>(),
+                        album => album.MasterMetadataAlbumName!,
+                        album => album.Album.Name,
+                        tod => tod.TimeOfDay,
+                        (id, hour) => new AlbumTimeOfDayStat(id, hour, 1)
+                    ));
+        services.AddScoped<IAggregationHelpersService<AggregatedArtist, ArtistTimeOfDayStat>>(sp =>
+                    new AggregationHelperService<AggregatedArtist, ArtistTimeOfDayStat>(
+                        sp.GetRequiredService<ILogger<AggregationHelperService<AggregatedArtist, ArtistTimeOfDayStat>>>(),
+                        sp.GetRequiredService<SpotifyStatsContext>(),
+                        artist => artist.MasterMetadataArtistName!, //group
+                        artist => artist.Artist.Name, // name
+                        tod => tod.TimeOfDay, // tod
+                        (id, hour) => new ArtistTimeOfDayStat(id, hour, 1)
+                    ));
+        services.AddScoped<IAggregationHelpersService<AggregatedTrack, TrackTimeOfDayStat>>(sp =>
+                    new AggregationHelperService<AggregatedTrack, TrackTimeOfDayStat>(
+                        sp.GetRequiredService<ILogger<AggregationHelperService<AggregatedTrack, TrackTimeOfDayStat>>>(),
+                        sp.GetRequiredService<SpotifyStatsContext>(),
+                        track => track.MasterMetadataTrackName!, //group
+                        track => track.Track.Name, // name
+                        tod => tod.TimeOfDay, // tod
+                        (id, hour) => new TrackTimeOfDayStat(id, hour, 1)
+                    ));
         services.AddSingleton<ImportJobQueue>();
         services.AddHostedService<ImportBackgroundWorker>();
 

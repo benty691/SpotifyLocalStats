@@ -2,6 +2,7 @@
 using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
 using WebApi.Models;
+using WebApi.Models.TimeOfDayConcretes;
 using WebApi.Services.Interfaces.Helpers;
 
 namespace WebApi.Services.Implementations.Helpers;
@@ -36,7 +37,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
         return aggTracks;
     }
 
-    public async Task RunCalculations()
+    public async Task RunCalculations(Guid userId)
     {
         await InitializeAggregatedTracksAsync();
         await CalculateLongestStreak();
@@ -114,7 +115,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
         // really need to determine how to split. 
         // also need to figure out whjat to return, maybe a dict for time of day and count?
 
-        TimeOfDayStat<AggregatedTrack> timeOfDayCount;
+        TrackTimeOfDayStat timeOfDayCount;
 
         if (_aggregatedTracks.Count == 0)
         {
@@ -128,7 +129,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
                 .Where(x => x.MasterMetadataTrackName == aggTrack.Track.Name && x.UserId == aggTrack.UserId)
                 .ToListAsync();
 
-            var timeOfDayStatsForUser = await _context.TrackTimeOfDaysStats.Where(x => x.Aggregate.UserId == aggTrack.UserId && x.Aggregate.Id == aggTrack.Id).ToListAsync();
+            var timeOfDayStatsForUser = await _context.TrackTimeOfDayStats.Where(x => x.Aggregate.UserId == aggTrack.UserId && x.Aggregate.Id == aggTrack.Id).ToListAsync();
 
             // not sure if this will workl, as we need to span from 0000-1000 etc etc, if in this range, increment count
             // need to get old stats, then update them with new, or make old obselete, or somehting?? 
@@ -146,7 +147,7 @@ public sealed class TrackAggregationHelpersService : ITrackAggregationHelpersSer
 
                     if (todSameAsTrack is null) //???
                     {
-                        timeOfDayCount = new TimeOfDayStat<AggregatedTrack>(aggTrack.Id, track.TimeStamp.Hour, 1)
+                        timeOfDayCount = new TrackTimeOfDayStat(aggTrack.Id, track.TimeStamp.Hour, 1)
                         {
                             Aggregate = aggTrack,
                         };

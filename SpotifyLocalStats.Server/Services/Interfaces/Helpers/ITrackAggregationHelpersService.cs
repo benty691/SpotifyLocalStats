@@ -2,6 +2,6 @@
 {
     public interface ITrackAggregationHelpersService
     {
-        Task RunCalculations();
+        Task RunCalculations(Guid userId);
     }
 }

@@ -24,15 +24,11 @@ public class UserBasicStatsService : IUserBasicStatsService
 
     private async Task<int> GetUniqueTracksCount(Guid id)
     {
-        // what do we actually want to retunr here? 
-        // I am thinking total number of tracks, so imported tracks count? or possibly get all agg tracks, then their playcount value, then sum and return 
-
         return await _context.ImportedTracks.Where(x => x.UserId == id).CountAsync();
     }
 
     private async Task<int> GetUniqueAlbumCount(Guid id)
     {
-
         // total unique artists listend to 
         return await _context.AggregatedAlbums.Where(x => x.UserId == id).CountAsync();
     }

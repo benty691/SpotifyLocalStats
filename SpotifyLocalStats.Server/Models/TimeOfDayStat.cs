@@ -1,6 +1,8 @@
-﻿namespace WebApi.Models
+﻿using SpotifyLocalStats.Server.Models;
+
+namespace WebApi.Models
 {
-    public class TimeOfDayStat<T> where T : class
+    public class TimeOfDayStat<TAggregate> where TAggregate : AggregateBase
     {
         public TimeOfDayStat(Guid aggregateId, int timeOfDay, int playCount)
         {
@@ -15,7 +17,7 @@
         }
 
         public Guid Id { get; private set; }
-        public T Aggregate { get; set; } = null!;
+        public TAggregate Aggregate { get; set; } = null!;
         public Guid AggregateId { get; private set; }
         public int TimeOfDay { get; set; }
         public int PlayCount { get; set; }

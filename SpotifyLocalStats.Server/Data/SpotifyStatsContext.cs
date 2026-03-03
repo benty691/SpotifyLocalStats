@@ -2,6 +2,7 @@
 using SpotifyLocalStats.Server.Models;
 using WebApi.Models;
 using WebApi.Models.Jobs;
+using WebApi.Models.TimeOfDayConcretes;
 
 namespace SpotifyLocalStats.Server.Data;
 
@@ -17,9 +18,9 @@ public class SpotifyStatsContext : DbContext
     public DbSet<AggregatedTrack> AggregatedTracks { get; set; }
     public DbSet<AggregatedAlbum> AggregatedAlbums { get; set; }
     public DbSet<AggregatedArtist> AggregatedArtists { get; set; }
-    public DbSet<TimeOfDayStat<AggregatedArtist>> ArtistTimeOfDaysStats { get; set; }
-    public DbSet<TimeOfDayStat<AggregatedTrack>> TrackTimeOfDaysStats { get; set; }
-    public DbSet<TimeOfDayStat<AggregatedAlbum>> AlbumTimeOfDaysStats { get; set; }
+    public DbSet<AlbumTimeOfDayStat> AlbumTimeOfDayStats { get; set; }
+    public DbSet<ArtistTimeOfDayStat> ArtistTimeOfDayStats { get; set; }
+    public DbSet<TrackTimeOfDayStat> TrackTimeOfDayStats { get; set; }
     public DbSet<ImportJobStatus> ImportJobStatuses { get; set; }
     public DbSet<UploadHistory> UploadHistories { get; set; }
 
@@ -67,6 +68,10 @@ public class SpotifyStatsContext : DbContext
         builder.Entity<AggregatedArtist>().ToTable("AggregatedArtists");
         builder.Entity<AggregatedAlbum>().ToTable("AggregatedAlbums");
         builder.Entity<AggregatedTrack>().ToTable("AggregatedTracks");
+
+        builder.Entity<ArtistTimeOfDayStat>().HasBaseType((Type?)null).ToTable("ArtistTimeOfDaysStats");
+        builder.Entity<AlbumTimeOfDayStat>().HasBaseType((Type?)null).ToTable("AlbumTimeOfDaysStats");
+        builder.Entity<TrackTimeOfDayStat>().HasBaseType((Type?)null).ToTable("TrackTimeOfDaysStats");
     }
 
     public async Task<(List<T>, int)> SaveChangesWithResultAsync<T>() where T : class

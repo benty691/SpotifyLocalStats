@@ -49,7 +49,7 @@ function ArtistDetailCard({
             <TimeOfDayStats stats={aggregateArtist.timeOfDayStats} />
 
             <div className='grid grid-cols-3 gap-3'>
-              <div className='rounded-2xl bg-surface border border-border p-5 flex flex-col justify-between'>
+              <div className='rounded-2xl bg-surface border border-border p-5 flex flex-col items-center justify-center gap-2 text-center'>
                 <p className='text-3xl font-black text-text-primary tabular-nums leading-none'>
                   {aggregateArtist.playCount.toLocaleString()}
                 </p>
@@ -58,7 +58,7 @@ function ArtistDetailCard({
                 </p>
               </div>
 
-              <div className='rounded-2xl bg-surface border border-border p-5 flex flex-col justify-between'>
+              <div className='rounded-2xl bg-surface border border-border p-5 flex flex-col items-center justify-center gap-2 text-center'>
                 <p className='text-3xl font-black text-text-primary tabular-nums leading-none'>
                   {formatDuration(aggregateArtist.minsListened)}
                 </p>
@@ -67,7 +67,7 @@ function ArtistDetailCard({
                 </p>
               </div>
 
-              <div className='rounded-2xl bg-surface border border-border p-5 flex flex-col justify-between'>
+              <div className='rounded-2xl bg-surface border border-border p-5 flex flex-col items-center justify-center gap-2 text-center'>
                 <p className='text-3xl font-black text-text-primary tabular-nums leading-none'>
                   ×{aggregateArtist.mostTimesIn24Hours}
                 </p>

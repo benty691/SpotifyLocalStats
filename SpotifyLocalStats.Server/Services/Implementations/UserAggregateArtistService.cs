@@ -2,7 +2,7 @@
 using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
 using WebApi.Data.DTOs;
-using WebApi.Services.Interfaces;
+using WebApi.Data.DTOs.NewFolder;
 
 namespace WebApi.Services.Implementations;
 

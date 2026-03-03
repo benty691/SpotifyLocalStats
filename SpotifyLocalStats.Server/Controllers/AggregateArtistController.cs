@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SpotifyLocalStats.Server.Data;
 using System.Net;
-using WebApi.Data.DTOs;
+using WebApi.Data.DTOs.NewFolder;
 using WebApi.Services.Interfaces;
 
 namespace WebApi.Controllers;

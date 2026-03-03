@@ -2,6 +2,6 @@
 {
     public interface IArtistAggregationHelpersService
     {
-        Task RunCalculations();
+        Task RunCalculations(Guid userId);
     }
 }

@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
+using WebApi.Models;
+using WebApi.Models.TimeOfDayConcretes;
 using WebApi.Services.Interfaces;
 using WebApi.Services.Interfaces.Helpers;
 
@@ -10,21 +12,23 @@ public class AggreationService : IAggregationService
 {
     private readonly ILogger<AggreationService> _logger;
     private readonly SpotifyStatsContext _context;
-    private readonly IArtistAggregationHelpersService _artistAggregationHelpersService;
-    private readonly IAlbumAggregationHelpersService _albumAggregationHelpersService;
-    private readonly ITrackAggregationHelpersService _TrackAggregationHelpersService;
+    private readonly IAggregationHelpersService<AggregatedArtist, ArtistTimeOfDayStat> _artistHelper;
+    private readonly IAggregationHelpersService<AggregatedAlbum, AlbumTimeOfDayStat> _albumHelper;
+    private readonly IAggregationHelpersService<AggregatedTrack, TrackTimeOfDayStat> _trackHelper;
 
-    public AggreationService(ILogger<AggreationService> logger, SpotifyStatsContext ctx, IArtistAggregationHelpersService artistAggregationHelpersService, IAlbumAggregationHelpersService albumAggregationHelpersService, ITrackAggregationHelpersService trackAggregationHelpersService)
+    public AggreationService(
+        ILogger<AggreationService> logger,
+        SpotifyStatsContext ctx,
+        IAggregationHelpersService<AggregatedArtist, ArtistTimeOfDayStat> artistHelper,
+        IAggregationHelpersService<AggregatedAlbum, AlbumTimeOfDayStat> albumHelper,
+        IAggregationHelpersService<AggregatedTrack, TrackTimeOfDayStat> trackHelper)
     {
-        _TrackAggregationHelpersService = trackAggregationHelpersService;
-        _albumAggregationHelpersService = albumAggregationHelpersService;
-        _artistAggregationHelpersService = artistAggregationHelpersService;
         _context = ctx;
         _logger = logger;
+        _artistHelper = artistHelper;
+        _albumHelper = albumHelper;
+        _trackHelper = trackHelper;
     }
-
-    // do we just recalculate all aggregated data for a user?
-    // or do we try and be smarter and just update what has changed?
 
     public async Task UpdateAggregatedDataForUser(User user, IEnumerable<ImportedTrack> tracks)
     {
@@ -34,15 +38,11 @@ public class AggreationService : IAggregationService
 
         await _context.SaveChangesAsync();
 
-        // should we have an orchestrator that calls all of these?
-        await _artistAggregationHelpersService.RunCalculations();
-        await _albumAggregationHelpersService.RunCalculations();
-        await _TrackAggregationHelpersService.RunCalculations();
+        await _artistHelper.RunCalculations(user.Id);
+        await _albumHelper.RunCalculations(user.Id);
+        await _trackHelper.RunCalculations(user.Id);
 
         await _context.SaveChangesAsync();
-
-        // so in theolry here, we should have populated all the dbs now.. including calculated values, no idea how long this would take? fairly quick I would guess... 
-        // then run 'baxkground' aggragtion helpers to fill in rest of the values... considering having this on a background service that updates daily when webapi opens (runs once after import of tracks, but for now, i think we just call after aggregates are created, essentially here. 
     }
 
     private async Task UpdateAggregateArtist(User user, IEnumerable<ImportedTrack> tracks)

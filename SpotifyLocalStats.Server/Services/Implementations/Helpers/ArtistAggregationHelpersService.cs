@@ -2,6 +2,7 @@
 using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
 using WebApi.Models;
+using WebApi.Models.TimeOfDayConcretes;
 using WebApi.Services.Interfaces.Helpers;
 
 namespace WebApi.Services.Implementations.Helpers;
@@ -37,7 +38,7 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
         return aggList;
     }
 
-    public async Task RunCalculations()
+    public async Task RunCalculations(Guid userId)
     {
         await InitializeAggregatedTracksAsync();
         await CalculateLongestStreak();
@@ -127,7 +128,7 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
                 .Where(x => x.MasterMetadataArtistName == aggArtist.Artist.Name && x.UserId == aggArtist.UserId)
                 .ToListAsync();
 
-            var timeOfDayStatsForUser = _context.ArtistTimeOfDaysStats.Where(x => x.Aggregate.Id == aggArtist.Id && aggArtist.UserId == x.Aggregate.UserId).ToDictionary(x => x.TimeOfDay, x => x);
+            var timeOfDayStatsForUser = _context.ArtistTimeOfDayStats.Where(x => x.Aggregate.Id == aggArtist.Id && aggArtist.UserId == x.Aggregate.UserId).ToDictionary(x => x.TimeOfDay, x => x);
 
             foreach (var track in artistTracks)
             {
@@ -135,11 +136,11 @@ public sealed class ArtistAggregationHelpersService : IArtistAggregationHelpersS
 
                 if (!todSameAsTrack) //i.e this time of day for this artiost doesnt exist yet
                 {
-                    var timeOfDay = new TimeOfDayStat<AggregatedArtist>(aggArtist.Id, track.TimeStamp.Hour, 1)
+                    var timeOfDay = new ArtistTimeOfDayStat(aggArtist.Id, track.TimeStamp.Hour, 1)
                     {
                         Aggregate = aggArtist,
                     };
-                    await _context.ArtistTimeOfDaysStats.AddAsync(timeOfDay);
+                    await _context.ArtistTimeOfDayStats.AddAsync(timeOfDay);
                     timeOfDayStatsForUser[track.TimeStamp.Hour] = timeOfDay;
                 }
                 else

@@ -2,6 +2,6 @@
 {
     public interface IAlbumAggregationHelpersService
     {
-        Task RunCalculations();
+        Task RunCalculations(Guid userId);
     }
 }

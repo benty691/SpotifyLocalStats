@@ -60,6 +60,7 @@ function Upload() {
         {returnStatusCode && returnStatusCode < 300 ? (
           <div>
             <UploadHistory uploadHistorys={uploadHistory!} />
+            <UploadFiles />
           </div>
         ) : (
           <UploadFiles />

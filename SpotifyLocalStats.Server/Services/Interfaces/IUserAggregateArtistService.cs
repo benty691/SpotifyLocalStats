@@ -1,10 +1,9 @@
 ﻿using SpotifyLocalStats.Server.Models;
-using WebApi.Data.DTOs;
 
 namespace WebApi.Services.Interfaces;
 
-public interface IUserAggregateArtistService
+public interface IUserArtistService
 {
-    Task<List<AggregateArtistDto>> GetAggregateArtists(User user);
+    Task<List<TAggregateDto>> GetAggregateArtists(User user);
 
 }
