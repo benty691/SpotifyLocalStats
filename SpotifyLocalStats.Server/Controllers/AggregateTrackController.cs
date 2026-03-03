@@ -7,14 +7,15 @@ using WebApi.Services.Interfaces;
 namespace WebApi.Controllers;
 
 [Route("/api/[controller]")]
-public class AggregateAlbumController : BaseApiController
+public class AggregateTrackController : BaseApiController
 {
     private readonly SpotifyStatsContext _context;
-    private readonly ILogger<AggregateAlbumController> _logger;
-    private readonly IUserAggregateService<AggregateAlbumDto> _userAggregateService;
+    private readonly ILogger<AggregateTrackController> _logger;
+    private readonly IUserAggregateService<AggregateTrackDto> _userAggregateService;
     private readonly IUserService _userService;
 
-    public AggregateAlbumController(SpotifyStatsContext context, ILogger<AggregateAlbumController> logger, IUserAggregateService<AggregateAlbumDto> userAggregateService, IUserService userService)
+
+    public AggregateTrackController(SpotifyStatsContext context, ILogger<AggregateTrackController> logger, IUserAggregateService<AggregateTrackDto> userAggregateService, IUserService userService)
     {
         _context = context;
         _logger = logger;
@@ -22,8 +23,9 @@ public class AggregateAlbumController : BaseApiController
         _userService = userService;
     }
 
+
     [HttpGet("{userId}")]
-    public async Task<ActionResult<List<AggregateAlbumDto>>> GetAggregateAlbum(string userId)
+    public async Task<ActionResult<List<AggregateTrackDto>>> GetAggregateAlbum(string userId)
     {
         if (!Guid.TryParse(userId, out var id))
         {
@@ -49,8 +51,8 @@ public class AggregateAlbumController : BaseApiController
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error getting user AggregateAlbum stats with id: {userId}");
-            return StatusCode((int)HttpStatusCode.InternalServerError, new { Message = $"Error retireiving user aggregate album stats for id: {userId}", Error = ex });
+            _logger.LogError(ex, $"Error getting user AggregateTrack stats with id: {userId}");
+            return StatusCode((int)HttpStatusCode.InternalServerError, new { Message = $"Error retireiving user aggregate track stats for id: {userId}", Error = ex });
         }
     }
 

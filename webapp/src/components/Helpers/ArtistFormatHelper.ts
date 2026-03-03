@@ -15,5 +15,5 @@ export const formatDuration = (mins: number) => {
   const hours = totalHours % 24;
   const remainder = mins % 60;
   if (days > 0) return `${days}d ${hours}h`;
-  return `${totalHours}h ${remainder}m`;
+  return `${totalHours}h ${remainder.toPrecision(2)}m`;
 };

@@ -1,5 +1,7 @@
+import AggregatePage from "../components/AggregateComponents/AggregatePage";
+
 function Tracks() {
-  return <></>;
+  return <AggregatePage entity='track' />;
 }
 
 export default Tracks;

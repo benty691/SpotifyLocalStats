@@ -1,22 +1,18 @@
-import type { AggregateArtistDto } from "../../types/DTOs/AggregateArtistDto";
+import type { AggregateBaseDto } from "../../types/DTOs/AggregateDto/AggregateBaseDto";
 import { ArtistFormatHeader } from "../Helpers/ArtistFormatHelper";
 
-function ArtistTable({
-  aggregateArtists,
-}: {
-  aggregateArtists: AggregateArtistDto[];
-}) {
+function AggregateTable({ aggregates }: { aggregates: AggregateBaseDto[] }) {
   return (
     <>
       <div>
         <table>
           <tr>
-            {aggregateArtists.length > 0 &&
-              Object.keys(aggregateArtists[0]).map((key) => (
+            {aggregates.length > 0 &&
+              Object.keys(aggregates[0]).map((key) => (
                 <th key={key}>{ArtistFormatHeader(key)}</th>
               ))}
           </tr>
-          {aggregateArtists.map((row) => (
+          {aggregates.map((row) => (
             <tr>
               {Object.entries(row).map(([key, value]) => (
                 <td key={key}>{value.toString()}</td>
@@ -29,4 +25,4 @@ function ArtistTable({
   );
 }
 
-export default ArtistTable;
+export default AggregateTable;

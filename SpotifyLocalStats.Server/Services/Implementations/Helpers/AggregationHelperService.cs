@@ -54,6 +54,8 @@ public sealed class AggregationHelperService<TAggregate, TTimeOfDay> : IAggregat
 
     public async Task RunCalculations(Guid userId)
     {
+        await InitializeAsync();
+
         var modelGroups = await _context.ImportedTracks
             .Where(x => x.UserId == userId)
             .GroupBy(_groupSelector)
@@ -62,15 +64,11 @@ public sealed class AggregationHelperService<TAggregate, TTimeOfDay> : IAggregat
         var aggregateDict = _aggregates
             .ToDictionary(x => _aggregateNameSelector(x), x => x);
 
-        var timeOfDayStatsForUser = _timeOfDayStats
-            .ToDictionary(x => _timeofDayNameSelector(x), x => x);
-
-        await InitializeAsync();
         CalculateLongestStreak(userId, modelGroups, aggregateDict);
         CalculateDrySpell(userId, modelGroups, aggregateDict);
         await CalculateMostTimesIn24Hours(userId, modelGroups, aggregateDict);
         CalculateTopListeningDate(userId, modelGroups, aggregateDict);
-        TimeOfDayStats(userId, modelGroups, aggregateDict, timeOfDayStatsForUser);
+        TimeOfDayStats(userId, modelGroups, aggregateDict);
     }
 
     private void CalculateTopListeningDate(Guid userId, List<IGrouping<string, ImportedTrack>> modelGroups, Dictionary<string, TAggregate> aggregateDict)
@@ -129,26 +127,31 @@ public sealed class AggregationHelperService<TAggregate, TTimeOfDay> : IAggregat
         }
     }
 
-    private void TimeOfDayStats(Guid userId, List<IGrouping<string, ImportedTrack>> modelGroups, Dictionary<string, TAggregate> aggregateDict, Dictionary<int, TTimeOfDay> timeOfDayDict)
+    private void TimeOfDayStats(Guid userId, List<IGrouping<string, ImportedTrack>> modelGroups, Dictionary<string, TAggregate> aggregateDict)
     {
-        // issue is here. need geenric 
-
         foreach (var modelGroup in modelGroups)
         {
-            var timeOfDays = modelGroup
-                .Select(x => x.TimeStamp)
-                .ToList();
-
             if (!aggregateDict.TryGetValue(modelGroup.Key!, out var aggregate))
                 continue;
 
-            foreach (var timeOfDay in timeOfDays)
+            var pre = _timeOfDayStats
+                .Where(x => x.AggregateId == aggregate.Id);
+
+            var local = _context.Set<TTimeOfDay>().Local
+                .Where(x => x.AggregateId == aggregate.Id);
+
+            var timeOfDayDict = pre
+                .Concat(local)
+                .GroupBy(x => _timeofDayNameSelector(x))
+                .ToDictionary(g => g.Key, g => g.First());
+
+            foreach (var timeOfDay in modelGroup.Select(x => x.TimeStamp))
             {
-                if (!timeOfDayDict.TryGetValue(timeOfDay.Hour, out var timeOfDayStat)) //i.e this time of day for this album doenst exist yet
+                if (!timeOfDayDict.TryGetValue(timeOfDay.Hour, out var timeOfDayStat))
                 {
-                    var newTimeOfDay = _timeOfDayFactory(aggregate.Id, timeOfDay.Hour); // <-- use factory
+                    var newTimeOfDay = _timeOfDayFactory(aggregate.Id, timeOfDay.Hour);
                     newTimeOfDay.Aggregate = aggregate;
-                    _timeOfDayStats.Add(newTimeOfDay);
+                    _context.Set<TTimeOfDay>().Add(newTimeOfDay);
                     timeOfDayDict[timeOfDay.Hour] = newTimeOfDay;
                 }
                 else

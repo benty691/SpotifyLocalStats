@@ -77,9 +77,6 @@ public sealed class ModelPopulationService : IModelPopulationService
         var albumList = _context.Albums.ToDictionary(x => x.Name, x => x); //O(n)
         var artistList = _context.Artists.Local.ToList().ToDictionary(x => x.Name, x => x);
 
-        // var artistFromDb = await _context.Artists.ToListAsync();
-        // var combinedArtists = artistFromDb.Concat(artistList).ToDictionary(x => (x.Name), x => x);
-
         foreach (var track in uniqueAlbumList) // O(n)
         {
             if (!albumList.ContainsKey(track.MasterMetadataAlbumName!))
@@ -117,10 +114,6 @@ public sealed class ModelPopulationService : IModelPopulationService
         var trackList = _context.Tracks.ToDictionary((x => x.Name), x => x);
         var artistList = _context.Artists.Local.ToList().ToDictionary(x => (x.Name), x => x);
         var albumList = _context.Albums.Local.ToList().ToDictionary(x => (x.Name), x => x);
-
-        //  var combinedArtists = artistFromDb.Concat(artistList);
-        //var albumList = await _context.Albums.ToListAsync();
-        //var combinedAlbums = albumsFromDB.Concat(albumList).ToDictionary((x => x.Name), x => x);
 
         foreach (var track in uniqueTrackList)
         {

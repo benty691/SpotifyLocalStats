@@ -11,15 +11,15 @@ public class AggregateArtistController : BaseApiController
 {
     private readonly SpotifyStatsContext _context;
     private readonly ILogger<AggregateArtistController> _logger;
-    private readonly IUserAggregateArtistService _userAggregateArtistService;
+    private readonly IUserAggregateService<AggregateArtistDto> _userAggregateService;
     private readonly IUserService _userService;
 
 
-    public AggregateArtistController(SpotifyStatsContext context, ILogger<AggregateArtistController> logger, IUserAggregateArtistService userAggregateArtistService, IUserService userService)
+    public AggregateArtistController(SpotifyStatsContext context, ILogger<AggregateArtistController> logger, IUserAggregateService<AggregateArtistDto> userAggregateService, IUserService userService)
     {
         _context = context;
         _logger = logger;
-        _userAggregateArtistService = userAggregateArtistService;
+        _userAggregateService = userAggregateService;
         _userService = userService;
     }
 
@@ -41,7 +41,7 @@ public class AggregateArtistController : BaseApiController
 
         try
         {
-            var aggArtists = await _userAggregateArtistService.GetAggregateArtists(user);
+            var aggArtists = await _userAggregateService.GetAggregate(user);
 
             return aggArtists == null ? StatusCode((int)HttpStatusCode.NotFound, $"User Aggregate Artist Stats not found for userId: {userId}") : Ok(aggArtists);
         }

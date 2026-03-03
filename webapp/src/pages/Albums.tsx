@@ -1,5 +1,7 @@
+import AggregatePage from "../components/AggregateComponents/AggregatePage";
+
 function Albums() {
-  return <></>;
+  return <AggregatePage entity="album" />;
 }
 
 export default Albums;
