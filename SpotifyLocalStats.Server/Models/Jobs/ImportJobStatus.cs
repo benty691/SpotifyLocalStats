@@ -17,9 +17,10 @@ public class ImportJobStatus
 }
 
 public enum JobStatus
-{ 
+{
     Queued,
     Processing,
     Completed,
-    Failed
+    Failed,
+    Duplicate
 }

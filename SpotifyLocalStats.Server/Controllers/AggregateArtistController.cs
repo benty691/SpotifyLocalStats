@@ -24,8 +24,8 @@ public class AggregateArtistController : BaseApiController
     }
 
 
-    [HttpGet("{userId}")]
-    public async Task<ActionResult<List<AggregateArtistDto>>> GetAggregateArtists(string userId)
+    [HttpGet("{userId}/{pageNumber}")]
+    public async Task<ActionResult<List<AggregateArtistDto>>> GetAggregateArtists(string userId, int pageNumber)
     {
         if (!Guid.TryParse(userId, out var id))
         {
@@ -41,9 +41,9 @@ public class AggregateArtistController : BaseApiController
 
         try
         {
-            var aggArtists = await _userAggregateService.GetAggregate(user);
+            var aggArtists = await _userAggregateService.GetAggregate(user, pageNumber);
 
-            return aggArtists == null ? StatusCode((int)HttpStatusCode.NotFound, $"User Aggregate Artist Stats not found for userId: {userId}") : Ok(aggArtists);
+            return (aggArtists == null) ? StatusCode((int)HttpStatusCode.NotFound, $"User Aggregate Artist Stats not found for userId: {userId}") : Ok(aggArtists);
         }
         catch (ArgumentException ex)
         {

@@ -1,4 +1,4 @@
-import UploadFiles from "../components/UploadFiles";
+import UploadFiles from "../components/UploadFiles/UploadFiles.tsx";
 import UploadHistory from "../components/UploadFiles/UploadHistory.tsx";
 import HowTo from "../components/HowTo.tsx";
 import { useUserContext } from "../contexts/UserContexts.tsx";
@@ -59,8 +59,8 @@ function Upload() {
       <div className='flex justify-center align-middle center '>
         {returnStatusCode && returnStatusCode < 300 ? (
           <div>
-            <UploadHistory uploadHistorys={uploadHistory!} />
             <UploadFiles />
+            <UploadHistory uploadHistorys={uploadHistory!} />
           </div>
         ) : (
           <UploadFiles />

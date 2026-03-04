@@ -6,6 +6,9 @@ using WebApi.Models;
 namespace SpotifyLocalStats.Server.Models;
 
 [Index(nameof(TimeStamp), nameof(SpotifyTrackUri), nameof(UserId), IsUnique = true, Name = "IX_TsAndSpotifyUriAndUserId")]
+[Index(nameof(UserId), nameof(MasterMetadataArtistName), Name = "IX_ImportedTracks_UserId_ArtistName")]
+[Index(nameof(UserId), nameof(MasterMetadataAlbumName), Name = "IX_ImportedTracks_UserId_AlbumName")]
+[Index(nameof(UserId), nameof(MasterMetadataTrackName), Name = "IX_ImportedTracks_UserId_TrackName")]
 public class ImportedTrack
 { /*
       {

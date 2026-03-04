@@ -138,21 +138,21 @@ public static class Dependencies
                         (id, hour) => new AlbumTimeOfDayStat(id, hour, 1)
                     ));
         services.AddScoped<IAggregationHelpersService<AggregatedArtist, ArtistTimeOfDayStat>>(sp =>
-                    new AggregationHelperService<AggregatedArtist, ArtistTimeOfDayStat>(
-                        sp.GetRequiredService<ILogger<AggregationHelperService<AggregatedArtist, ArtistTimeOfDayStat>>>(),
+                    new ArtistAggregationHelperService(
+                        sp.GetRequiredService<ILogger<ArtistAggregationHelperService>>(),
                         sp.GetRequiredService<SpotifyStatsContext>(),
-                        artist => artist.MasterMetadataArtistName!, //group
-                        artist => artist.Artist.Name, // name
-                        tod => tod.TimeOfDay, // tod
+                        artist => artist.MasterMetadataArtistName!,
+                        artist => artist.Artist.Name,
+                        tod => tod.TimeOfDay,
                         (id, hour) => new ArtistTimeOfDayStat(id, hour, 1)
                     ));
         services.AddScoped<IAggregationHelpersService<AggregatedTrack, TrackTimeOfDayStat>>(sp =>
                     new AggregationHelperService<AggregatedTrack, TrackTimeOfDayStat>(
                         sp.GetRequiredService<ILogger<AggregationHelperService<AggregatedTrack, TrackTimeOfDayStat>>>(),
                         sp.GetRequiredService<SpotifyStatsContext>(),
-                        track => track.MasterMetadataTrackName!, //group
-                        track => track.Track.Name, // name
-                        tod => tod.TimeOfDay, // tod
+                        track => track.MasterMetadataTrackName!,
+                        track => track.Track.Name,
+                        tod => tod.TimeOfDay,
                         (id, hour) => new TrackTimeOfDayStat(id, hour, 1)
                     ));
         services.AddSingleton<ImportJobQueue>();

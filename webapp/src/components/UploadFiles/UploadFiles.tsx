@@ -1,21 +1,22 @@
-import { useUserContext } from "../contexts/UserContexts";
-import type { ImportTracksDto } from "../types/DTOs/ImportTrackDto";
-import type { ImportJobStatusDto } from "../types/DTOs/ImportJobStatusDto";
+import { useUserContext } from "../../contexts/UserContexts";
+import type { ImportTracksDto } from "../../types/DTOs/ImportTrackDto";
+import type { ImportJobStatusDto } from "../../types/DTOs/ImportJobStatusDto";
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { importApi } from "../services/api/importApi";
-import { apiClient } from "../services/api/apiClient";
-import type { ImportJobResponseDto } from "../types/DTOs/ImportJobResponseDto";
+import { importApi } from "../../services/api/importApi";
+import { apiClient } from "../../services/api/apiClient";
+import type { ImportJobResponseDto } from "../../types/DTOs/ImportJobResponseDto";
 import type { Axios, AxiosError } from "axios";
-import UploadPopupBox from "./UploadFiles/UploadPopupBox";
+import UploadPopupBox from "./UploadPopupBox";
 
 function UploadFiles() {
   const [tracksImport, setTracksImport] = useState<FileList | null>();
   const [fileInputKey, setFileInputKey] = useState<number>(0);
   const [uploadResult, setUploadResult] = useState<string>();
-  const [jobStatusEndpoint, setJobStatusEndpoint] = useState<string | null>();
-  const [jobStatus, setJobStatus] = useState<ImportJobStatusDto | null>();
+  const [jobStatusEndpoint, setJobStatusEndpoint] = useState<string[] | null>();
+  const [jobStatus, setJobStatus] = useState<ImportJobStatusDto[] | null>();
   const [loading, setLoading] = useState<Boolean>();
+  const [loadingJobStatus, setLoadingJobStatus] = useState<boolean>();
   const { user } = useUserContext();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -44,15 +45,20 @@ function UploadFiles() {
       console.log(formData.values());
       let res = await importApi.uploadTrack(formData);
 
+      console.log(res.data);
+
       setTracksImport(null);
       setFileInputKey((prev) => prev + 1);
 
       // accepted
       if (res.status === 202) {
-        setUploadResult(
-          "Import of file successful. Running task in Background",
-        );
-        setJobStatusEndpoint(res.data.StatusUrl);
+        setUploadResult("File Upload Began Succesfully");
+        const endpoints = res.data.map((jobStatus) => jobStatus.statusUrl);
+
+        if (endpoints.length === 0) {
+          return;
+        }
+        setJobStatusEndpoint(endpoints);
       }
     } catch (e) {
       setUploadResult("Error uploading files. Please try again");
@@ -63,23 +69,36 @@ function UploadFiles() {
   };
 
   useEffect(() => {
-    if (!jobStatusEndpoint) return;
-    if (jobStatus?.Status === "Completed" || jobStatus?.Status === "Failed") {
-      // job is finished in some way. we calll getUserBasicStats??
-      return;
-    }
+    if (!jobStatusEndpoint || jobStatusEndpoint.length === 0) return;
 
-    // poll that status until the job was either successful or failed.
+    console.log("Job status endpoint:", jobStatusEndpoint.length);
+    jobStatusEndpoint.map((url) => console.log("url: ", url));
+
     const interval = setInterval(async () => {
       try {
-        const res = await importApi.getJobStatus(jobStatusEndpoint);
-        setJobStatus(res.data);
+        const results = await Promise.all(
+          jobStatusEndpoint.map((url) => importApi.getJobStatus(url)),
+        );
+        const statuses = results.map((res) => res.data);
+        setJobStatus(statuses);
+
+        const allDone = statuses.every(
+          (s) =>
+            s.status === 2 || // completed
+            s.status === 3 || // failed
+            s.status === 4, // suplicated
+        );
+        if (allDone) {
+          clearInterval(interval);
+          setJobStatusEndpoint(null);
+        }
       } catch (e) {
         console.error(e);
-      } finally {
       }
-    }, 20000);
-  }, [jobStatusEndpoint, jobStatus]);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [jobStatusEndpoint]);
 
   const handleClear = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -88,7 +107,11 @@ function UploadFiles() {
 
   return (
     <>
-      {uploadResult && <UploadPopupBox uploadResult={uploadResult} />}
+      {/*Upload Popup box*/}
+      {uploadResult && jobStatus && (
+        <UploadPopupBox uploadResult={uploadResult} uploadStatus={jobStatus} />
+      )}
+
       <form
         onSubmit={handleSubmit}
         className='flex items-center justify-center align-middle'

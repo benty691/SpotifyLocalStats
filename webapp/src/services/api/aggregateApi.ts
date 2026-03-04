@@ -11,6 +11,8 @@ const endpointMap: Record<AggregateEntity, string> = {
 };
 
 export const aggregateApi = {
-  getAggregate: (entity: AggregateEntity, userId: Guid) =>
-    apiClient.get<AggregateBaseDto[]>(`/${endpointMap[entity]}/${userId}`),
+  getAggregate: (entity: AggregateEntity, userId: Guid, pageNumber: number) =>
+    apiClient.get<AggregateBaseDto[]>(
+      `/${endpointMap[entity]}/${userId}/${pageNumber}`,
+    ),
 };

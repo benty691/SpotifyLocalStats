@@ -1,10 +1,8 @@
-import type { Guid } from "guid-typescript";
-
 export interface ImportJobStatusDto {
-  JobId: Guid;
-  Status: string;
-  ProgressPercent: number;
-  ErrorMessage: string;
-  CreatedAt: string;
-  CompletedAt: string;
+  jobId: string;
+  status: number;
+  progressPercent: number;
+  errorMessage: string;
+  createdAt: string | null;
+  completedAt: string | null;
 }

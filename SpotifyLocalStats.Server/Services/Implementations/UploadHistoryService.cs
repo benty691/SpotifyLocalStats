@@ -25,7 +25,8 @@ public class UploadHistoryService : IUploadHistoryService
             CreatedAt = x.CreatedAt,
             FileName = x.FileName,
             ImportedTrackCount = _context.ImportedTracks
-                .Count(t => t.UploadHistoryId == x.Id)
+                .Count(t => t.UploadHistoryId == x.Id),
+            Id = x.Id
         })
         .ToListAsync();
     }

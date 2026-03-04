@@ -22,8 +22,8 @@ public class AggregateAlbumController : BaseApiController
         _userService = userService;
     }
 
-    [HttpGet("{userId}")]
-    public async Task<ActionResult<List<AggregateAlbumDto>>> GetAggregateAlbum(string userId)
+    [HttpGet("{userId}/{pageNumber}")]
+    public async Task<ActionResult<List<AggregateAlbumDto>>> GetAggregateAlbum(string userId, int pageNumber)
     {
         if (!Guid.TryParse(userId, out var id))
         {
@@ -39,9 +39,9 @@ public class AggregateAlbumController : BaseApiController
 
         try
         {
-            var aggArtists = await _userAggregateService.GetAggregate(user);
+            var aggArtists = await _userAggregateService.GetAggregate(user, pageNumber);
 
-            return aggArtists == null ? StatusCode((int)HttpStatusCode.NotFound, $"User Aggregate Album Stats not found for userId: {userId}") : Ok(aggArtists);
+            return (aggArtists == null) ? StatusCode((int)HttpStatusCode.NotFound, $"User Aggregate Album Stats not found for userId: {userId}") : Ok(aggArtists);
         }
         catch (ArgumentException ex)
         {

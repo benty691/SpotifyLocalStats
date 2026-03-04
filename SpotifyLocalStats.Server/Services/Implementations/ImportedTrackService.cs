@@ -21,9 +21,9 @@ public class ImportedTrackService : IImportedTrackService
     {
         var trackList = await ValidateIncomingJson(json);
         var updatedTrackList = await AssignUserAndUpload(trackList, user, file);
-        await SaveTracksToDb(updatedTrackList, user);
+        var newTracks = await SaveTracksToDb(updatedTrackList, user);
 
-        return updatedTrackList;
+        return newTracks;
     }
 
     public async Task<IEnumerable<ImportedTrack>> ValidateIncomingJson(string json)
@@ -68,9 +68,8 @@ public class ImportedTrackService : IImportedTrackService
         return importedTracks;
     }
 
-    public async Task<int> SaveTracksToDb(IEnumerable<ImportedTrack> importedTracks, User user)
+    public async Task<List<ImportedTrack>> SaveTracksToDb(IEnumerable<ImportedTrack> importedTracks, User user)
     {
-
         // De-duplicate incoming trackList
         var uniqueImportedTracks = importedTracks
             .GroupBy(t => new { t.TimeStamp, t.SpotifyTrackUri })
@@ -84,11 +83,11 @@ public class ImportedTrackService : IImportedTrackService
         }
 
         // fresh import
-        if (_spotifyStatsContext.ImportedTracks.Count() == 0)
+        if (!_spotifyStatsContext.ImportedTracks.Any(x => x.UserId == user.Id))
         {
             await _spotifyStatsContext.ImportedTracks.AddRangeAsync(uniqueImportedTracks);
-            var newTracksImported = await _spotifyStatsContext.SaveChangesAsync();
-            return newTracksImported;
+            await _spotifyStatsContext.SaveChangesAsync();
+            return uniqueImportedTracks;
         }
 
         var existingKeys = _spotifyStatsContext.ImportedTracks
@@ -103,12 +102,10 @@ public class ImportedTrackService : IImportedTrackService
         if (newTracks.Any())
         {
             await _spotifyStatsContext.ImportedTracks.AddRangeAsync(newTracks);
+            await _spotifyStatsContext.SaveChangesAsync();
         }
 
-        var numberOfRecordsSaved = await _spotifyStatsContext.SaveChangesAsync();
-        var recordsSkipped = importedTracks.Count() - numberOfRecordsSaved;
-
-        _logger.LogInformation($"Saved {numberOfRecordsSaved} imported tracks to database. {recordsSkipped} were skipped due to rule unique enforcment");
-        return numberOfRecordsSaved;
+        _logger.LogInformation($"Saved {newTracks.Count} imported tracks to database. {uniqueImportedTracks.Count - newTracks.Count} were skipped as duplicates");
+        return newTracks;
     }
 }

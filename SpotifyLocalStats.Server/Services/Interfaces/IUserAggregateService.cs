@@ -5,5 +5,5 @@ namespace WebApi.Services.Interfaces;
 
 public interface IUserAggregateService<TAggregateDto> where TAggregateDto : AggregateBaseDto
 {
-    Task<List<TAggregateDto>> GetAggregate(User user);
+    Task<List<TAggregateDto>> GetAggregate(User user, int pageNumber);
 }

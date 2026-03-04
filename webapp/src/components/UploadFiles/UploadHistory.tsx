@@ -12,7 +12,10 @@ function UploadHistory({
         <h3>Upload History</h3>
         <div>
           {uploadHistorys.map((uploadHistory) => (
-            <UploadHistoryCard uploadHistory={uploadHistory} />
+            <UploadHistoryCard
+              uploadHistory={uploadHistory}
+              key={uploadHistory.id.toString()}
+            />
           ))}
         </div>
       </div>

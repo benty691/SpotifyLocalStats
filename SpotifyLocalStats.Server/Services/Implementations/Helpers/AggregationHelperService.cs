@@ -9,29 +9,27 @@ namespace WebApi.Services.Implementations.Helpers;
 
 
 // I want to mkae the type of this class (album, track, artits) a generic sop we consolidate three classes into one.. 
-public sealed class AggregationHelperService<TAggregate, TTimeOfDay> : IAggregationHelpersService<TAggregate, TTimeOfDay>
+public class AggregationHelperService<TAggregate, TTimeOfDay> : IAggregationHelpersService<TAggregate, TTimeOfDay>
     where TAggregate : AggregateBase
     where TTimeOfDay : TimeOfDayStat<TAggregate>
 {
-    private readonly ILogger<AggregationHelperService<TAggregate, TTimeOfDay>> _logger;
-    private readonly SpotifyStatsContext _context;
+    protected ILogger _logger;
+    protected readonly SpotifyStatsContext _context;
     private Func<TAggregate, string> _aggregateNameSelector;
     private Func<TTimeOfDay, int> _timeofDayNameSelector;
     private Expression<Func<ImportedTrack, string>> _groupSelector;
     private Func<Guid, int, TTimeOfDay> _timeOfDayFactory;
 
-
-    private List<TAggregate> _aggregates = new List<TAggregate>();
-    private List<TTimeOfDay> _timeOfDayStats = new List<TTimeOfDay>();
+    protected List<TAggregate> _aggregates = new List<TAggregate>();
+    protected List<TTimeOfDay> _timeOfDayStats = new List<TTimeOfDay>();
 
     public AggregationHelperService(
-        ILogger<AggregationHelperService<TAggregate,
-        TTimeOfDay>> logger, SpotifyStatsContext context,
+        ILogger logger,
+        SpotifyStatsContext context,
         Expression<Func<ImportedTrack, string>> groupSelector,
         Func<TAggregate, string> aggregateNameSelector,
         Func<TTimeOfDay, int> timeOfDayNameSelector,
-        Func<Guid, int, TTimeOfDay> timeOfDayFactory
-        )
+        Func<Guid, int, TTimeOfDay> timeOfDayFactory)
     {
         _logger = logger;
         _context = context;
@@ -41,20 +39,21 @@ public sealed class AggregationHelperService<TAggregate, TTimeOfDay> : IAggregat
         _timeOfDayFactory = timeOfDayFactory;
     }
 
-    private async Task InitializeAsync()
+    protected virtual async Task InitializeAsync(Guid userId)
     {
-        _aggregates = await _context.Set<TAggregate>().ToListAsync(); // will have to look into this 
-        _timeOfDayStats = await _context.Set<TTimeOfDay>().ToListAsync();
+        _aggregates = await _context.Set<TAggregate>().Where(x => x.UserId == userId).ToListAsync();
 
         if (!_aggregates.Any())
-        {
             throw new InvalidOperationException($"No aggregates for type {typeof(TAggregate)} found.");
-        }
+
+        var existing = await _context.Set<TTimeOfDay>().Where(x => x.Aggregate.UserId == userId).ToListAsync();
+        _context.Set<TTimeOfDay>().RemoveRange(existing);
+        _timeOfDayStats = new List<TTimeOfDay>();
     }
 
-    public async Task RunCalculations(Guid userId)
+    public virtual async Task RunCalculations(Guid userId)
     {
-        await InitializeAsync();
+        await InitializeAsync(userId);
 
         var modelGroups = await _context.ImportedTracks
             .Where(x => x.UserId == userId)
@@ -97,66 +96,60 @@ public sealed class AggregationHelperService<TAggregate, TTimeOfDay> : IAggregat
 
     private async Task CalculateMostTimesIn24Hours(Guid userId, List<IGrouping<string, ImportedTrack>> modelGroups, Dictionary<string, TAggregate> aggregateDict)
     {
-        var playsIn24Hours = 1;
-
-        foreach (var modelGroup in modelGroups)
-        {
-            var orderedAlbums = modelGroup
-                .Select(x => x.TimeStamp)
-                .OrderBy(x => x)
-                .ToList();
-
-            foreach (var track in modelGroup)
-            {
-                if (!aggregateDict.TryGetValue(modelGroup.Key!, out var aggregate))
-                    continue;
-
-                var trackTime = track.TimeStamp;
-                var startTime = trackTime.AddHours(-24);
-                var nextPlaysIn24Hours = modelGroup
-                    .Where(x => x.TimeStamp >= startTime && x.TimeStamp < trackTime)
-                    .Count();
-
-                if (nextPlaysIn24Hours > playsIn24Hours)
-                {
-                    playsIn24Hours = nextPlaysIn24Hours;
-                }
-
-                aggregate.MostTimesIn24Hours = playsIn24Hours;
-            }
-        }
-    }
-
-    private void TimeOfDayStats(Guid userId, List<IGrouping<string, ImportedTrack>> modelGroups, Dictionary<string, TAggregate> aggregateDict)
-    {
         foreach (var modelGroup in modelGroups)
         {
             if (!aggregateDict.TryGetValue(modelGroup.Key!, out var aggregate))
                 continue;
 
-            var pre = _timeOfDayStats
-                .Where(x => x.AggregateId == aggregate.Id);
+            var timestamps = modelGroup
+                .Select(x => x.TimeStamp)
+                .OrderBy(x => x)
+                .ToList();
 
-            var local = _context.Set<TTimeOfDay>().Local
-                .Where(x => x.AggregateId == aggregate.Id);
+            var left = 0;
+            var maxPlays = 1;
+            var window = TimeSpan.FromHours(24);
 
-            var timeOfDayDict = pre
-                .Concat(local)
-                .GroupBy(x => _timeofDayNameSelector(x))
-                .ToDictionary(g => g.Key, g => g.First());
-
-            foreach (var timeOfDay in modelGroup.Select(x => x.TimeStamp))
+            for (var right = 0; right < timestamps.Count; right++)
             {
-                if (!timeOfDayDict.TryGetValue(timeOfDay.Hour, out var timeOfDayStat))
+                while (timestamps[right] - timestamps[left] >= window)
+                    left++;
+
+                var windowSize = right - left + 1;
+                if (windowSize > maxPlays)
+                    maxPlays = windowSize;
+            }
+
+            aggregate.MostTimesIn24Hours = maxPlays;
+        }
+    }
+
+    private void TimeOfDayStats(Guid userId, List<IGrouping<string, ImportedTrack>> modelGroups, Dictionary<string, TAggregate> aggregateDict)
+    {
+        var timeOfDayDict = _timeOfDayStats.ToDictionary(x => (x.TimeOfDay, x.Aggregate.Id), x => x);
+
+        foreach (var modelGroup in modelGroups)
+        {
+            if (!aggregateDict.TryGetValue(modelGroup.Key!, out var aggregate))
+                continue;
+
+            var countPerHour = modelGroup
+                .GroupBy(x => x.TimeStamp.Hour)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            foreach (var (hour, count) in countPerHour)
+            {
+                if (!timeOfDayDict.TryGetValue((hour, aggregate.Id), out var timeOfDayStat))
                 {
-                    var newTimeOfDay = _timeOfDayFactory(aggregate.Id, timeOfDay.Hour);
+                    var newTimeOfDay = _timeOfDayFactory(aggregate.Id, hour);
+                    newTimeOfDay.PlayCount = count;
                     newTimeOfDay.Aggregate = aggregate;
                     _context.Set<TTimeOfDay>().Add(newTimeOfDay);
-                    timeOfDayDict[timeOfDay.Hour] = newTimeOfDay;
+                    timeOfDayDict[(hour, aggregate.Id)] = newTimeOfDay;
                 }
                 else
                 {
-                    timeOfDayStat.PlayCount += 1;
+                    timeOfDayStat.PlayCount = count;
                     timeOfDayStat.LastUpdatedAt = DateTime.UtcNow;
                 }
             }

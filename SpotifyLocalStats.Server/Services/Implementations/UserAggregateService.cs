@@ -27,17 +27,27 @@ public class UserAggregateService<TAggregate, TAggregateDto> : IUserAggregateSer
         _mapper = mapper;
     }
 
-    public async Task<List<TAggregateDto>> GetAggregate(User user)
+    public async Task<List<TAggregateDto>> GetAggregate(User user, int pageNumber)
     {
         var query = _context.Set<TAggregate>()
             .Where(x => x.UserId == user.Id);
 
         query = _includeBuilder(query);
 
+        const int pageSize = 50;
+
+        var totalCount = await query.CountAsync();
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+        var clampedPage = Math.Clamp(pageNumber, 1, Math.Max(1, totalPages));
+
         var aggregates = await query
             .OrderByDescending(x => x.PlayCount)
+            .Skip(pageSize * (clampedPage - 1))
+            .Take(pageSize)
             .ToListAsync();
 
+        //return //new AggergateRespnseDto<AggregateArtistDto>() { Aggregate =
         return aggregates.Select(_mapper).ToList();
+        //, RecordCount = totalCount };
     }
 }

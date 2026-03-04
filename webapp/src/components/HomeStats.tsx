@@ -2,7 +2,7 @@ import StatsCard from "./StatsCard";
 import { useState, useEffect, useContext } from "react";
 import { useUserContext } from "../contexts/UserContexts";
 import LoginPopup from "./LoginPopup";
-import UploadFiles from "./UploadFiles";
+import UploadFiles from "./UploadFiles/UploadFiles";
 import Welcome from "./HomeComponents/Welcome";
 
 import type { ApiError } from "../types/ApiError";

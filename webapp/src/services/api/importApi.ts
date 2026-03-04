@@ -8,8 +8,8 @@ import type { ImportJobResponseDto } from "../../types/DTOs/ImportJobResponseDto
 export const importApi = {
   uploadTrack: async (
     formData: FormData,
-  ): Promise<AxiosResponse<ImportJobResponseDto>> =>
-    apiClient.post<ImportJobResponseDto>("/ImportTracks", formData),
+  ): Promise<AxiosResponse<ImportJobResponseDto[]>> =>
+    apiClient.post<ImportJobResponseDto[]>("/ImportTracks", formData),
   getJobStatus: async (endpoint: string) =>
     apiClient.get<ImportJobStatusDto>(endpoint),
 };

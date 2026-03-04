@@ -34,22 +34,30 @@ namespace WebApi.Services.Implementations
 
             try
             {
-                var trackList = await _importedTrackService.HandleImport(json, user, file);
+                var newTracks = await _importedTrackService.HandleImport(json, user, file);
                 job.ProgressPercent = 10;
                 await _context.SaveChangesAsync();
 
-                var result = await _modelPopulationService.PopulateModelsFromImportedTracks(trackList);
+                if (!newTracks.Any())
+                {
+                    job.Status = Models.Jobs.JobStatus.Duplicate;
+                    job.CompletedAt = DateTime.UtcNow;
+                    job.ErrorMessage = "All tracks in this file have already been imported.";
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return new ImportTracksDTO();
+                }
+
+                var result = await _modelPopulationService.PopulateModelsFromImportedTracks(newTracks);
                 job.ProgressPercent = 55;
                 await _context.SaveChangesAsync();
 
-                await _aggreationService.UpdateAggregatedDataForUser(user, trackList);
+                await _aggreationService.UpdateAggregatedDataForUser(user, newTracks);
                 job.ProgressPercent = 100;
                 job.Status = Models.Jobs.JobStatus.Completed;
                 job.CompletedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
 
-                // return amount of records processed, few other smaller details, via a dto creation? 
-                // maybe return loading until processing is finished?
                 await transaction.CommitAsync();
 
                 return result;

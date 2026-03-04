@@ -8,7 +8,7 @@ namespace WebApi.Services.Interfaces
         Task<IEnumerable<ImportedTrack>> HandleImport(string json, User user, IFormFile file);
         Task<IEnumerable<ImportedTrack>> ValidateIncomingJson(string json);
         Task<IEnumerable<ImportedTrack>> AssignUserAndUpload(IEnumerable<ImportedTrack> importedTracks, User user, IFormFile file);
-        Task<int> SaveTracksToDb(IEnumerable<ImportedTrack> importedTracks, User user);
+        Task<List<ImportedTrack>> SaveTracksToDb(IEnumerable<ImportedTrack> importedTracks, User user);
 
     }
 }

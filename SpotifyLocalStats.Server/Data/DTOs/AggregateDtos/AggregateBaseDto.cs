@@ -15,5 +15,6 @@ public class AggregateBaseDto
     public DateTime LongestDrySpellStart { get; set; }
     public DateTime LongestDrySpellEnd { get; set; }
     public int MostTimesIn24Hours { get; set; }
+    public int TotalRecords { get; set; }
 
 }

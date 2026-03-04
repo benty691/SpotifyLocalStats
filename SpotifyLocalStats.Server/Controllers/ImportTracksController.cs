@@ -24,7 +24,9 @@ public class ImportTracksController : BaseApiController
     }
 
     [HttpPost]
-    public async Task<ActionResult<ImportJobStatus>> ImportTracks([FromForm] string userId, [FromForm] List<IFormFile> files)
+    [RequestSizeLimit(500_000_000)] // 500 MB
+    [RequestFormLimits(MultipartBodyLengthLimit = 500_000_000)]
+    public async Task<ActionResult<List<ImportJobStatus>>> ImportTracks([FromForm] string userId, [FromForm] List<IFormFile> files)
     {
         if (!Guid.TryParse(userId, out var id))
         {
