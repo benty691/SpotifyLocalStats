@@ -1,11 +1,11 @@
 ﻿namespace WebApi.Data.DTOs
 {
-    public class ImportTracksDTO
+    public class ImportTrackResponseDto
     {
-        public ImportTracksDTO() 
+        public ImportTrackResponseDto()
         {
-            ImportedAt = DateTime.UtcNow; 
-        }    
+            ImportedAt = DateTime.UtcNow;
+        }
 
         public int ArtistCount { get; set; }
         public int AlbumCount { get; set; }

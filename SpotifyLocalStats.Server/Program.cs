@@ -1,8 +1,5 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using SpotifyLocalStats.Server.Data;
 using WebApi.Config;
-using WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +13,8 @@ var baseUrlConfig = configSection.Get<BaseUrlConfiguration>();
 builder.Services.AddMemoryCache();
 builder.Services.AddControllers();
 builder.Logging.AddConsole();
-builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 builder.Services.AddLogging(builder => builder.AddConsole());
 builder.Configuration.AddEnvironmentVariables();
 
@@ -31,6 +29,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+
 //builder.Configuration.AddConfiguration("appsettings.test.json");
 var app = builder.Build();
 
@@ -42,12 +41,18 @@ app.Logger.LogInformation("Backend App created...");
 app.UseDefaultFiles();
 app.MapStaticAssets();
 
+app.UseRouting();
+app.UseCors("AllowViteDevServer");
+app.UseAuthorization();
+
+app.MapControllers();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.UseDeveloperExceptionPage();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 if (app.Environment.IsProduction())
@@ -55,11 +60,8 @@ if (app.Environment.IsProduction())
     app.UseHttpsRedirection();
 }
 
-app.UseRouting();
-app.UseCors("AllowViteDevServer");
-app.UseAuthorization();
-app.MapControllers();
-app.MapFallbackToFile("/index.html");
+
 
 app.Logger.LogInformation("LAUNCHING Backend");
 app.Run();
+

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AggregateDetailCard from "./AggregateDetailCard";
 import AggregateTable from "./AggregateTable";
 import type { AxiosError } from "axios";
@@ -15,6 +15,8 @@ const entityLabel: Record<AggregateEntity, string> = {
   album: "Album",
 };
 
+const aggregatesPerPage = 50;
+
 function AggregatePage({ entity }: { entity: AggregateEntity }) {
   const { user } = useUserContext();
 
@@ -25,6 +27,7 @@ function AggregatePage({ entity }: { entity: AggregateEntity }) {
   const [aggregates, setAggregates] = useState<AggregateBaseDto[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [statusCode, setStatusCode] = useState<number>();
+  const [aggregateCount, setAggregateCount] = useState<number>();
 
   useEffect(() => {
     const fetchAggregates = async () => {
@@ -38,14 +41,18 @@ function AggregatePage({ entity }: { entity: AggregateEntity }) {
           pageNumber,
         );
 
-        const aggregates = res.data as AggregateBaseDto[];
+        const aggregates = res.data.aggregate as AggregateBaseDto[];
+
+        setAggregateCount(res.data.recordCount);
+        console.log(aggregateCount);
+        console.log(aggregates.map((value) => value.name));
 
         if (!aggregates?.length) {
           setTopAggregate(null);
           setAggregates(null);
         } else {
           if (pageNumber === 1) setTopAggregate(aggregates[0]);
-          setAggregates((prev) => [...aggregates, ...(prev ?? [])]);
+          setAggregates((prev) => [...(prev ?? []), ...aggregates]);
         }
       } catch (e) {
         const error = e as AxiosError;
@@ -57,25 +64,41 @@ function AggregatePage({ entity }: { entity: AggregateEntity }) {
     };
 
     fetchAggregates();
-  }, [pageNumber, user, entity]);
+  }, [pageNumber, entity, user]);
 
   return (
-    <div className='flex flex-col items-center gap-10 py-10 w-9/10 mx-auto'>
-      {topAggregate && (
-        <AggregateDetailCard
-          aggregate={topAggregate}
-          entityLabel={entityLabel[entity]}
-        />
-      )}
-      {aggregates && <AggregateTable aggregates={aggregates} />}
-      <button
-        onClick={() => setPageNumber(pageNumber + 1)}
-        disabled={loading}
-        className="px-6 py-2.5 rounded-xl border border-border text-sm font-semibold text-text-secondary hover:text-text-primary hover:border-accent-coral/40 hover:bg-surface transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-      >
-        {loading ? "Loading…" : "Load More"}
-      </button>
-    </div>
+    <>
+      {/*top details card*/}
+      <div className='flex flex-col items-center gap-10 py-10 w-9/10 mx-auto'>
+        <div>
+          {!statusCode && topAggregate && (
+            <AggregateDetailCard
+              aggregate={topAggregate}
+              entityLabel={entityLabel[entity]}
+            />
+          )}
+          {!statusCode && aggregates && (
+            <AggregateTable aggregates={aggregates} />
+          )}
+        </div>
+        {/*Load more Button*/}
+        <div>
+          {aggregateCount && aggregateCount > pageNumber * aggregatesPerPage ? (
+            <div>
+              <button
+                onClick={() => setPageNumber(pageNumber + 1)}
+                disabled={loading}
+                className='px-6 py-2.5 rounded-xl border border-border text-sm font-semibold text-text-secondary hover:text-text-primary hover:border-accent-coral/40 hover:bg-surface transition-colors disabled:opacity-40 disabled:cursor-not-allowed'
+              >
+                {loading ? "Loading…" : "Load More"}
+              </button>
+            </div>
+          ) : (
+            <div></div>
+          )}
+        </div>
+      </div>
+    </>
   );
 }
 

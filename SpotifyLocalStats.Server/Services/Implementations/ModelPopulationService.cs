@@ -18,13 +18,13 @@ public sealed class ModelPopulationService : IModelPopulationService
 
 
     // we need to retunr a list of succesfulkly saved records from each tables, so maybe create a new class represnting this retunr type.. 
-    public async Task<ImportTracksDTO> PopulateModelsFromImportedTracks(IEnumerable<ImportedTrack> tracks)
+    public async Task<ImportTrackResponseDto> PopulateModelsFromImportedTracks(IEnumerable<ImportedTrack> tracks)
     {
         var artistCount = await GenerateArtist(tracks);
         var albumCount = await GenerateAlbum(tracks);
         var trackCount = await GenerateTrack(tracks);
 
-        return new ImportTracksDTO() { AlbumCount = albumCount, ArtistCount = artistCount.Item2, TrackCount = trackCount };
+        return new ImportTrackResponseDto() { AlbumCount = albumCount, ArtistCount = artistCount.Item2, TrackCount = trackCount };
     }
 
 

@@ -128,15 +128,7 @@ public static class Dependencies
                 }
             ));
         services.AddScoped<IUploadHistoryService, UploadHistoryService>();
-        services.AddScoped<IAggregationHelpersService<AggregatedAlbum, AlbumTimeOfDayStat>>(sp =>
-                    new AggregationHelperService<AggregatedAlbum, AlbumTimeOfDayStat>(
-                        sp.GetRequiredService<ILogger<AggregationHelperService<AggregatedAlbum, AlbumTimeOfDayStat>>>(),
-                        sp.GetRequiredService<SpotifyStatsContext>(),
-                        album => album.MasterMetadataAlbumName!,
-                        album => album.Album.Name,
-                        tod => tod.TimeOfDay,
-                        (id, hour) => new AlbumTimeOfDayStat(id, hour, 1)
-                    ));
+
         services.AddScoped<IAggregationHelpersService<AggregatedArtist, ArtistTimeOfDayStat>>(sp =>
                     new ArtistAggregationHelperService(
                         sp.GetRequiredService<ILogger<ArtistAggregationHelperService>>(),
@@ -146,9 +138,19 @@ public static class Dependencies
                         tod => tod.TimeOfDay,
                         (id, hour) => new ArtistTimeOfDayStat(id, hour, 1)
                     ));
+        services.AddScoped<IAggregationHelpersService<AggregatedAlbum, AlbumTimeOfDayStat>>(sp =>
+                    new AlbumAggregationHelperService(
+                        sp.GetRequiredService<ILogger<AlbumAggregationHelperService>>(),
+                        sp.GetRequiredService<SpotifyStatsContext>(),
+                        album => album.MasterMetadataAlbumName!,
+                        album => album.Album.Name,
+                        tod => tod.TimeOfDay,
+                        (id, hour) => new AlbumTimeOfDayStat(id, hour, 1)
+                    ));
+
         services.AddScoped<IAggregationHelpersService<AggregatedTrack, TrackTimeOfDayStat>>(sp =>
-                    new AggregationHelperService<AggregatedTrack, TrackTimeOfDayStat>(
-                        sp.GetRequiredService<ILogger<AggregationHelperService<AggregatedTrack, TrackTimeOfDayStat>>>(),
+                    new TrackAggregationHelperService(
+                        sp.GetRequiredService<ILogger<TrackAggregationHelperService>>(),
                         sp.GetRequiredService<SpotifyStatsContext>(),
                         track => track.MasterMetadataTrackName!,
                         track => track.Track.Name,

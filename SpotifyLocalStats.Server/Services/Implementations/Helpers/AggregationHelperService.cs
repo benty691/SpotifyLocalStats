@@ -42,13 +42,14 @@ public class AggregationHelperService<TAggregate, TTimeOfDay> : IAggregationHelp
     protected virtual async Task InitializeAsync(Guid userId)
     {
         _aggregates = await _context.Set<TAggregate>().Where(x => x.UserId == userId).ToListAsync();
+        _timeOfDayStats = await _context.Set<TTimeOfDay>()
+            .Where(x => x.Aggregate.UserId == userId)
+            .ToListAsync();
 
         if (!_aggregates.Any())
+        {
             throw new InvalidOperationException($"No aggregates for type {typeof(TAggregate)} found.");
-
-        var existing = await _context.Set<TTimeOfDay>().Where(x => x.Aggregate.UserId == userId).ToListAsync();
-        _context.Set<TTimeOfDay>().RemoveRange(existing);
-        _timeOfDayStats = new List<TTimeOfDay>();
+        }
     }
 
     public virtual async Task RunCalculations(Guid userId)
@@ -126,30 +127,29 @@ public class AggregationHelperService<TAggregate, TTimeOfDay> : IAggregationHelp
 
     private void TimeOfDayStats(Guid userId, List<IGrouping<string, ImportedTrack>> modelGroups, Dictionary<string, TAggregate> aggregateDict)
     {
-        var timeOfDayDict = _timeOfDayStats.ToDictionary(x => (x.TimeOfDay, x.Aggregate.Id), x => x);
+        var timeOfDayDict = _timeOfDayStats.Where(x => x.Aggregate.UserId == userId).ToDictionary(x => (x.TimeOfDay, x.Aggregate.Id), x => x);
+
+        //model gorup is an 'artist' group ie list of imported tracks of a single artist
+        //model gorup is an 'track' group ie list of imported tracks of a single track
+        //model gorup is an 'album' group ie list of imported tracks of a single album
 
         foreach (var modelGroup in modelGroups)
         {
             if (!aggregateDict.TryGetValue(modelGroup.Key!, out var aggregate))
                 continue;
 
-            var countPerHour = modelGroup
-                .GroupBy(x => x.TimeStamp.Hour)
-                .ToDictionary(g => g.Key, g => g.Count());
-
-            foreach (var (hour, count) in countPerHour)
+            foreach (var track in modelGroup)
             {
-                if (!timeOfDayDict.TryGetValue((hour, aggregate.Id), out var timeOfDayStat))
+                if (!timeOfDayDict.TryGetValue((track.TimeStamp.Hour, aggregate.Id), out var timeOfDayStat))
                 {
-                    var newTimeOfDay = _timeOfDayFactory(aggregate.Id, hour);
-                    newTimeOfDay.PlayCount = count;
+                    var newTimeOfDay = _timeOfDayFactory(aggregate.Id, track.TimeStamp.Hour);
                     newTimeOfDay.Aggregate = aggregate;
                     _context.Set<TTimeOfDay>().Add(newTimeOfDay);
-                    timeOfDayDict[(hour, aggregate.Id)] = newTimeOfDay;
+                    timeOfDayDict[(track.TimeStamp.Hour, aggregate.Id)] = newTimeOfDay;
                 }
                 else
                 {
-                    timeOfDayStat.PlayCount = count;
+                    timeOfDayStat.PlayCount += 1;
                     timeOfDayStat.LastUpdatedAt = DateTime.UtcNow;
                 }
             }

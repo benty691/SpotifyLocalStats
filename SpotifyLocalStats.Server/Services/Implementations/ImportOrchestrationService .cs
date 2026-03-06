@@ -27,7 +27,7 @@ namespace WebApi.Services.Implementations
             await Orchestrate(json, file, user, jobId, cancellationToken);
         }
 
-        private async Task<ImportTracksDTO> Orchestrate(string json, IFormFile file, User user, Guid jobId, CancellationToken cancellationToken)
+        private async Task<ImportTrackResponseDto> Orchestrate(string json, IFormFile file, User user, Guid jobId, CancellationToken cancellationToken)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
             var job = _context.ImportJobStatuses.Find(jobId);
@@ -45,7 +45,7 @@ namespace WebApi.Services.Implementations
                     job.ErrorMessage = "All tracks in this file have already been imported.";
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
-                    return new ImportTracksDTO();
+                    return new ImportTrackResponseDto();
                 }
 
                 var result = await _modelPopulationService.PopulateModelsFromImportedTracks(newTracks);

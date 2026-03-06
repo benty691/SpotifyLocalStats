@@ -5,7 +5,7 @@ namespace WebApi.Services.Interfaces;
 
 public interface IModelPopulationService
 {
-    Task<ImportTracksDTO> PopulateModelsFromImportedTracks(IEnumerable<ImportedTrack> tracks);
+    Task<ImportTrackResponseDto> PopulateModelsFromImportedTracks(IEnumerable<ImportedTrack> tracks);
     /*
     Task GenerateArtist(IEnumerable<ImportedTrack> tracks);
     Task GenerateAlbum(IEnumerable<ImportedTrack> tracks);

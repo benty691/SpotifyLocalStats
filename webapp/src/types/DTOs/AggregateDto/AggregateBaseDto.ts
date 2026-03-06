@@ -1,6 +1,6 @@
 import type { TimeOfDayStatDto } from "./../TimeOfDayDtos";
 
-export type AggregateBaseDto = {
+export interface AggregateBaseDto {
   name: string;
   playCount: number;
   minsListened: number;
@@ -15,4 +15,4 @@ export type AggregateBaseDto = {
   longestDrySpellEnd: Date;
   mostTimesIn24Hours: number;
   timeOfDayStats: TimeOfDayStatDto<AggregateBaseDto>[];
-};
+}

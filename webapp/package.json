@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate-api": "nswag openapi2tsclient /input:https://localhost:7102/swagger/v1/swagger.json /output:src/api/generated.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",

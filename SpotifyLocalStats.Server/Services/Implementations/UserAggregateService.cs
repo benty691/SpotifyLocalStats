@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
+using WebApi.Data.DTOs.AggregateDtos;
 using WebApi.Data.DTOs.NewFolder;
 using WebApi.Services.Interfaces;
 
@@ -27,7 +28,7 @@ public class UserAggregateService<TAggregate, TAggregateDto> : IUserAggregateSer
         _mapper = mapper;
     }
 
-    public async Task<List<TAggregateDto>> GetAggregate(User user, int pageNumber)
+    public async Task<AggregateResponseDto<TAggregateDto>> GetAggregate(User user, int pageNumber)
     {
         var query = _context.Set<TAggregate>()
             .Where(x => x.UserId == user.Id);
@@ -46,8 +47,6 @@ public class UserAggregateService<TAggregate, TAggregateDto> : IUserAggregateSer
             .Take(pageSize)
             .ToListAsync();
 
-        //return //new AggergateRespnseDto<AggregateArtistDto>() { Aggregate =
-        return aggregates.Select(_mapper).ToList();
-        //, RecordCount = totalCount };
+        return new AggregateResponseDto<TAggregateDto>() { Aggregate = aggregates.Select(_mapper).ToList(), RecordCount = totalCount };
     }
 }

@@ -1,4 +1,4 @@
-import AggregatePage from "../components/AggregateComponents/AggregatePage";
+import AggregatePage from "../../components/AggregateComponents/AggregatePage";
 
 function Artists() {
   return <AggregatePage entity='artist' />;
