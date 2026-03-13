@@ -1,6 +1,7 @@
 using SpotifyLocalStats.Server.Data;
 using WebApi.Config;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // todo : move this to diffferent folder
@@ -16,7 +17,9 @@ builder.Logging.AddConsole();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddLogging(builder => builder.AddConsole());
+
 builder.Configuration.AddEnvironmentVariables();
+
 
 builder.Services.AddCors(options =>
 {
@@ -37,6 +40,8 @@ app.Logger.LogInformation("Backend App created...");
 
 // need to check has there been a user created, if there has, nothing, else create one. 
 //var user = Dependencies.DoesUserExist(builder.Services);
+
+
 
 app.UseDefaultFiles();
 app.MapStaticAssets();
@@ -60,8 +65,5 @@ if (app.Environment.IsProduction())
     app.UseHttpsRedirection();
 }
 
-
-
-app.Logger.LogInformation("LAUNCHING Backend");
 app.Run();
 

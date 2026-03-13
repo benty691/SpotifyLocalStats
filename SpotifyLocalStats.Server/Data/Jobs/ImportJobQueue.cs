@@ -1,13 +1,12 @@
 ﻿using System.Threading.Channels;
 
-namespace WebApi.Data.Jobs
+namespace WebApi.Data.Jobs;
+
+public class ImportJobQueue
 {
-    public class ImportJobQueue
-    {
-        private readonly Channel<ImportJobData> _channel = Channel.CreateUnbounded<ImportJobData>();
+    private readonly Channel<ImportJobData> _channel = Channel.CreateUnbounded<ImportJobData>();
 
-        public async Task EnqueAsync(ImportJobData data) => await _channel.Writer.WriteAsync(data);
+    public async Task EnqueAsync(ImportJobData data) => await _channel.Writer.WriteAsync(data);
 
-        public IAsyncEnumerable<ImportJobData> ReadAllAsync(CancellationToken cancellationToken) => _channel.Reader.ReadAllAsync(cancellationToken);
-    }
+    public IAsyncEnumerable<ImportJobData> ReadAllAsync(CancellationToken cancellationToken) => _channel.Reader.ReadAllAsync(cancellationToken);
 }

@@ -58,7 +58,7 @@ function Upload() {
     <>
       <div className='flex justify-center align-middle center '>
         {returnStatusCode && returnStatusCode < 300 ? (
-          <div>
+          <div className='flex-row'>
             <UploadFiles />
             <UploadHistory uploadHistorys={uploadHistory!} />
           </div>

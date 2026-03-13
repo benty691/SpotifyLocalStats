@@ -1,14 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Duende.AccessTokenManagement;
+using Microsoft.EntityFrameworkCore;
 using SpotifyLocalStats.Server.Models;
 using WebApi.Data.DTOs;
 using WebApi.Data.DTOs.NewFolder;
 using WebApi.Data.Jobs;
 using WebApi.Models.TimeOfDayConcretes;
+using WebApi.Services.Auth;
 using WebApi.Services.Implementations;
 using WebApi.Services.Implementations.Helpers;
 using WebApi.Services.Interfaces;
 using WebApi.Services.Interfaces.Helpers;
 using WebApi.Services.Workers;
+
 
 namespace SpotifyLocalStats.Server.Data;
 
@@ -16,19 +19,6 @@ public static class Dependencies
 {
     public static void ConfigureServices(IConfiguration configuration, IServiceCollection services)
     {
-        /*bool useOnlyInMemoryDatabase = false;
-        if (configuration["UseOnlyInMemoryDatabase"] != null)
-        {
-            useOnlyInMemoryDatabase = bool.Parse(configuration["UseOnlyInMemoryDatabase"]!);
-        }
-
-        if (useOnlyInMemoryDatabase)
-        {
-            services.AddDbContext<SpotifyStatsContext>(c =>
-               c.UseInMemoryDatabase("SpotifyStats"));
-        }*/
-        // use SQL server
-
         services.AddDbContext<SpotifyStatsContext>(c =>
             c.UseSqlServer(configuration.GetConnectionString("SpotifyStatsConnection")));
         services.AddScoped<IImportedTrackService, ImportedTrackService>();
@@ -157,34 +147,11 @@ public static class Dependencies
                         tod => tod.TimeOfDay,
                         (id, hour) => new TrackTimeOfDayStat(id, hour, 1)
                     ));
+        services.AddSingleton<ISpotifyTokenProviderService, SpotifyTokenProviderService>();
+
+        services.AddClientCredentialsTokenManagement(sp =>
         services.AddSingleton<ImportJobQueue>();
         services.AddHostedService<ImportBackgroundWorker>();
 
-    }
-
-    public static User DoesUserExist(IServiceCollection services)
-    {
-        var user = new User("DefaultUser", "TestUser");
-
-        using (var serviceProvider = services.BuildServiceProvider())
-        {
-            using (var context = serviceProvider.GetRequiredService<SpotifyStatsContext>())
-            {
-                var userCount = context.Users.Count();
-                if (userCount == 0)
-                {
-                    user.HasImportedHistorical = false;
-                    context.Users.Add(user);
-                    context.SaveChanges();
-                }
-                else
-                {
-                    user = context.Users.Single();
-                    user.LastTimeUsed = DateTime.UtcNow;
-                    context.SaveChanges();
-                }
-            }
-        }
-        return user;
     }
 }

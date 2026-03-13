@@ -32,6 +32,8 @@ namespace WebApi.Services.Implementations
             using var transaction = await _context.Database.BeginTransactionAsync();
             var job = _context.ImportJobStatuses.Find(jobId);
 
+
+            // I should really batch this top make it more reliable and add a rety for failed batching. This should allow me to also update job status, as prev its part of the transaction, so wont update till transaction completes..  
             try
             {
                 var newTracks = await _importedTrackService.HandleImport(json, user, file);

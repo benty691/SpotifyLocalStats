@@ -9,6 +9,7 @@ public sealed class ModelPopulationService : IModelPopulationService
 {
     private readonly ILogger<ModelPopulationService> _logger;
     private readonly SpotifyStatsContext _context;
+    private readonly ISpotifyCallerService _spotifyCallerService;
 
     public ModelPopulationService(ILogger<ModelPopulationService> logger, SpotifyStatsContext context)
     {
@@ -48,6 +49,11 @@ public sealed class ModelPopulationService : IModelPopulationService
             {
                 // we need spotify webapi to allow this to occur properly, as we neeed to hit the endpoint to get details, but we need the artist id from spotify to query??? 
                 // appears we can use the search endpoint and search artist nam, and then get aristid from that, then query artist endpoint for details
+
+                // we create a hosted service that runs in the backgrouns, and is essentially a queue that ingests artist name and such and then queries the spoty api for more info on this, this retunrs and then we create a new artist
+                //^ issue with this, i sthat we would be waiting forever to get the returned artist details to handle this at creation of the artist, rather, we should just update the artist once the item in the quue is complete. 
+
+
 
                 var newArtist = new Artist(track.MasterMetadataArtistName!);
                 await _context.Artists.AddAsync(newArtist);
