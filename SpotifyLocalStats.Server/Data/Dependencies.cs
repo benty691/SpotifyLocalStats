@@ -1,5 +1,4 @@
-﻿using Duende.AccessTokenManagement;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SpotifyLocalStats.Server.Models;
 using WebApi.Data.DTOs;
 using WebApi.Data.DTOs.NewFolder;
@@ -7,8 +6,10 @@ using WebApi.Data.Jobs;
 using WebApi.Models.TimeOfDayConcretes;
 using WebApi.Services.Auth;
 using WebApi.Services.Implementations;
+using WebApi.Services.Implementations.External;
 using WebApi.Services.Implementations.Helpers;
 using WebApi.Services.Interfaces;
+using WebApi.Services.Interfaces.External;
 using WebApi.Services.Interfaces.Helpers;
 using WebApi.Services.Workers;
 
@@ -147,9 +148,9 @@ public static class Dependencies
                         tod => tod.TimeOfDay,
                         (id, hour) => new TrackTimeOfDayStat(id, hour, 1)
                     ));
-        services.AddSingleton<ISpotifyTokenProviderService, SpotifyTokenProviderService>();
+        services.AddScoped<ISpotifyTokenProviderService, SpotifyTokenProviderService>();
+        services.AddScoped<ISpotifyCallerService, SpotifyCallerService>();
 
-        services.AddClientCredentialsTokenManagement(sp =>
         services.AddSingleton<ImportJobQueue>();
         services.AddHostedService<ImportBackgroundWorker>();
 

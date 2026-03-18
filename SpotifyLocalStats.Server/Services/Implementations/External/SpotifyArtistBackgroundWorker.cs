@@ -1,19 +1,18 @@
 ﻿using SpotifyLocalStats.Server.Data;
 using WebApi.Data.External;
 using WebApi.Models.Jobs;
-using WebApi.Services.Interfaces;
 using WebApi.Services.Interfaces.External;
 
 namespace WebApi.Services.Implementations.External;
 
-public class SpotifyArtistBackgroundWorker : BackgroundService, ISpotifyBackgroundWorker
+public class SpotifyBackgroundWorker : BackgroundService
 {
 
-    private readonly SpotifyArtistQueue _queue;
+    private readonly SpotifyTrackQueue _queue;
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly ILogger<SpotifyArtistBackgroundWorker> _logger;
+    private readonly ILogger<SpotifyBackgroundWorker> _logger;
 
-    public SpotifyArtistBackgroundWorker(SpotifyArtistQueue queue, IServiceScopeFactory serviceScopeFactory, ILogger<SpotifyArtistBackgroundWorker> logger)
+    public SpotifyBackgroundWorker(SpotifyTrackQueue queue, IServiceScopeFactory serviceScopeFactory, ILogger<SpotifyBackgroundWorker> logger)
     {
         _queue = queue;
         _scopeFactory = serviceScopeFactory;
@@ -495,10 +494,7 @@ public class SpotifyArtistBackgroundWorker : BackgroundService, ISpotifyBackgrou
         {
             using var scope = _scopeFactory.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<SpotifyStatsContext>();
-            var importService = scope.ServiceProvider.GetRequiredService<IImportOrchestrationService>();
-
-
-
+            var spotifyBackgroundWorker = scope.ServiceProvider.GetRequiredService<ISpotifyCallerService>();
 
             var importJob = await context.ImportJobStatuses.FindAsync(data.JobId);
             importJob.Status = JobStatus.Processing;
@@ -506,7 +502,7 @@ public class SpotifyArtistBackgroundWorker : BackgroundService, ISpotifyBackgrou
 
             try
             {
-                await importService.ProcessAsync(data.Json, data.File, data.User, data.JobId, stoppingToken);
+                await spotifyBackgroundWorker.ProcessAsync(data.SpotifyTrackId, stoppingToken);
 
             }
             catch (Exception ex)

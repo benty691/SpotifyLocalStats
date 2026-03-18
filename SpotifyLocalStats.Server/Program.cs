@@ -1,5 +1,7 @@
+using SpotifyLocalStats.Api;
 using SpotifyLocalStats.Server.Data;
 using WebApi.Config;
+using WebApi.Services.Auth;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +19,11 @@ builder.Logging.AddConsole();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddLogging(builder => builder.AddConsole());
+builder.Services.AddHttpClient<SpotifyApiClient>(client =>
+{
+    client.BaseAddress = new Uri("https://api.spotify.com/v1");
+})
+    .AddHttpMessageHandler<SpotifyAuthHandler>();
 
 builder.Configuration.AddEnvironmentVariables();
 

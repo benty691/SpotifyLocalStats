@@ -2,6 +2,6 @@
 
 public interface ISpotifyTokenProviderService
 {
-
+    Task<string> GetToken();
 }
 

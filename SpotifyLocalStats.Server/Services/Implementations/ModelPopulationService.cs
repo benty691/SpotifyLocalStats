@@ -1,6 +1,8 @@
 ﻿using SpotifyLocalStats.Server.Data;
 using SpotifyLocalStats.Server.Models;
 using WebApi.Data.DTOs;
+using WebApi.Data.External;
+using WebApi.Services.Auth;
 using WebApi.Services.Interfaces;
 
 namespace WebApi.Services.Implementations;
@@ -9,7 +11,8 @@ public sealed class ModelPopulationService : IModelPopulationService
 {
     private readonly ILogger<ModelPopulationService> _logger;
     private readonly SpotifyStatsContext _context;
-    private readonly ISpotifyCallerService _spotifyCallerService;
+    private readonly ISpotifyTokenProviderService _SpotifyTokenService;
+    private readonly SpotifyTrackQueue _queue;
 
     public ModelPopulationService(ILogger<ModelPopulationService> logger, SpotifyStatsContext context)
     {
@@ -136,6 +139,14 @@ public sealed class ModelPopulationService : IModelPopulationService
                     _logger.LogDebug($"No Album found when attempting to create track. Skipping track create for {track.MasterMetadataTrackName} and trackId: {track.SpotifyTrackUri}. Album Name:{track.MasterMetadataAlbumName}");
                     continue;
                 }
+
+                var token = await _SpotifyTokenService.GetToken();
+                var spotifyTrack = new SpotifyTrackData()
+                {
+                    SpotifyTrackId = track.SpotifyTrackUri
+                };
+
+                await _queue.EnqueAsync(spotifyTrack);
 
                 var newTrack = new Track(
                     artist,

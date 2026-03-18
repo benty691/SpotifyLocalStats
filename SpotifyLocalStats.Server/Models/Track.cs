@@ -1,14 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-namespace SpotifyLocalStats.Server.Models;
+﻿namespace SpotifyLocalStats.Server.Models;
 
 //Tracks are generated via imported tracks. We do not have a catalog of all tracks.
 public class Track : BaseModel
 {
     public Track()
     {
-        ExternalIds = new List<ExternalId>();
-        ExternalIds = new List<ExternalId>();
+        Images = new List<Image>();
     }
     public Track(Artist artist, Album album, string name, string spotifyTrackUri)
     {
@@ -21,6 +18,7 @@ public class Track : BaseModel
     public string Name { get; set; }
     public Album Album { get; set; } // can in theory be on multiple albums 
     public Artist Artist { get; set; }
+    public ICollection<Image> Images { get; set; }
     public string? SpotifyTrackUri { get; set; } = string.Empty;
     public int? MsPlayed { get; set; }
     public bool? IsSingle { get; set; }
@@ -33,6 +31,6 @@ public class Track : BaseModel
     public string? PreviewUrl { get; set; }
     public string[]? AvaliableMarkets { get; set; }
     public string? Href { get; set; }
-    public ICollection<ExternalId> ExternalIds { get; set; }
+    public ExternalId ExternalIds { get; set; }
     public int? TimesPlayed { get; set; } // This should be either calculated from aggregates. or a seperate table called trackStats... 
 }

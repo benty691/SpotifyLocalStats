@@ -1,4 +1,6 @@
-﻿
+﻿using System.Text.Json;
+using WebApi.Data.DTOs;
+
 namespace WebApi.Services.Auth
 {
     public class SpotifyTokenProviderService : ISpotifyTokenProviderService
@@ -6,47 +8,58 @@ namespace WebApi.Services.Auth
 
         private readonly IConfiguration _configuration;
         private readonly ILogger<SpotifyTokenProviderService> _logger;
-        private readonly IHttpClientBuilder _httpClientBuilder;
+        private string _accessToken;
+        private DateTime _expiresAt;
 
-        private readonly int TOKEN_REFRESH_TIME_INTERVAL = 600000; // ms one hour
-
-        public SpotifyTokenProviderService(IConfiguration configuration, ILogger<SpotifyTokenProviderService> logger, IHttpClientBuilder httpClientBuilder)
+        public SpotifyTokenProviderService(IConfiguration configuration, ILogger<SpotifyTokenProviderService> logger)
         {
             _configuration = configuration;
             _logger = logger;
-            _httpClientBuilder = httpClientBuilder;
         }
 
-        public async Task<bool> TokenLifeCycleManager()
+        public async Task<string> GetToken()
         {
-            // essentially we need to keep track of if the token needs a refresh. so we just treat this the same as reading from a db, and if in needs a refresh, return true,l then th consumer of this will get a new token. 
-            using (var timer = new Timer(
-                callback: TimerTask,
-                state: null,
-                dueTime: 100,
-                period: 3600000
-                )
-            {
+            // checks if we have a valid token, if so, return it, if not, create one then return it
+            var token = _accessToken;
 
+            if (token == null || _expiresAt > DateTime.Now)
+            {
+                var response = await GenerateAccessToken();
+                _accessToken = response.AccessToken;
+                _expiresAt = DateTime.Now.AddSeconds(response.ExpiresIn - 60); // add one minute buffer
             }
 
-
+            return token;
         }
 
-        private void TimerTask(object? state)
+        private async Task<SpotifyAccessTokenResponseDto> GenerateAccessToken()
         {
-            // well this would probbaly generate a new token, then in that case we would not have to check if we need one, we are just always creating one? issues is that we would be making api calls that arent required, we only really need it when imports occur, no other time. 
+            HttpRequestMessage request = new HttpRequestMessage()
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri("https://accounts.spotify.com/api/token")
+            };
+
+            HttpClient client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Basic " + _configuration["client_id"].ToString() + ":" + _configuration["client_secret"].ToString());
+
+
+            using (var response = await client.SendAsync(request))
+            {
+                response.EnsureSuccessStatusCode();
+                var body = await response.Content.ReadAsStreamAsync();
+
+                var spotifyAccessResponse = await JsonSerializer.DeserializeAsync<SpotifyAccessTokenResponseDto>(body);
+
+                if (spotifyAccessResponse == null)
+                {
+                    throw new ArgumentNullException($"spotify retunrned an error: {body}");
+                }
+
+                return spotifyAccessResponse;
+            }
+
         }
-
-
-
-
-
-
-
-
-
-
     }
-}
 }

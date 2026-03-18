@@ -1,0 +1,17 @@
+﻿{
+  "runtime": "Net90",
+  "documentGenerator": {
+    "fromDocument": {
+      "url": "open-api-schema.yaml"
+    }
+  },
+  "codeGenerators": {
+    "openApiToCSharpClient": {
+      "className": "SpotifyApiClient",
+      "namespace": "SpotifyLocalStats.Api",
+      "generateClientClasses": true,
+      "generateDtoTypes": true,
+      "output": "Generated/SpotifyApiClient.cs"
+    }
+  }
+}
